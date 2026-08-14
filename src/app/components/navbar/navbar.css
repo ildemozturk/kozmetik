@@ -1,0 +1,57 @@
+/* Aktif Menü Linki Stili */
+.nav-link-custom.active-nav-link {
+  color: #e18baf !important;
+  font-weight: 600 !important;
+  position: relative;
+}
+
+/* Aktif Menü Linkinin Altındaki Pembe Vurgu Çizgisi */
+.nav-link-custom.active-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 2px;
+  background-color: #e18baf;
+  border-radius: 2px;
+}
+
+/* Aktif Sepet İkonu Stili */
+a.icon-btn.active-icon-link i {
+  color: #e18baf !important;
+}
+
+/* Offcanvas Yan Panel Yapısı */
+.wishlist-drawer {
+  top: 0;
+  right: -380px;
+  width: 360px;
+  height: 100vh;
+  z-index: 1050;
+  transition: right 0.3s ease-in-out;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05);
+}
+
+.wishlist-drawer.open {
+  right: 0;
+}
+
+.drawer-backdrop {
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 1040;
+}
+
+.bg-pink {
+  background-color: #e18baf !important;
+  color: white;
+}
+
+.text-pink {
+  color: #e18baf !important;
+}

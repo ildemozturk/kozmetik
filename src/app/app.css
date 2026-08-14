@@ -1,0 +1,189 @@
+/* Toz Pembe Logo Rengi */
+.brand-pink {
+  color: #e8a0bf !important; /* Soft toz pembe */
+  letter-spacing: 2px;
+}
+
+/* İkonlar ve Rozetler */
+.icon-btn {
+  transition: all 0.2s ease-in-out;
+}
+
+.icon-btn:hover {
+  color: #e8a0bf !important;
+  transform: scale(1.15);
+}
+
+.bg-pink {
+  background-color: #e8a0bf !important;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+.text-pink {
+  color: #d87093 !important;
+}
+
+.bg-pink {
+  background-color: #d87093 !important;
+}
+
+.bg-pink-light {
+  background-color: #fff0f3 !important;
+}
+
+/* 1. KATEGORİ MENÜSÜ STİLLERİ & GÖLGELERİ */
+.category-btn {
+  color: #495057 !important;
+  background-color: transparent !important;
+  transition: all 0.25s ease-in-out;
+  font-size: 0.9rem;
+}
+
+/* Kategori Butonu Üzerine Gelince (Hover) Pembe Gölge */
+.category-btn:hover {
+  background-color: #fff8f9 !important;
+  color: #d87093 !important;
+  box-shadow: 0 4px 12px rgba(216, 112, 147, 0.2) !important;
+  transform: translateX(2px);
+}
+
+/* Seçilen Kategori (Active) */
+.category-btn.active {
+  background-color: #fff0f3 !important;
+  color: #d87093 !important;
+  font-weight: 600;
+  border-left: 4px solid #d87093 !important;
+  box-shadow: 0 2px 8px rgba(216, 112, 147, 0.15) !important;
+}
+
+.category-btn .arrow {
+  font-size: 0.75rem;
+  opacity: 0.5;
+  transition: transform 0.2s;
+}
+
+.category-btn:hover .arrow,
+.category-btn.active .arrow {
+  opacity: 1;
+  transform: translateX(3px);
+  color: #d87093;
+}
+
+/* 2. SEPETE EKLE BUTONU STİLİ & PEMBE GÖLGE */
+.btn-outline-pink {
+  border-color: #d87093;
+  color: #d87093;
+  transition: all 0.3s ease-in-out;
+}
+
+.btn-outline-pink:hover {
+  background-color: #d87093 !important;
+  border-color: #d87093 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(216, 112, 147, 0.45) !important;
+  transform: translateY(-2px);
+}
+
+.btn-pink {
+  background-color: #d87093;
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-pink:hover {
+  background-color: #c45b7f;
+  color: white;
+  box-shadow: 0 4px 14px rgba(216, 112, 147, 0.45) !important;
+}
+
+/* 3. SAYFALAMA (PAGINATION) PEMBE STİL & GÖLGE */
+.page-button {
+  color: #d87093;
+  border: 1px solid #ffd3e0;
+  background-color: white;
+  transition: all 0.25s ease-in-out;
+}
+
+/* Sayıların Üzerine Gelince */
+.page-button:hover:not(:disabled) {
+  background-color: #fff0f3 !important;
+  border-color: #d87093 !important;
+  color: #d87093 !important;
+  box-shadow: 0 4px 12px rgba(216, 112, 147, 0.3) !important;
+  transform: translateY(-2px);
+}
+
+/* Seçili Sayı (Active) */
+.page-button.active {
+  background-color: #d87093 !important;
+  border-color: #d87093 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(216, 112, 147, 0.4) !important;
+}
+
+/* 4. ÜRÜN KARTLARI HOVER GÖLGESİ */
+.product-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(216, 112, 147, 0.2) !important;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+.icon-btn {
+  transition: all 0.2s ease-in-out;
+}
+
+.icon-btn:hover {
+  color: #d87093 !important;
+  transform: scale(1.15);
+}
+
+.bg-pink {
+  background-color: #d87093 !important;
+}
+/* Custom Toast Notification */
+.custom-toast {
+  position: fixed;
+  top: 90px;
+  right: 25px;
+  z-index: 9999;
+  min-width: 300px;
+  max-width: 380px;
+  border-left: 5px solid #e18baf !important;
+  animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.toast-icon {
+  width: 42px;
+  height: 42px;
+  background-color: #fff0f5;
+  flex-shrink: 0;
+}
+
+.text-pink {
+  color: #e18baf !important;
+}
+
+.border-pink-subtle {
+  border-color: #f7d6e4 !important;
+}
+
+/* Kayarak Gelme Animasyonu */
+@keyframes slideInRight {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

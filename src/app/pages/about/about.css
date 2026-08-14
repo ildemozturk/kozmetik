@@ -1,0 +1,28 @@
+.image-accordion {
+  width: 100%;
+}
+
+.accordion-panel {
+  flex: 0.5; /* Kapalıyken dar görünür */
+  background-size: cover;
+  background-position: center;
+  transition: flex 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  cursor: pointer;
+}
+
+/* Tıklanan / Aktif olan resim genişler */
+.accordion-panel.active {
+  flex: 3; /* Açık olan genişler */
+}
+
+/* Yazıların altındaki karartma efekti */
+.panel-overlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Sadece aktif resimde metinler görünsün */
+.accordion-panel.active .panel-overlay {
+  opacity: 1;
+}

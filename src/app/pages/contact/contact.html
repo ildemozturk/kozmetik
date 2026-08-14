@@ -1,0 +1,91 @@
+<div class="container py-5">
+  <div class="row g-5">
+    
+    <!-- İletişim Bilgileri -->
+    <div class="col-lg-5">
+      <span class="text-pink fw-bold text-uppercase small" style="letter-spacing: 1.5px;">BİZE ULAŞIN</span>
+      <h2 class="fw-bold my-3 text-dark">Sorularınız İçin Yanınızdayız</h2>
+      <p class="text-muted mb-4">Ürünlerimiz veya siparişlerinizle ilgili her türlü soru için bize ulaşabilirsiniz.</p>
+      
+      <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-white rounded-3 shadow-sm">
+        <div class="fs-4 text-pink"><i class="bi bi-geo-alt-fill"></i></div>
+        <div>
+          <h6 class="fw-bold mb-0">Adres</h6>
+          <small class="text-muted">Çankaya, Ankara / Türkiye</small>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-white rounded-3 shadow-sm">
+        <div class="fs-4 text-pink"><i class="bi bi-envelope-fill"></i></div>
+        <div>
+          <h6 class="fw-bold mb-0">E-Posta</h6>
+          <small class="text-muted">lumierebeautyy.contact@gmail.com</small>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-3 p-3 bg-white rounded-3 shadow-sm">
+        <div class="fs-4 text-pink"><i class="bi bi-telephone-fill"></i></div>
+        <div>
+          <h6 class="fw-bold mb-0">Telefon</h6>
+          <small class="text-muted">+90 (312) 000 00 00</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- İletişim Formu (Canlı EmailJS Entegreli) -->
+    <div class="col-lg-7">
+      <div class="p-4 p-md-5 bg-white rounded-4 shadow-sm">
+        <h4 class="fw-bold mb-4">Mesaj Gönderin</h4>
+
+        <!-- Başarı Bildirimi -->
+        @if (isSuccess) {
+          <div class="alert alert-success rounded-3 small mb-4">
+            <i class="bi bi-check-circle-fill me-2"></i>Mesajınız başarıyla iletildi! En kısa sürede dönüş yapacağız.
+          </div>
+        }
+
+        <!-- Hata Bildirimi -->
+        @if (errorMessage) {
+          <div class="alert alert-danger rounded-3 small mb-4">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
+          </div>
+        }
+
+        <form (ngSubmit)="sendEmail($event)">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Ad Soyad</label>
+              <input type="text" class="form-control" [(ngModel)]="formData.name" name="name" required placeholder="">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">E-Posta</label>
+              <input type="email" class="form-control" [(ngModel)]="formData.email" name="email" required placeholder="">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label small fw-semibold">Konu</label>
+              <input type="text" class="form-control" [(ngModel)]="formData.subject" name="subject" required placeholder="">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label small fw-semibold">Mesaj</label>
+              <textarea class="form-control" rows="4" [(ngModel)]="formData.message" name="message" required placeholder="Mesajınızı buraya yazabilirsiniz..."></textarea>
+            </div>
+
+            <div class="col-12">
+              <button type="submit" class="btn btn-pink rounded-pill px-4 py-2 fw-semibold" [disabled]="isLoading">
+                @if (isLoading) {
+                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>Gönderiliyor...
+                } @else {
+                  Mesajı Gönder
+                }
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>

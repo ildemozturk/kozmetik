@@ -1,0 +1,108 @@
+<header class="navbar-custom py-3 border-bottom shadow-sm bg-white sticky-top">
+  <div class="container d-flex justify-content-between align-items-center">
+    
+    <!-- Sol Taraf: Marka Logosu (Ana Sayfaya / Vitrine Gider) -->
+    <a class="navbar-brand text-center m-0 cursor-pointer text-decoration-none" 
+       routerLink="/" 
+       routerLinkActive="active-brand" 
+       [routerLinkActiveOptions]="{ exact: true }">
+      <h1 class="brand-title m-0 fw-light" style="color: #e18bafe0 !important; letter-spacing: 2px; font-weight: 300 !important;">LUMIÈRE</h1>
+      <span class="brand-subtitle text-uppercase small text-muted" style="letter-spacing: 1px; font-size: 0.75rem;">Cosmetics</span>
+    </a>
+
+    <!-- Orta Kısım: Linkler -->
+    <nav class="d-none d-md-flex align-items-center gap-4">
+      <a routerLink="/urunler" 
+         routerLinkActive="active-nav-link" 
+         class="text-decoration-none text-muted fw-medium nav-link-custom">Ürünler</a>
+         
+      <a routerLink="/hakkimizda" 
+         routerLinkActive="active-nav-link" 
+         class="text-decoration-none text-muted fw-medium nav-link-custom">Hakkımızda</a>
+         
+      <a routerLink="/sss" 
+         routerLinkActive="active-nav-link" 
+         class="text-decoration-none text-muted fw-medium nav-link-custom">S.S.S.</a>
+         
+      <a routerLink="/iletisim" 
+         routerLinkActive="active-nav-link" 
+         class="text-decoration-none text-muted fw-medium nav-link-custom">İletişim</a>
+    </nav>
+
+    <!-- Sağ Taraf: İkonlar -->
+    <div class="d-flex align-items-center gap-4 text-muted fs-5">
+
+      <button type="button" class="btn p-0 border-0 text-muted icon-btn" (click)="onProfileClick()" title="Hesabım">
+        <i class="bi bi-person"></i>
+      </button>
+
+      <!-- Favoriler İkonu -->
+      <button type="button" class="btn p-0 border-0 text-muted icon-btn position-relative" (click)="toggleWishlistModal()" title="Favorilerim">
+        <i class="bi bi-heart"></i>
+        @if (wishlistCount > 0) {
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-pink" style="font-size: 0.55rem;">
+            {{ wishlistCount }}
+          </span>
+        }
+      </button>
+
+      <!-- Sepet İkonu -->
+      <a routerLink="/cart" 
+         routerLinkActive="active-icon-link" 
+         class="btn p-0 border-0 text-muted icon-btn position-relative text-decoration-none" 
+         title="Sepetim">
+        <i class="bi bi-bag"></i>
+        @if (cartCount > 0) {
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-pink" style="font-size: 0.55rem;">
+            {{ cartCount }}
+          </span>
+        }
+      </a>
+
+    </div>
+
+  </div>
+</header>
+
+<!-- FAVORİLER YAN PANELİ (OFFCANVAS) -->
+<div class="wishlist-drawer bg-white border-start position-fixed" [class.open]="isWishlistOpen">
+  
+  <!-- Panel Başlığı -->
+  <div class="border-bottom d-flex justify-content-between align-items-center wishlist-header p-3">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-heart-fill text-pink fs-5"></i>
+      <h6 class="fw-bold mb-0 text-dark">Favorilerim ({{ wishlistCount }})</h6>
+    </div>
+    <button type="button" class="btn-close shadow-none" (click)="toggleWishlistModal()"></button>
+  </div>
+
+  <!-- Ürün Listesi Alanı -->
+  <div class="wishlist-body p-3 overflow-y-auto">
+    @for (item of wishlistItems; track item.id) {
+      <div class="wishlist-item d-flex gap-3 align-items-center p-2 mb-2 rounded-3 bg-light border position-relative">
+        <img [src]="item.imageUrl" [alt]="item.name" class="rounded-3 object-fit-cover" style="width: 60px; height: 60px;">
+        
+        <div class="flex-grow-1 overflow-hidden">
+          <h6 class="small fw-semibold mb-1 text-truncate text-dark">{{ item.name }}</h6>
+          <span class="fw-bold text-pink small">{{ item.price | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
+        </div>
+
+        <!-- Sil Butonu -->
+        <button type="button" class="btn btn-sm text-danger border-0 px-2" (click)="removeItem(item.id, $event)" title="Favorilerden Çıkar">
+          <i class="bi bi-trash fs-6"></i>
+        </button>
+      </div>
+    } @empty {
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-heartbreak display-4 d-block mb-2 text-pink opacity-50"></i>
+        <p class="small mb-0">Favorilerinizde henüz ürün bulunmuyor.</p>
+      </div>
+    }
+  </div>
+
+</div>
+
+<!-- Arka Plan Karartması (Backdrop) -->
+@if (isWishlistOpen) {
+  <div class="drawer-backdrop position-fixed" (click)="toggleWishlistModal()"></div>
+}

@@ -1,0 +1,40 @@
+.text-pink {
+  color: #e18baf !important;
+}
+
+.btn-pink {
+  background-color: #e18baf !important;
+  border-color: #e18baf !important;
+  transition: all 0.3s ease;
+}
+
+.btn-pink:hover {
+  background-color: #d0759d !important;
+  box-shadow: 0 5px 15px rgba(225, 139, 175, 0.4);
+}
+
+.btn-outline-pink {
+  color: #e18baf !important;
+  border-color: #e18baf !important;
+}
+
+.btn-outline-pink:hover {
+  background-color: #e18baf !important;
+  color: #ffffff !important;
+}
+
+.cart-item-row {
+  transition: background-color 0.2s ease;
+}
+
+.cart-item-row:hover {
+  background-color: #fffafc;
+}
+
+.cart-img-wrapper img {
+  transition: transform 0.3s ease;
+}
+
+.cart-item-row:hover .cart-img-wrapper img {
+  transform: scale(1.05);
+}

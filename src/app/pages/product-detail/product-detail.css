@@ -1,0 +1,24 @@
+/* Sekme Buton Stilleri */
+.tab-btn {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  transition: all 0.25s ease;
+}
+
+.tab-btn:hover {
+  background-color: #fff0f3;
+  color: #d87093;
+}
+
+.active-tab-btn {
+  background-color: #d87093 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(216, 112, 147, 0.25);
+}
+
+/* Kargo ve Garantili İkon Çizgisi */
+.vr {
+  width: 1px;
+  background-color: #e9ecef;
+  opacity: 1;
+}

@@ -1,0 +1,196 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+/* ==========================================================
+   LUMIÈRE COSMETICS - GLOBAL STILLER & PEMBE TEMA
+   ========================================================== */
+
+/* --- 1. GENEL TEMEL TONLAR & MARKA LOGOSU --- */
+.brand-pink {
+  color: #e8a0bf !important; /* Soft Toz Pembe Logo */
+  letter-spacing: 2px;
+}
+
+.text-pink {
+  color: #e8a0bf !important;
+}
+
+.bg-pink {
+  background-color: #e8a0bf !important;
+}
+
+.bg-pink-light {
+  background-color: #fff0f3 !important;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* --- 2. NAVBAR İKONLARI & TIKLANABİLİRLİK --- */
+.icon-btn {
+  transition: all 0.2s ease-in-out;
+}
+
+.icon-btn:hover {
+  color: #e8a0bf !important;
+  transform: scale(1.15);
+}
+
+/* --- 3. KATEGORİ MENÜSÜ & BAŞLIK (BEYAZ ZEMİN) --- */
+
+/* Kategori Kartı Başlığı (Arka Plan Beyaz) */
+.category-header {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Tetiklenmeden (Varsayılan): Beyaz Zemin ("Tüm Ürünler" dahil) */
+.category-btn {
+  color: #495057 !important;
+  background-color: #ffffff !important;
+  border: 1px solid #ffffff !important;
+  transition: all 0.25s ease-in-out;
+  font-size: 0.9rem;
+}
+
+/* Üstüne Gelince (Hover): Açık Pembe Zemin & Pembe Gölge */
+.category-btn:hover {
+  background-color: #fff0f3 !important; /* Açık Toz Pembe */
+  color: #e8a0bf !important;
+  border-color: #ffe3ec !important;
+  box-shadow: 0 4px 12px rgba(232, 160, 191, 0.25) !important;
+  transform: translateX(3px);
+}
+
+/* Basılınca / Seçilince (Active): Daha Koyu Pembe Zemin & Koyu Pembe Çizgi */
+.category-btn.custom-active,
+.category-btn.active {
+  background-color: #f7cad0 !important; /* Bir Tık Daha Koyu Pembe */
+  color: #c45b7f !important;           /* Koyu Pembe Yazı */
+  font-weight: 600;
+  border-left: 4px solid #c45b7f !important;
+  box-shadow: 0 2px 8px rgba(196, 91, 127, 0.3) !important;
+}
+
+/* Kategori Sağ Ok İkonu Animasyonu */
+.category-btn .arrow {
+  font-size: 0.75rem;
+  opacity: 0.4;
+  transition: all 0.2s ease;
+}
+
+.category-btn:hover .arrow {
+  opacity: 0.9;
+  color: #e8a0bf;
+  transform: translateX(2px);
+}
+
+.category-btn.custom-active .arrow,
+.category-btn.active .arrow {
+  opacity: 1;
+  color: #c45b7f;
+  transform: translateX(4px);
+}
+
+/* --- 4. SEPETE EKLE VE GENEL BUTONLAR --- */
+.btn-outline-pink {
+  border-color: #e8a0bf !important;
+  color: #e8a0bf !important;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Sepete Ekle Butonu Hover: Pembe Dolgu & Pembe Gölge */
+.btn-outline-pink:hover {
+  background-color: #e8a0bf !important;
+  border-color: #e8a0bf !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(232, 160, 191, 0.5) !important;
+  transform: translateY(-2px);
+}
+
+.btn-pink {
+  background-color: #e8a0bf !important;
+  color: white !important;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-pink:hover {
+  background-color: #d68cb0 !important;
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(232, 160, 191, 0.5) !important;
+}
+
+/* --- 5. SAYFALAMA (PAGINATION) PEMBE STİLLERİ --- */
+.page-button {
+  color: #e8a0bf !important;
+  border: 1px solid #ffd3e0 !important;
+  background-color: white !important;
+  transition: all 0.25s ease-in-out;
+}
+
+/* Sayı Üzerine Gelince */
+.page-button:hover:not(:disabled) {
+  background-color: #fff0f3 !important;
+  border-color: #e8a0bf !important;
+  color: #e8a0bf !important;
+  box-shadow: 0 4px 12px rgba(232, 160, 191, 0.35) !important;
+  transform: translateY(-2px);
+}
+
+/* Seçili Sayı (Active) */
+.page-button.custom-active,
+.page-button.active {
+  background-color: #e8a0bf !important;
+  border-color: #e8a0bf !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(232, 160, 191, 0.45) !important;
+}
+
+/* --- 6. ÜRÜN KARTLARI HOVER GÖLGESİ --- */
+.product-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(232, 160, 191, 0.25) !important;
+}
+/* Slayt Geçiş Efekti (Custom Animation) */
+.carousel-item {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.6s ease-in-out;
+}
+
+.carousel-item.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Slayt Alt Noktaları */
+.carousel-indicators button {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background-color: #000000 !important;
+  opacity: 0.4;
+  transition: all 0.3s ease;
+}
+
+.carousel-indicators button.active {
+  opacity: 1 !important;
+  width: 12px !important;
+  height: 12px !important;
+  background-color: #000000 !important;
+}
+.quantity-counter-btn {
+  background-color: #fff0f5;
+  border: 1px solid #e18baf;
+  min-width: 80px;
+}
+
+.quantity-counter-btn button:hover {
+  background-color: #fce1e6;
+  border-radius: 50%;
+}

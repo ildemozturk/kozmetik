@@ -1,0 +1,124 @@
+<div class="container py-4 mb-5">
+  <h3 class="fw-light mb-4 text-dark">Alışveriş Sepetim</h3>
+
+  @if (cartService.cartItems().length > 0) {
+    <div class="row g-4">
+      
+      <!-- Sol Taraf: Sepet Ürün Listesi -->
+      <div class="col-lg-8">
+        
+        <!-- ÜCRETSİZ KARGO BİLGİ VE İLERLEME ÇUBUĞU -->
+        <div class="p-3 mb-3 bg-white rounded-4 border shadow-sm">
+          @if (cartService.amountLeftForFreeShipping() === 0) {
+            <div class="d-flex align-items-center gap-2 text-success fw-medium">
+              <i class="bi bi-truck fs-5"></i>
+              <span>Tebrikler! Kargonuz <strong>ÜCRETSİZ</strong>.</span>
+            </div>
+          } @else {
+            <div class="d-flex justify-content-between align-items-center mb-2 small">
+              <span class="text-dark">
+                Ücretsiz kargoya <strong>{{ cartService.amountLeftForFreeShipping() | currency:'TRY':'symbol-narrow':'1.2-2' }}</strong> kaldı!
+              </span>
+              <span class="text-pink fw-bold">500 TL</span>
+            </div>
+            <!-- İlerleme Çubuğu -->
+            <div class="progress" style="height: 6px;">
+              <div class="progress-bar bg-pink rounded-pill" 
+                   role="progressbar" 
+                   [style.width.%]="(cartService.subtotal() / 500) * 100"></div>
+            </div>
+          }
+        </div>
+
+        <!-- Sepet Ürün Kartları -->
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+          <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+            <span class="fw-bold text-dark">Ürünler ({{ cartService.totalItems() }})</span>
+            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" (click)="clearCart()">
+              <i class="bi bi-trash3 me-1"></i> Sepeti Temizle
+            </button>
+          </div>
+
+          @for (item of cartService.cartItems(); track item.product.id) {
+            <div class="d-flex gap-3 align-items-center py-3 border-bottom position-relative">
+              <img [src]="item.product.imageUrl" [alt]="item.product.name" class="rounded-3 object-fit-cover" style="width: 80px; height: 80px;">
+              
+              <div class="flex-grow-1">
+                <h6 class="fw-bold text-dark mb-1">{{ item.product.name }}</h6>
+                <span class="text-muted small d-block mb-2">{{ item.product.description }}</span>
+                <span class="fw-bold text-dark fs-6">{{ item.product.price | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
+              </div>
+
+              <!-- Adet Butonları -->
+              <div class="quantity-counter-btn d-flex align-items-center justify-content-between rounded-pill px-2 py-1 shadow-sm">
+                <button type="button" class="btn btn-sm p-0 border-0 text-pink fw-bold d-flex align-items-center justify-content-center" 
+                        style="width: 24px; height: 24px;" 
+                        (click)="decreaseQuantity(item)">
+                  <i class="bi bi-dash"></i>
+                </button>
+
+                <span class="fw-bold px-2 text-pink fs-7">{{ item.quantity }}</span>
+
+                <button type="button" class="btn btn-sm p-0 border-0 text-pink fw-bold d-flex align-items-center justify-content-center" 
+                        style="width: 24px; height: 24px;" 
+                        (click)="increaseQuantity(item)">
+                  <i class="bi bi-plus"></i>
+                </button>
+              </div>
+
+              <!-- Sil Butonu -->
+              <button type="button" class="btn border-0 text-danger ms-2 p-1" (click)="removeItem(item.product.id)">
+                <i class="bi bi-x-lg fs-6"></i>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Sağ Taraf: Sipariş Özeti -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 100px;">
+          <h5 class="fw-bold text-dark mb-3">Sipariş Özeti</h5>
+
+          <div class="d-flex justify-content-between mb-2 text-muted">
+            <span>Ara Toplam</span>
+            <span class="fw-medium text-dark">{{ cartService.subtotal() | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
+          </div>
+
+          <!-- Kargo Ücreti Gösterimi -->
+          <div class="d-flex justify-content-between mb-3 text-muted">
+            <span>Kargo Ücreti</span>
+            @if (cartService.shippingFee() === 0) {
+              <span class="fw-bold text-success">ÜCRETSİZ</span>
+            } @else {
+              <span class="fw-medium text-dark">{{ cartService.shippingFee() | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
+            }
+          </div>
+
+          <hr class="my-3">
+
+          <div class="d-flex justify-content-between mb-4">
+            <span class="fw-bold text-dark fs-5">Toplam</span>
+            <span class="fw-bold text-pink fs-4">{{ cartService.grandTotal() | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
+          </div>
+
+          <!-- ÖDEME SAYFASINA YÖNLENDİREN BUTON -->
+          <a routerLink="/odeme" class="btn btn-pink w-100 rounded-pill py-2 fw-semibold shadow-sm text-center text-decoration-none">
+            Sepeti Onayla <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  } @else {
+    <!-- Boş Sepet Görünümü -->
+    <div class="text-center py-5 bg-white rounded-4 border shadow-sm">
+      <i class="bi bi-bag-x display-1 text-pink opacity-50 d-block mb-3"></i>
+      <h4 class="fw-bold text-dark mb-2">Sepetiniz Boş</h4>
+      <p class="text-muted small mb-4">Sepetinizde henüz ürün bulunmuyor. Hemen alışverişe başlayın!</p>
+      <a routerLink="/urunler" class="btn btn-pink rounded-pill px-4 py-2">
+        Alışverişe Başla
+      </a>
+    </div>
+  }
+</div>

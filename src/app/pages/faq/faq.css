@@ -1,0 +1,17 @@
+/* Tıklanmış/Açık akordiyon butonunun mavi renklerini Ez ve Pembe/Beyaz Yap */
+.accordion-button:not(.collapsed) {
+  color: #d87093 !important; /* Pembe yazı rengi */
+  background-color: #fff0f3 !important; /* Hafif toz pembe arka plan */
+  box-shadow: none !important;
+}
+
+/* Butona tıklandığında etrafında çıkan mavi halkanı (focus/outline) kaldır */
+.accordion-button:focus {
+  box-shadow: none !important;
+  border-color: rgba(0, 0, 0, 0.125) !important;
+}
+
+/* Sağdaki ok simgesinin mavi olmasını engelle / rengini ayarla */
+.accordion-button::after {
+  filter: grayscale(1); /* Mavi oku nötr/siyah-beyaz yapar */
+}

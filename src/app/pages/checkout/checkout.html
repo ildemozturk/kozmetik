@@ -1,0 +1,169 @@
+<div class="container py-4 mb-5">
+  <h3 class="fw-light mb-4 text-dark">Ödeme ve Teslimat Bilgileri</h3>
+
+  @if (cartService.cartItems().length > 0) {
+    <div class="row g-4">
+      
+      <!-- Sol Taraf: Adres Bilgileri Formu & Iyzico Ekranı -->
+      <div class="col-lg-8">
+        
+        <!-- 1. Teslimat Adresi -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+          <h5 class="fw-bold text-dark mb-3">
+            <i class="bi bi-geo-alt text-pink me-2"></i>1. Teslimat Adresi
+          </h5>
+          
+          <form [formGroup]="checkoutForm">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label small text-muted">Ad Soyad</label>
+                <input type="text" formControlName="fullName" class="form-control rounded-3" placeholder="">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label small text-muted">E-posta</label>
+                <input type="email" formControlName="email" class="form-control rounded-3" placeholder="">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label small text-muted">Telefon</label>
+                <input type="tel" formControlName="phone" class="form-control rounded-3" placeholder="05xx xxx xx xx" maxlength="11">
+              </div>
+
+              <!-- DİNAMİK ŞEHİR SEÇİMİ -->
+              <div class="col-md-4 position-relative">
+                <label class="form-label small text-muted">İl</label>
+                <div class="custom-select-box form-control rounded-3 d-flex justify-content-between align-items-center cursor-pointer"
+                     (click)="isCityDropdownOpen = !isCityDropdownOpen">
+                  <span>{{ checkoutForm.value.city || 'İl Seçiniz' }}</span>
+                  <i class="bi bi-chevron-down small text-muted"></i>
+                </div>
+
+                @if (isCityDropdownOpen) {
+                  <ul class="custom-dropdown-menu shadow-sm rounded-3">
+                    @for (c of cities; track c.plateCode) {
+                      <li class="dropdown-item-pink" 
+                          [class.active]="checkoutForm.value.city === c.name"
+                          (click)="selectCity(c)">
+                        {{ c.name }}
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+
+              <!-- DİNAMİK İLÇE SEÇİMİ -->
+              <div class="col-md-4 position-relative">
+                <label class="form-label small text-muted">İlçe</label>
+                <div class="custom-select-box form-control rounded-3 d-flex justify-content-between align-items-center cursor-pointer"
+                     [class.disabled]="checkoutForm.get('district')?.disabled"
+                     (click)="!checkoutForm.get('district')?.disabled && (isDistrictDropdownOpen = !isDistrictDropdownOpen)">
+                  <span>{{ checkoutForm.value.district || 'İlçe Seçiniz' }}</span>
+                  <i class="bi bi-chevron-down small text-muted"></i>
+                </div>
+
+                @if (isDistrictDropdownOpen && districts.length > 0) {
+                  <ul class="custom-dropdown-menu shadow-sm rounded-3">
+                    @for (d of districts; track d) {
+                      <li class="dropdown-item-pink" 
+                          [class.active]="checkoutForm.value.district === d"
+                          (click)="selectDistrict(d)">
+                        {{ d }}
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+
+              <div class="col-12">
+                <label class="form-label small text-muted">Açık Adres</label>
+                <textarea formControlName="address" class="form-control rounded-3" rows="2" placeholder="Mahalle, Sokak, Bina No..."></textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- 2. IYZICO ÖDEME FORMU KUTUSU -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-dark mb-0">
+              <i class="bi bi-credit-card text-pink me-2"></i>2. Güvenli Ödeme
+            </h5>
+            
+          </div>
+
+          <!-- IYZICO FORMUNUN DÖKÜLECEĞİ ALAN -->
+          <div id="iyzipay-checkout-form" class="responsive"></div>
+        </div>
+
+      </div>
+
+      <!-- Sağ Taraf: Ödeme Özeti -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 100px;">
+          <h5 class="fw-bold text-dark mb-3">Sipariş Özeti</h5>
+
+          <div class="d-flex justify-content-between mb-2 text-muted">
+            <span>Ara Toplam</span>
+            <span class="fw-medium text-dark">{{ cartService.subtotal() | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-3 text-muted">
+            <span>Kargo Ücreti</span>
+            @if (cartService.shippingFee() === 0) {
+              <span class="fw-bold text-success">ÜCRETSİZ</span>
+            } @else {
+              <span class="fw-medium text-dark">{{ cartService.shippingFee() | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
+            }
+          </div>
+
+          <hr class="my-3">
+
+          <div class="d-flex justify-content-between mb-4">
+            <span class="fw-bold text-dark fs-5">Ödenecek Tutar</span>
+            <span class="fw-bold text-pink fs-4">{{ cartService.grandTotal() | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
+          </div>
+
+          <button type="button" 
+                  class="btn btn-pink w-100 rounded-pill py-3 fw-bold shadow-sm"
+                  [disabled]="isProcessing"
+                  (click)="processPayment()">
+            @if (isProcessing) {
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span> Ödeme alınıyor...
+            } @else {
+              <i class="bi bi-lock-fill me-1"></i> Ödemeye Geç
+            }
+          </button>
+        </div>
+      </div>
+
+    </div>
+  } @else {
+    <div class="text-center py-5 bg-white rounded-4 border shadow-sm">
+      <i class="bi bi-cart-x display-1 text-pink opacity-50 d-block mb-3"></i>
+      <h4 class="fw-bold text-dark">Sepetinizde Ürün Bulunmuyor</h4>
+      <p class="text-muted small mb-4">Ödeme yapabilmek için sepetinize ürün eklemelisiniz.</p>
+      <a routerLink="/urunler" class="btn btn-pink rounded-pill px-4 py-2">Ürünlere Git</a>
+    </div>
+  }
+
+  <!-- TOAST BİLDİRİM BİLEŞENİ -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+    <div id="orderToast" class="toast align-items-center text-white border-0 shadow-lg rounded-3" 
+         [class.bg-success]="toastType === 'success'" 
+         [class.bg-danger]="toastType === 'error'" 
+         role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body d-flex align-items-center gap-2">
+          @if (toastType === 'success') {
+            <i class="bi bi-check-circle-fill fs-5"></i>
+          } @else {
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+          }
+          <span>{{ toastMessage }}</span>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="hideToast()"></button>
+      </div>
+    </div>
+  </div>
+</div>

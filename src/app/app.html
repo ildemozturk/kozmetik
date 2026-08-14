@@ -1,0 +1,21 @@
+<app-navbar></app-navbar>
+
+<main>
+  <router-outlet></router-outlet>
+</main>
+
+<app-footer></app-footer>
+
+<!-- ŞIK TOAST BİLDİRİMİ -->
+@if (cartService.toastMessage()) {
+  <div class="custom-toast shadow-lg rounded-4 d-flex align-items-center gap-3 p-3 bg-white border border-pink-subtle">
+    <div class="toast-icon bg-pink-light rounded-circle d-flex align-items-center justify-content-center text-pink fs-5">
+      <i class="bi bi-trash3-fill"></i>
+    </div>
+    <div class="toast-content flex-grow-1">
+      
+      <p class="small text-muted mb-0">{{ cartService.toastMessage() }}</p>
+    </div>
+    <button type="button" class="btn-close ms-auto shadow-none" (click)="cartService.toastMessage.set(null)"></button>
+  </div>
+}

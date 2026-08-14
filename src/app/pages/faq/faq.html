@@ -1,0 +1,111 @@
+<div class="container py-5" style="max-width: 900px;">
+  <div class="text-center mb-5">
+    <span class="text-pink fw-bold text-uppercase small" style="letter-spacing: 1.5px;">YARDIM MERKEZI</span>
+    <h1 class="fw-bold my-2 text-dark">Sıkça Sorulan Sorular</h1>
+    <p class="text-muted">Merak ettiğiniz tüm detayları ve yanıtları burada bulabilirsiniz.</p>
+  </div>
+
+  <div class="accordion accordion-flush shadow-sm rounded-4 overflow-hidden bg-white p-3">
+    
+    <!-- 1. Soru -->
+    <div class="accordion-item border-bottom">
+      <h2 class="accordion-header">
+        <button class="accordion-button fw-semibold text-dark" 
+                [class.collapsed]="openIndex !== 0" 
+                (click)="toggleFaq(0)" 
+                type="button">
+          Kargo teslimat süresi ne kadardır?
+        </button>
+      </h2>
+      <div class="accordion-collapse collapse" [class.show]="openIndex === 0">
+        <div class="accordion-body text-muted small">
+          Siparişleriniz 1-3 iş günü içerisinde kargoya verilir. Kargo takip numaranız e-posta adresinize iletilmektedir.
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Soru -->
+    <div class="accordion-item border-bottom">
+      <h2 class="accordion-header">
+        <button class="accordion-button fw-semibold text-dark" 
+                [class.collapsed]="openIndex !== 1" 
+                (click)="toggleFaq(1)" 
+                type="button">
+          Ürünleriniz hassas ciltler için uygun mudur?
+        </button>
+      </h2>
+      <div class="accordion-collapse collapse" [class.show]="openIndex === 1">
+        <div class="accordion-body text-muted small">
+          Evet, tüm dermatolojik ürünlerimiz hassas cilt yapıları göz önünde bulundurularak hipoalerjenik olarak geliştirilmiştir.
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Soru -->
+    <div class="accordion-item border-bottom">
+      <h2 class="accordion-header">
+        <button class="accordion-button fw-semibold text-dark" 
+                [class.collapsed]="openIndex !== 2" 
+                (click)="toggleFaq(2)" 
+                type="button">
+          İade ve değişim politikanız nedir?
+        </button>
+      </h2>
+      <div class="accordion-collapse collapse" [class.show]="openIndex === 2">
+        <div class="accordion-body text-muted small">
+          Ambalajı açılmamış ve kullanılmamış ürünleri 14 gün içerisinde ücretsiz bir şekilde anlaşmalı kargo firmamıza size iletilen kod ile birlikte iade edebilirsiniz.
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Soru -->
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button fw-semibold text-dark" 
+                [class.collapsed]="openIndex !== 3" 
+                (click)="toggleFaq(3)" 
+                type="button">
+          Ürünler vegan mı?
+        </button>
+      </h2>
+      <div class="accordion-collapse collapse" [class.show]="openIndex === 3">
+        <div class="accordion-body text-muted small">
+          Evet, tüm ürün yelpazemiz %100 vegan sertifikalıdır ve hiçbir hayvansal içerik barındırmaz.
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item border-bottom">
+      <h2 class="accordion-header">
+        <button class="accordion-button fw-semibold text-dark" 
+                [class.collapsed]="openIndex !== 6" 
+                (click)="toggleFaq(6)" 
+                type="button">
+          Açılan kozmetik ürünlerinin kullanım ömrü (PAO) ne kadardır?
+        </button>
+      </h2>
+      <div class="accordion-collapse collapse" [class.show]="openIndex === 6">
+        <div class="accordion-body text-muted small">
+          Ürünlerimizin ambalaj arkasında yer alan açık kapak simgesi (PAO) kullanım ömrünü belirtir. İçerik yapısına göre ürünlerimiz açıldıktan sonra genellikle 6 ila 12 ay süresince tazeliğini korur.
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button fw-semibold text-dark" 
+                [class.collapsed]="openIndex !== 7" 
+                (click)="toggleFaq(7)" 
+                type="button">
+          Kapıda ödeme veya havale imkanı bulunuyor mu?
+        </button>
+      </h2>
+      <div class="accordion-collapse collapse" [class.show]="openIndex === 7">
+        <div class="accordion-body text-muted small">
+          Güvenli ödeme altyapımız üzerinden tüm kredi kartları ve banka kartları ile ödeme yapabilirsiniz. Şu an için kapıda ödeme seçeneğimiz bulunmamaktadır.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

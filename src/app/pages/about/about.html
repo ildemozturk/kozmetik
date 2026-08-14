@@ -1,0 +1,63 @@
+<div class="container py-5">
+  <!-- Banner / Header -->
+  <div class="row align-items-center g-5 mb-5">
+    
+    <!-- Sol Taraf: Metinler -->
+    <div class="col-lg-6">
+      <span class="text-pink fw-bold text-uppercase small" style="letter-spacing: 1.5px;">BİZİM HİKAYEMİZ</span>
+      <h1 class="display-5 fw-bold my-3 text-dark">Doğal Güzellik, Bilimle Buluşuyor</h1>
+      <p class="lead text-muted">
+        Lumière Beauty olarak, cildinizin doğal ışıltısını ortaya çıkarmak için doğadan ilham alan ve bilimsel olarak kanıtlanmış içerikleri bir araya getiriyoruz.
+      </p>
+      <p class="text-muted">
+        %100 vegan, cruelty-free ve sürdürülebilir ambalaj vizyonumuzla sadece cildinize değil, doğaya da saygı gösteriyoruz.
+      </p>
+    </div>
+
+    <!-- Sağ Taraf: Yan Yana Genişleyen Dikey Resim Akordiyonu -->
+    <div class="col-lg-6">
+      <div class="image-accordion d-flex gap-2" style="height: 380px;">
+        @for (img of galleryImages; track $index) {
+          <div class="accordion-panel position-relative rounded-4 overflow-hidden shadow-sm cursor-pointer"
+               [class.active]="activeImageIndex === $index"
+               (click)="setActive($index)"
+               [style.background-image]="'url(' + img.url + ')'">
+            
+            <!-- Resim Üzerindeki Metin Katmanı (Overlay) -->
+            <div class="panel-overlay position-absolute bottom-0 start-0 end-0 p-3 text-white d-flex flex-column justify-content-end">
+              <h6 class="fw-bold mb-0 text-truncate">{{ img.title }}</h6>
+              <small class="small opacity-75 text-truncate">{{ img.subtitle }}</small>
+            </div>
+
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Değerlerimiz (Özellik Kartları) -->
+  <div class="row g-4 mt-4 text-center">
+    <div class="col-md-4">
+      <div class="p-4 bg-white rounded-4 shadow-sm h-100 border-0">
+        <div class="fs-1 text-pink mb-3"><i class="bi bi-flower1"></i></div>
+        <h5 class="fw-bold">Temiz İçerik</h5>
+        <p class="text-muted small mb-0">Paraben, sülfat ve zararlı kimyasallar içermeyen saf formüller.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="p-4 bg-white rounded-4 shadow-sm h-100 border-0">
+        <div class="fs-1 text-pink mb-3"><i class="bi bi-heart-pulse"></i></div>
+        <h5 class="fw-bold">Cruelty-Free</h5>
+        <p class="text-muted small mb-0">Hiçbir ürünümüz hayvanlar üzerinde test edilmez, %100 doğa dostudur.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="p-4 bg-white rounded-4 shadow-sm h-100 border-0">
+        <div class="fs-1 text-pink mb-3"><i class="bi bi-shield-check"></i></div>
+        <h5 class="fw-bold">Dermatolojik Test</h5>
+        <p class="text-muted small mb-0">Hassas ciltler dahil tüm cilt tipleri için klinik olarak test edilmiştir.</p>
+      </div>
+    </div>
+  </div>
+</div>

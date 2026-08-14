@@ -1,0 +1,316 @@
+<div class="container mb-5">
+  <div class="row g-4">
+    
+    <!-- Sol Taraf: Kategoriler, Sıralama & Stok Filtresi -->
+    <div class="col-md-3">
+      
+      <!-- 1. KATEGORİLER KARTI -->
+      <div class="category-card shadow-sm border-0 rounded-4 overflow-hidden bg-white mb-4">
+        <div class="category-header p-3 bg-white d-flex align-items-center gap-2 border-bottom">
+          <i class="bi bi-grid-fill text-pink"></i>
+          <span class="fw-bold text-dark mb-0">Kategoriler</span>
+        </div>
+        
+        <div class="list-group list-group-flush p-2 border-0">
+          <button 
+            type="button" 
+            class="category-btn list-group-item d-flex justify-content-between align-items-center rounded-3 mb-1 border-0"
+            [class.custom-active]="selectedCategory === '' || selectedCategory === null"
+            (click)="selectCategory('')">
+            <span>Tüm Ürünler</span>
+            <i class="bi bi-chevron-right arrow"></i>
+          </button>
+          
+          @for (cat of categories; track cat) {
+            <button 
+              type="button" 
+              class="category-btn list-group-item d-flex justify-content-between align-items-center rounded-3 mb-1 border-0"
+              [class.custom-active]="selectedCategory === cat"
+              (click)="selectCategory(cat)">
+              <span>{{ cat }}</span>
+              <i class="bi bi-chevron-right arrow"></i>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- 2. SIRALAMA & FİLTRELEME KARTI -->
+      <div class="filter-card shadow-sm border-0 rounded-4 p-3 bg-white">
+        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+          <i class="bi bi-sliders text-pink fs-5"></i>
+          <span class="fw-bold text-dark mb-0">Filtrele & Sırala</span>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label small text-muted fw-semibold mb-2">Ürün Sıralaması</label>
+          <div class="d-flex flex-column gap-2">
+            <label class="custom-radio-container">
+              <input type="radio" name="sortOption" value="default" [(ngModel)]="selectedSort" (change)="onSortChange()">
+              <span class="radio-mark"></span>
+              <span class="radio-label">Varsayılan Sıralama</span>
+            </label>
+            <label class="custom-radio-container">
+              <input type="radio" name="sortOption" value="price-asc" [(ngModel)]="selectedSort" (change)="onSortChange()">
+              <span class="radio-mark"></span>
+              <span class="radio-label">Fiyat: Düşükten Yükseğe</span>
+            </label>
+            <label class="custom-radio-container">
+              <input type="radio" name="sortOption" value="price-desc" [(ngModel)]="selectedSort" (change)="onSortChange()">
+              <span class="radio-mark"></span>
+              <span class="radio-label">Fiyat: Yüksekten Düşüğe</span>
+            </label>
+            <label class="custom-radio-container">
+              <input type="radio" name="sortOption" value="name-asc" [(ngModel)]="selectedSort" (change)="onSortChange()">
+              <span class="radio-mark"></span>
+              <span class="radio-label">Ürün Adı: A - Z</span>
+            </label>
+            <label class="custom-radio-container">
+              <input type="radio" name="sortOption" value="name-desc" [(ngModel)]="selectedSort" (change)="onSortChange()">
+              <span class="radio-mark"></span>
+              <span class="radio-label">Ürün Adı: Z - A</span>
+            </label>
+          </div>
+        </div>
+
+        <hr class="text-muted opacity-25 my-3">
+
+        <div>
+          <label class="form-label small text-muted fw-semibold mb-2">Stok Durumu</label>
+          <div class="d-flex flex-column gap-2">
+            <label class="custom-radio-container">
+              <input type="radio" name="stockOption" value="all" [(ngModel)]="selectedStockFilter" (change)="onStockFilterChange()">
+              <span class="radio-mark"></span>
+              <span class="radio-label">Tüm Ürünler</span>
+            </label>
+            <label class="custom-radio-container">
+              <input type="radio" name="stockOption" value="in-stock" [(ngModel)]="selectedStockFilter" (change)="onStockFilterChange()">
+              <span class="radio-mark"></span>
+              <span class="radio-label">Sadece Stokta Olanlar</span>
+            </label>
+            <label class="custom-radio-container">
+              <input type="radio" name="stockOption" value="out-of-stock" [(ngModel)]="selectedStockFilter" (change)="onStockFilterChange()">
+              <span class="radio-mark"></span>
+              <span class="radio-label">Tükenen Ürünler</span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Sağ Taraf: Reklam Banner & Ürün Vitrini -->
+    <div class="col-md-9">
+      
+      <!-- Banner -->
+      <div class="carousel rounded-4 overflow-hidden shadow-sm mb-4 position-relative bg-white" (mouseenter)="stopAutoSlide()" (mouseleave)="startAutoSlide()">
+        <div class="carousel-indicators mb-2 position-absolute bottom-0 start-50 translate-middle-x z-2 d-flex gap-1">
+          <button type="button" class="border-0 rounded-circle" [class.active]="activeSlide === 0" (click)="setSlide(0)"></button>
+          <button type="button" class="border-0 rounded-circle" [class.active]="activeSlide === 1" (click)="setSlide(1)"></button>
+          <button type="button" class="border-0 rounded-circle" [class.active]="activeSlide === 2" (click)="setSlide(2)"></button>
+          <button type="button" class="border-0 rounded-circle" [class.active]="activeSlide === 3" (click)="setSlide(3)"></button>
+        </div>
+        
+        <div class="carousel-inner">
+          <div class="carousel-item" [class.active]="activeSlide === 0" style="background: linear-gradient(135deg, #ffffff 50%, #fff0f3 50%); min-height: 260px;">
+            <div class="row align-items-center h-100 px-4 px-md-5 py-3">
+              <div class="col-md-6 z-1">
+                <span class="text-secondary fw-semibold text-uppercase tracking-wider small">YAZ KAMPANYASI</span>
+                <h2 class="display-6 fw-bold my-1 text-dark">Sezon Sonu İndirimi</h2>
+                <div class="d-flex align-items-baseline gap-2 my-2">
+                  <span class="fw-bold fs-4 text-dark">İNDİRİM</span>
+                  <span class="display-5 fw-extrabold text-pink" style="font-weight: 800;">%50'YE</span>
+                  <span class="fw-bold fs-5 text-dark">VARAN İNDİRİM</span>
+                </div>
+              </div>
+              <div class="col-md-6 text-end position-relative d-none d-md-block">
+                <img src="https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop" 
+                     alt="Kozmetik Ürünleri" 
+                     class="img-fluid object-fit-contain rounded-3" 
+                     style="max-height: 230px; filter: drop-shadow(0 10px 15px rgba(216,112,147,0.2));">
+              </div>
+            </div>
+          </div>
+
+          <div class="carousel-item" [class.active]="activeSlide === 1" style="background: linear-gradient(90deg, #fff0f3 0%, #f7cad0 100%); min-height: 260px;">
+            <div class="row align-items-center h-100 px-4 px-md-5 py-3">
+              <div class="col-md-6 z-1">
+                <span class="text-pink fw-bold text-uppercase small" style="letter-spacing: 1.5px;">NEW COLLECTION</span>
+                <h2 class="display-5 fw-normal my-2 text-dark" style="font-family: 'Playfair Display', serif, Georgia;">Her Gün Işılda</h2>
+                <p class="text-muted mb-3 small">Doğal ışıltınızı ortaya çıkararak güzellik esaslarınızı keşfedin.</p>
+              </div>
+              <div class="col-md-6 text-center d-none d-md-block">
+                <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=600&auto=format&fit=crop" 
+                     alt="Lumiere Skincare" 
+                     class="img-fluid object-fit-contain rounded-3" 
+                     style="max-height: 230px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));">
+              </div>
+            </div>
+          </div>
+
+          <div class="carousel-item" [class.active]="activeSlide === 2" style="background: linear-gradient(135deg, #ffeaec 0%, #ffffff 100%); min-height: 260px;">
+            <div class="row align-items-center h-100 px-4 px-md-5 py-3">
+              <div class="col-md-6 z-1">
+                <span class="text-secondary fw-bold text-uppercase small" style="letter-spacing: 1.2px;">SKINCARE ROUTINE</span>
+                <h2 class="display-6 fw-bold my-2 text-dark">Aydınlatıcı Serumlar</h2>
+                <p class="text-muted mb-3 small">C Vitamini ve Hyalüronik asit kompleksi ile cildinize derinlemesine nem verin.</p>
+              </div>
+              <div class="col-md-6 text-end position-relative d-none d-md-block">
+                <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=600&auto=format&fit=crop" 
+                     alt="Cilt Bakım Serumu" 
+                     class="img-fluid object-fit-contain rounded-3" 
+                     style="max-height: 230px; filter: drop-shadow(0 10px 15px rgba(216,112,147,0.25));">
+              </div>
+            </div>
+          </div>
+
+          <div class="carousel-item" [class.active]="activeSlide === 3" style="background: linear-gradient(90deg, #fce1e6 0%, #fff0f3 100%); min-height: 260px;">
+            <div class="row align-items-center h-100 px-4 px-md-5 py-3">
+              <div class="col-md-6 z-1">
+                <span class="text-pink fw-bold text-uppercase small" style="letter-spacing: 1.5px;">SPECIAL ESSENCE</span>
+                <h2 class="display-6 fw-bold my-2 text-dark">İmza Parfümler</h2>
+                <p class="text-muted mb-3 small">Çiçeksi ve odunsu notalarla gün boyu kalıcı, büyüleyici koku deneyimi.</p>
+              </div>
+              <div class="col-md-6 text-center d-none d-md-block">
+                <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=600&auto=format&fit=crop" 
+                     alt="Lüks Parfüm" 
+                     class="img-fluid object-fit-contain rounded-3" 
+                     style="max-height: 230px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.12));">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+        
+      <!-- Ürün Vitrini (Grid) -->
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+        @for (product of products; track product.id) {
+          <div class="col">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden product-card bg-white position-relative p-2">
+              
+              <!-- İndirim Rozeti -->
+              @if (isDiscounted(product)) {
+                <span class="position-absolute top-0 start-0 m-3 badge bg-danger rounded-pill shadow-sm fs-8 z-2">
+                  İndirim
+                </span>
+              }
+
+              <!-- 1. Ürün Görseli (TIKLANINCA PİKSELİ SAKLAR) -->
+              <a [routerLink]="['/urunler', product.id]" (click)="saveScrollPosition()" class="text-center p-2 d-block text-decoration-none">
+                <img [src]="product.imageUrl" class="img-fluid object-fit-cover rounded-3" alt="{{ product.name }}" style="height: 200px;">
+              </a>
+
+              <!-- 2. Favori Kalp Butonu -->
+              <div class="px-2 pt-1 mb-2">
+                <button type="button" 
+                        class="btn btn-light btn-sm rounded-circle shadow-sm d-flex align-items-center justify-content-center favorite-btn p-0"
+                        [class.sparkle-active]="product.isFavorite"
+                        style="width: 36px; height: 36px;"
+                        (click)="toggleFavorite(product, $event)"
+                        [title]="product.isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'">
+                  <i class="bi fs-5" 
+                     [class.bi-heart-fill]="product.isFavorite" 
+                     [class.bi-heart]="!product.isFavorite"
+                     [class.text-pink]="product.isFavorite"
+                     [class.text-muted]="!product.isFavorite"></i>
+                </button>
+              </div>
+
+              <!-- 3. Kart Gövdesi -->
+              <div class="card-body d-flex flex-column justify-content-between p-2 pt-0">
+                <div>
+                  <!-- BAŞLIK TIKLAMASINDA PİKSEL SAKLAMA -->
+                  <a [routerLink]="['/urunler', product.id]" (click)="saveScrollPosition()" class="text-decoration-none">
+                    <h6 class="card-title text-truncate fw-bold mb-1 text-dark" title="{{ product.name }}">{{ product.name }}</h6>
+                  </a>
+                  <p class="card-text text-muted small text-truncate mb-3" style="font-size: 0.82rem;">{{ product.description }}</p>
+                </div>
+                
+                <!-- 4. Fiyat ve Butonlar -->
+                <div class="d-flex justify-content-between align-items-center mt-auto">
+                  <div class="d-flex align-items-baseline gap-1 flex-wrap">
+                    @if (isDiscounted(product)) {
+                      <span class="text-muted text-decoration-line-through small fs-7 me-1">
+                        {{ getOldPrice(product) | currency:'TRY':'symbol-narrow':'1.2-2' }}
+                      </span>
+                    }
+                    <span class="fw-bold fs-5 text-dark">
+                      {{ product.price | currency:'TRY':'symbol-narrow':'1.2-2' }}
+                    </span>
+                  </div>
+
+                  @if (cartService.getItemQuantity(product.id) > 0) {
+                    <div class="quantity-counter-btn d-flex align-items-center justify-content-between rounded-pill px-2 py-1 shadow-sm">
+                      <button type="button" class="btn btn-sm p-0 border-0 text-pink fw-bold d-flex align-items-center justify-content-center" 
+                              style="width: 22px; height: 22px;" 
+                              (click)="decreaseCartQuantity(product, $event)">
+                        <i class="bi bi-dash"></i>
+                      </button>
+
+                      <span class="fw-bold px-2 text-pink fs-7">{{ cartService.getItemQuantity(product.id) }}</span>
+
+                      <button type="button" class="btn btn-sm p-0 border-0 text-pink fw-bold d-flex align-items-center justify-content-center" 
+                              style="width: 22px; height: 22px;" 
+                              [disabled]="product.stock && cartService.getItemQuantity(product.id) >= product.stock.quantity"
+                              (click)="addToCart(product, $event)">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                    </div>
+                  } @else {
+                    <button type="button" 
+                            class="btn btn-outline-pink btn-sm rounded-pill px-3 py-1 fw-medium" 
+                            [disabled]="!product.stock || product.stock.quantity <= 0"
+                            (click)="addToCart(product, $event)">
+                      @if (product.stock && product.stock.quantity > 0) {
+                        <i class="bi bi-cart-plus me-1"></i> Ekle
+                      } @else {
+                        <span class="text-danger fw-bold">Tükendi</span>
+                      }
+                    </button>
+                  }
+                </div>
+              </div>
+
+            </div>
+          </div>
+        } @empty {
+          <div class="col-12 text-center py-5">
+            <p class="text-muted small mt-2">Aradığınız kriterlere uygun ürün bulunamadı.</p>
+          </div>
+        }
+      </div>
+
+      <!-- Sayfalama (Pagination) -->
+      @if (totalPages > 1) {
+        <nav class="d-flex justify-content-center mt-4">
+          <ul class="pagination pagination-sm gap-1">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <button type="button" class="page-button btn rounded-3" (click)="changePage(currentPage - 1)">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+            </li>
+            
+            @for (page of pagesArray; track page) {
+              <li class="page-item">
+                <button 
+                  type="button"
+                  class="page-button btn rounded-3" 
+                  [class.custom-active]="currentPage === page" 
+                  (click)="changePage(page)">
+                  {{ page }}
+                </button>
+              </li>
+            }
+
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <button type="button" class="page-button btn rounded-3" (click)="changePage(currentPage + 1)">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      }
+    </div>
+
+  </div>
+</div>
