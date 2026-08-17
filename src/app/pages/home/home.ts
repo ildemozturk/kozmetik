@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, CurrencyPipe, isPlatformBrowser } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProductService } from '../../services/product.service';
@@ -17,7 +18,7 @@ interface Slide {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe, RouterLink],
+  imports: [CommonModule, CurrencyPipe, RouterLink, FormsModule],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })
@@ -32,6 +33,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   totalSlides: number = 4;
   carouselTimer: any;
   private wishlistSub!: Subscription;
+
+  // GELİNCE HABER VER MODAL DEĞİŞKENLERİ
+  isNotifyModalOpen: boolean = false;
+  selectedProductForNotify: Product | null = null;
+  notifyEmail: string = '';
+  notifyMessage: string = '';
+  isNotifyLoading: boolean = false;
 
   slides: Slide[] = [
     {
@@ -50,7 +58,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       subtitle: 'Sezon Favorileri',
       title: 'Doğal Işıltı & Makyaj',
       description: 'Hafif dokulu fondötenler ve ipeksi allıklarla doğal güzelliğini ön plana çıkar.',
-      imageUrl: 'https://images.unsplash.com/photo-1676570092589-a6c09ecbb373?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWFrZXVwJTIwcHJvZHVjdHMlMjBwaW5rJTIwYmFja2dyb3VuZHxlbnwwfHwwfHx8MA%3D%3D'
+      imageUrl: 'https://media.istockphoto.com/id/1658893205/tr/foto%C4%9Fraf/make-up-products-at-pink-background-top-view.jpg?s=612x612&w=0&k=20&c=5U9yC2AWhUr9Su2qzrAivfAvJG7OWhYMJQD4dX8qRV8='
     },
     {
       subtitle: 'Sınırlı Stok',
@@ -69,7 +77,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Favori servisindeki yayınları anlık dinliyoruz
     this.wishlistSub = this.wishlistService.wishlistSubject.subscribe(() => {
       this.syncFavoriteStates();
       this.cdr.detectChanges();
@@ -112,22 +119,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   loadFeaturedProducts(): void {
-    // 1. GERÇEK BEST SELLERS ENDPOINT'İNİ ÇAĞIRIYORUZ:
-    this.productService.getBestSellers(8).subscribe({
-      next: (data: Product[]) => {
-        this.bestSellers = [...data];
-        this.syncFavoriteStates();
-        this.cdr.detectChanges();
-      },
-      error: (err: any) => {
-        console.error('Best sellers yüklenirken hata oluştu:', err);
-      }
-    });
-
-    // 2. İNDİRİMLİ ÜRÜNLER İÇİN NORMAL ÜRÜNLERİ ÇAĞIRIYORUZ:
     this.productService.getProducts('', 1, 30).subscribe(res => {
       const allProducts: Product[] = res.data;
+
+      this.bestSellers = allProducts.slice(0, 8);
       this.discountedProducts = allProducts.filter((p: Product) => this.isDiscounted(p));
+      
       this.syncFavoriteStates();
       this.cdr.detectChanges();
     });
@@ -164,6 +161,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     return !!(oldP && oldP > currentP);
   }
 
+  isOutOfStock(product: Product): boolean {
+    return !product.stock || product.stock.quantity <= 0;
+  }
+
   scroll(containerType: 'bestSellers' | 'discount', direction: 'left' | 'right'): void {
     const targetContainer = containerType === 'bestSellers' ? this.bestSellersContainer : this.discountContainer;
     if (targetContainer) {
@@ -182,6 +183,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   addToCart(product: Product, event: Event): void {
     event.stopPropagation();
+    if (this.isOutOfStock(product)) return;
     this.cartService.addToCart(product);
   }
 
@@ -189,5 +191,46 @@ export class HomeComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     const currentQty = this.cartService.getItemQuantity(product.id);
     this.cartService.updateQuantity(product.id, currentQty - 1);
+  }
+
+  // MODAL KONTROLLERİ
+  openNotifyModal(product: Product, event: Event): void {
+    event.stopPropagation();
+    this.selectedProductForNotify = product;
+    this.notifyEmail = '';
+    this.notifyMessage = '';
+    this.isNotifyOpen(true);
+  }
+
+  closeNotifyModal(): void {
+    this.isNotifyOpen(false);
+    this.selectedProductForNotify = null;
+  }
+
+  private isNotifyOpen(state: boolean): void {
+    this.isNotifyModalOpen = state;
+    this.cdr.detectChanges();
+  }
+
+  submitStockNotification(): void {
+    if (!this.selectedProductForNotify || !this.notifyEmail) return;
+
+    this.isNotifyLoading = true;
+    this.notifyMessage = '';
+
+    this.productService.subscribeStockNotification(this.selectedProductForNotify.id, this.notifyEmail).subscribe({
+      next: (res) => {
+        this.isNotifyLoading = false;
+        this.notifyMessage = res.message || 'Talebiniz alındı!';
+        setTimeout(() => {
+          this.closeNotifyModal();
+        }, 2000);
+      },
+      error: (err) => {
+        this.isNotifyLoading = false;
+        this.notifyMessage = err.error?.message || 'Bir hata oluştu. Lütfen tekrar deneyin.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 }
