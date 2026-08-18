@@ -2,7 +2,7 @@ import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
-import { authInterceptor } from './interceptors/auth.interceptor';
+import { authInterceptor } from './interceptors/auth-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -10,10 +10,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(
       routes,
       withInMemoryScrolling({
-        scrollPositionRestoration: 'disabled', // Tarayıcının en üste zorlamasını kapatıyoruz
+        scrollPositionRestoration: 'disabled',
         anchorScrolling: 'disabled'
       })
     ),
-    provideHttpClient(withInterceptors([authInterceptor])) // JWT Interceptor eklendi
+    provideHttpClient(withInterceptors([authInterceptor]))
   ]
 };

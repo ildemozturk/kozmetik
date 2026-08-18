@@ -10,6 +10,7 @@ export const authGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
+  // Kullanıcının gitmek istediği URL'i (örn: /odeme) saklayarak login'e yönlendiriyoruz
   router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
   return false;
 };

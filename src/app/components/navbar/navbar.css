@@ -1,3 +1,10 @@
+/* Navbar Stacking Context En Üste */
+.navbar-custom {
+  position: sticky !important;
+  top: 0;
+  z-index: 1050 !important;
+}
+
 /* Aktif Menü Linki Stili */
 .nav-link-custom.active-nav-link {
   color: #e18baf !important;
@@ -5,7 +12,6 @@
   position: relative;
 }
 
-/* Aktif Menü Linkinin Altındaki Pembe Vurgu Çizgisi */
 .nav-link-custom.active-nav-link::after {
   content: '';
   position: absolute;
@@ -18,9 +24,105 @@
   border-radius: 2px;
 }
 
-/* Aktif Sepet İkonu Stili */
 a.icon-btn.active-icon-link i {
   color: #e18baf !important;
+}
+
+.icon-btn {
+  transition: transform 0.2s ease, color 0.2s ease;
+  background: transparent;
+  cursor: pointer;
+}
+
+.icon-btn:hover i {
+  color: #c9667e !important;
+}
+
+.user-greeting {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #3b282e;
+}
+
+/* Admin Menü Rozeti */
+.admin-badge-link {
+  color: #c9667e !important;
+  background-color: #fff0f3;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  border: 1px solid #fecdd3;
+  transition: all 0.2s ease;
+}
+
+.admin-badge-link:hover {
+  background-color: #ffe4e6;
+}
+
+/* Kullanıcı Dropdown Menüsü */
+.user-dropdown-menu {
+  width: 230px;
+  position: absolute !important;
+  top: 100% !important;
+  right: 0 !important;
+  z-index: 9999 !important;
+  border-color: #f2e3e7 !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 10px 30px -5px rgba(201, 102, 126, 0.15), 0 4px 10px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 12px;
+}
+
+.user-dropdown-menu .dropdown-item {
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.user-dropdown-menu .dropdown-item:hover {
+  background-color: #fff0f3;
+  color: #c9667e !important;
+}
+
+/* Renk Paleti */
+.bg-pink {
+  background-color: #e18baf !important;
+  color: white;
+}
+
+.text-pink {
+  color: #e18baf !important;
+}
+
+.bg-pink-soft {
+  background-color: #fde8ed;
+}
+
+/* Siparişler Modal Stilleri */
+.modal-backdrop-custom {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1100;
+  padding: 1rem;
+}
+
+.modal-dialog-custom {
+  width: 100%;
+  max-width: 600px;
+  border: 1px solid #fce7eb;
+  animation: modalScale 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScale {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Offcanvas Yan Panel Yapısı */
@@ -29,7 +131,7 @@ a.icon-btn.active-icon-link i {
   right: -380px;
   width: 360px;
   height: 100vh;
-  z-index: 1050;
+  z-index: 1060;
   transition: right 0.3s ease-in-out;
   box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05);
 }
@@ -45,13 +147,4 @@ a.icon-btn.active-icon-link i {
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.3);
   z-index: 1040;
-}
-
-.bg-pink {
-  background-color: #e18baf !important;
-  color: white;
-}
-
-.text-pink {
-  color: #e18baf !important;
 }

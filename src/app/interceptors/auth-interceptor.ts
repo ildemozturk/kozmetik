@@ -6,13 +6,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const token = authService.getToken();
 
-  if (token) {
-    const cloned = req.clone({
+  // Yalnızca kendi backend API'mize giden isteklere token ekle (Dış API'leri hariç tut)
+  const isApiUrl = req.url.startsWith('http://localhost:5246') || req.url.startsWith('/api');
+
+  if (token && isApiUrl) {
+    req = req.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`
       }
     });
-    return next(cloned);
   }
 
   return next(req);

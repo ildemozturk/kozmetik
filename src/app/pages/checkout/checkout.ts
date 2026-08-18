@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
@@ -43,7 +43,8 @@ export class CheckoutComponent implements OnInit {
     public cartService: CartService,
     private fb: FormBuilder,
     private http: HttpClient,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -53,7 +54,7 @@ export class CheckoutComponent implements OnInit {
     this.checkPaymentStatus();
   }
 
-  // URL'den Ödeme Durumunu Kontrol Etme & Sepeti Temizleme
+  // URL'den Ödeme Durumunu Kontrol Etme & Siparişi Geçmişe Kaydetme
   private checkPaymentStatus(): void {
     this.route.queryParams.subscribe(params => {
       if (params['status'] === 'success') {
@@ -61,12 +62,40 @@ export class CheckoutComponent implements OnInit {
         this.token = params['token'] || '';
         this.orderNumber = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
         
-        // Ödeme başarılı olduğu an sepeti bildirim tetiklemeden temizliyoruz
+        // Siparişi Navbar'daki Siparişlerim kısmında görünmesi için localStorage'a kaydediyoruz
+        this.saveOrderToHistory();
+
+        // Sepeti temizliyoruz
         this.cartService.clearCart(false);
+        this.cdr.detectChanges();
       } else if (params['status'] === 'error') {
         this.showToast('Ödeme işlemi başarısız oldu veya iptal edildi.', 'error');
       }
     });
+  }
+
+  private saveOrderToHistory(): void {
+    const items = this.cartService.cartItems().map(item => ({
+      id: item.product.id,
+      name: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity,
+      imageUrl: item.product.imageUrl
+    }));
+
+    if (items.length === 0) return;
+
+    const newOrder = {
+      id: this.orderNumber || 'ORD-' + Math.floor(100000 + Math.random() * 900000),
+      date: new Date().toISOString(),
+      status: 'Hazırlanıyor',
+      totalAmount: this.cartService.grandTotal(),
+      items: items
+    };
+
+    const existingOrders = JSON.parse(localStorage.getItem('lumiere_orders') || '[]');
+    existingOrders.unshift(newOrder);
+    localStorage.setItem('lumiere_orders', JSON.stringify(existingOrders));
   }
 
   private initForms(): void {
@@ -90,18 +119,19 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
+  // Interceptor / CORS preflight hatasına takılmamak için doğrudan fetch() ile çekiyoruz
   loadCitiesFromApi(): void {
-    const apiUrl = 'https://mertmtn.github.io/CityDistrictJSONAPI/all-city-district.json';
-    this.http.get<any>(apiUrl).subscribe({
-      next: (res) => {
+    fetch('https://mertmtn.github.io/CityDistrictJSONAPI/all-city-district.json')
+      .then(res => res.json())
+      .then((res: any) => {
         if (res && res.city && Array.isArray(res.city)) {
           this.cities = res.city;
+          this.cdr.detectChanges();
         }
-      },
-      error: (err) => {
+      })
+      .catch((err) => {
         console.error('İl/İlçe API Yükleme Hatası:', err);
-      }
-    });
+      });
   }
 
   selectCity(city: City): void {
@@ -170,35 +200,34 @@ export class CheckoutComponent implements OnInit {
       }))
     };
 
-    this.http.post<any>('https://localhost:7276/api/orders/initiate-payment', orderPayload).subscribe({
+    this.http.post<any>('http://localhost:5246/api/orders/initiate-payment', orderPayload).subscribe({
       next: (res) => {
         this.isProcessing = false;
 
-       
+        const container = document.getElementById('iyzipay-checkout-form');
+        if (container) {
+          container.innerHTML = res.checkoutFormContent;
 
-          const container = document.getElementById('iyzipay-checkout-form');
-          if (container) {
-            container.innerHTML = res.checkoutFormContent;
-
-            const scriptElements = container.getElementsByTagName('script');
-            Array.from(scriptElements).forEach((oldScript) => {
-              const newScript = document.createElement('script');
-              newScript.type = 'text/javascript';
-              if (oldScript.src) {
-                newScript.src = oldScript.src;
-              } else {
-                newScript.innerHTML = oldScript.innerHTML;
-              }
-              document.body.appendChild(newScript);
-            });
-          }
-        
+          const scriptElements = container.getElementsByTagName('script');
+          Array.from(scriptElements).forEach((oldScript) => {
+            const newScript = document.createElement('script');
+            newScript.type = 'text/javascript';
+            if (oldScript.src) {
+              newScript.src = oldScript.src;
+            } else {
+              newScript.innerHTML = oldScript.innerHTML;
+            }
+            document.body.appendChild(newScript);
+          });
+        }
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.isProcessing = false;
         console.error('Ödeme başlatma hatası detayı:', err.error);
         const errorMsg = err.error?.message || 'Ödeme formu başlatılamadı.';
         this.showToast(errorMsg, 'error');
+        this.cdr.detectChanges();
       }
     });
   }

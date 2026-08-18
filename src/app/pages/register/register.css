@@ -1,0 +1,276 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+.auth-page-container {
+  min-height: calc(100vh - 90px);
+  background-color: #faf7f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 1.5rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.auth-box-wrapper {
+  width: 100%;
+  max-width: 1060px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 15px 40px -10px rgba(190, 140, 155, 0.12);
+  border: 1px solid #f2e3e7;
+  padding: 3.5rem 3rem;
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  gap: 3.5rem;
+  align-items: start;
+}
+
+/* Kolon Ayırıcı Çizgi */
+.column-divider {
+  width: 1px;
+  height: 100%;
+  background: #ede0e4;
+  min-height: 440px;
+}
+
+.auth-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.column-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #2b1a20;
+  letter-spacing: 1.5px;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+}
+
+/* FORM ALANLARI */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.form-field label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #3b282e;
+  letter-spacing: 0.8px;
+}
+
+.form-field label span {
+  color: #d67a92;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font-size: 0.92rem;
+  color: #2b1a20;
+  background: #fffdfd;
+  border: 1.5px solid #ebd9df;
+  border-radius: 8px;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.form-field input::placeholder {
+  color: #bfaab1;
+  font-size: 0.88rem;
+}
+
+.form-field input:focus {
+  outline: none;
+  border-color: #c9667e;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(201, 102, 126, 0.12);
+}
+
+.form-options {
+  margin-top: 0.2rem;
+}
+
+.terms-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  color: #594248;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.terms-label input {
+  accent-color: #c9667e;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ÜYELİĞİ TAMAMLA BUTONU (BEYAZDAN TOZ PEMBEYE) */
+.btn-submit {
+  margin-top: 0.75rem;
+  width: 100%;
+  padding: 1rem;
+  background: #ffffff;
+  color: #3b282e;
+  border: 1.5px solid #e5c2cb;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(201, 102, 126, 0.05);
+  transition: all 0.25s ease;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: #fde8ed;
+  border-color: #c9667e;
+  color: #c9667e;
+  box-shadow: 0 6px 16px rgba(201, 102, 126, 0.15);
+  transform: translateY(-1px);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* SAĞ KOLON (GİRİŞ YÖNLENDİRME) */
+.redirect-intro {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #523f45;
+  margin-bottom: 1.8rem;
+}
+
+.benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.benefits-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+}
+
+.benefit-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  color: #c9667e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.benefit-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.benefit-text {
+  font-size: 0.88rem;
+  color: #4a383d;
+  line-height: 1.55;
+}
+
+.btn-outline {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  text-align: center;
+  background: #ffffff;
+  color: #3b282e;
+  border: 1.5px solid #e5c2cb;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(201, 102, 126, 0.05);
+  transition: all 0.25s ease;
+}
+
+.btn-outline:hover {
+  background: #fde8ed;
+  border-color: #c9667e;
+  color: #c9667e;
+  box-shadow: 0 6px 16px rgba(201, 102, 126, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Hata Kutusu */
+.alert-error {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  background-color: #fff1f4;
+  border: 1px solid #fed2dc;
+  border-radius: 8px;
+  color: #a82e49;
+  font-size: 0.85rem;
+  margin-bottom: 1.2rem;
+}
+
+.alert-error svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.spinner-inline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(201, 102, 126, 0.3);
+  border-top-color: #c9667e;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mobil Uyumluluk */
+@media (max-width: 860px) {
+  .auth-box-wrapper {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    padding: 2.5rem 1.5rem;
+  }
+
+  .column-divider {
+    display: none;
+  }
+}
