@@ -13,7 +13,6 @@ import { ProductDetailComponent } from './pages/product-detail/product-detail';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { AdminDashboard } from './pages/admin/admin-dashboard/admin-dashboard';
-import { AdminProducts } from './pages/admin/admin-products/admin-products';
 
 // Guard Tanımları
 import { authGuard } from './guards/auth-guard';
@@ -40,29 +39,24 @@ export const routes: Routes = [
   { path: 'sss', component: Faq },
   { path: 'iletisim', component: Contact },
 
-  // Sepet
+  // Sepet & Sipariş
   { path: 'cart', component: CartComponent },
   { path: 'sepet', redirectTo: 'cart', pathMatch: 'full' },
-
-  // Ödeme & Sipariş (Korumalı Rota: Giriş Yapılmamışsa Login'e Yönlendirir)
   { 
     path: 'odeme', 
     component: CheckoutComponent, 
     canActivate: [authGuard] 
   },
   { path: 'checkout', redirectTo: 'odeme', pathMatch: 'full' },
-
-  // Sipariş Başarılı
   { path: 'siparis-basarili', component: OrderSuccessComponent },
 
-  // Admin Paneli (Yetki Korumalı)
+  // Admin Paneli (Doğrudan Dashboard Açılır)
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: AdminDashboard },
-      { path: 'products', component: AdminProducts }
+      { path: 'dashboard', component: AdminDashboard }
     ]
   },
 

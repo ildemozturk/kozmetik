@@ -50,11 +50,12 @@ export class Login implements OnInit {
         this.toastService.success(`Hoş geldiniz, ${res.fullName}!`);
         
         if (this.returnUrl && this.returnUrl !== '/') {
-          this.router.navigateByUrl(this.returnUrl);
+          this.router.navigateByUrl(this.returnUrl, { replaceUrl: true });
         } else if (res.role === 'Admin') {
-          this.router.navigate(['/admin/dashboard']);
+          // Admin girişi yapıldığı anda doğrudan Dashboard açılır
+          this.router.navigate(['/admin/dashboard'], { replaceUrl: true });
         } else {
-          this.router.navigate(['/']);
+          this.router.navigate(['/'], { replaceUrl: true });
         }
       },
       error: (err) => {

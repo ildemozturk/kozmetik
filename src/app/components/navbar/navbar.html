@@ -1,7 +1,7 @@
 <header class="navbar-custom py-3 border-bottom shadow-sm bg-white sticky-top">
   <div class="container d-flex justify-content-between align-items-center">
     
-    <!-- Sol Taraf: Marka Logosu -->
+    <!-- Marka Logosu -->
     <a class="navbar-brand text-center m-0 cursor-pointer text-decoration-none" 
        routerLink="/" 
        routerLinkActive="active-brand" 
@@ -12,32 +12,21 @@
 
     <!-- Orta Kısım: Menü Linkleri -->
     <nav class="d-none d-md-flex align-items-center gap-4">
-      <a routerLink="/urunler" 
-         routerLinkActive="active-nav-link" 
-         class="text-decoration-none text-muted fw-medium nav-link-custom">Ürünler</a>
-          
-      <a routerLink="/hakkimizda" 
-         routerLinkActive="active-nav-link" 
-         class="text-decoration-none text-muted fw-medium nav-link-custom">Hakkımızda</a>
-          
-      <a routerLink="/sss" 
-         routerLinkActive="active-nav-link" 
-         class="text-decoration-none text-muted fw-medium nav-link-custom">S.S.S.</a>
-          
-      <a routerLink="/iletisim" 
-         routerLinkActive="active-nav-link" 
-         class="text-decoration-none text-muted fw-medium nav-link-custom">İletişim</a>
+      <a routerLink="/urunler" routerLinkActive="active-nav-link" class="text-decoration-none text-muted fw-medium nav-link-custom">Ürünler</a>
+      <a routerLink="/hakkimizda" routerLinkActive="active-nav-link" class="text-decoration-none text-muted fw-medium nav-link-custom">Hakkımızda</a>
+      <a routerLink="/sss" routerLinkActive="active-nav-link" class="text-decoration-none text-muted fw-medium nav-link-custom">S.S.S.</a>
+      <a routerLink="/iletisim" routerLinkActive="active-nav-link" class="text-decoration-none text-muted fw-medium nav-link-custom">İletişim</a>
 
       @if (isAdmin) {
-        <a routerLink="/admin/dashboard" 
+        <a routerLink="/admin/products" 
            routerLinkActive="active-nav-link" 
            class="text-decoration-none fw-semibold nav-link-custom admin-badge-link">
-          <i class="bi bi-shield-lock me-1"></i>Yönetim Paneli
+          <i class="bi bi-boxes me-1.5"></i>Stok Yönetimi
         </a>
       }
     </nav>
 
-    <!-- Sağ Taraf: İkonlar ve Kullanıcı Menüsü -->
+    <!-- Sağ Taraf: Profil, Favoriler, Sepet -->
     <div class="d-flex align-items-center gap-4 text-muted fs-5 position-relative">
 
       <!-- HESABIM / PROFİL ALANI -->
@@ -56,11 +45,10 @@
         @if (isUserMenuOpen && isLoggedIn) {
           <div class="user-dropdown-menu shadow-lg bg-white border rounded-3 p-2 position-absolute end-0 mt-2">
             <div class="px-3 py-2 border-bottom">
-              <span class="text-muted" style="font-size: 0.75rem;">Hesabım</span>
+              <span class="text-muted" style="font-size: 0.75rem;">Giriş Yapıldı</span>
               <p class="mb-0 fw-bold text-dark text-truncate" style="font-size: 0.95rem;">{{ currentUser?.fullName }}</p>
             </div>
 
-            <!-- Menü Seçenekleri -->
             <div class="py-1">
               <button type="button" (click)="openOrdersModal()" class="dropdown-item py-2 px-3 small text-dark d-flex align-items-center gap-2 border-0 bg-transparent w-100 text-start">
                 <i class="bi bi-bag-check text-pink"></i> Siparişlerim
@@ -68,11 +56,8 @@
 
               @if (isAdmin) {
                 <hr class="my-1 border-light">
-                <a routerLink="/admin/dashboard" (click)="isUserMenuOpen = false" class="dropdown-item py-2 px-3 small text-dark d-flex align-items-center gap-2">
-                  <i class="bi bi-speedometer2 text-pink"></i> Admin Paneli
-                </a>
                 <a routerLink="/admin/products" (click)="isUserMenuOpen = false" class="dropdown-item py-2 px-3 small text-dark d-flex align-items-center gap-2">
-                  <i class="bi bi-box-seam text-pink"></i> Ürün Yönetimi
+                  <i class="bi bi-boxes text-pink"></i> Stok Yönetimi
                 </a>
               }
             </div>
@@ -97,10 +82,7 @@
       </button>
 
       <!-- SEPET İKONU -->
-      <a routerLink="/cart" 
-         routerLinkActive="active-icon-link" 
-         class="btn p-0 border-0 text-muted icon-btn position-relative text-decoration-none" 
-         title="Sepetim">
+      <a routerLink="/cart" routerLinkActive="active-icon-link" class="btn p-0 border-0 text-muted icon-btn position-relative text-decoration-none" title="Sepetim">
         <i class="bi bi-bag fs-5"></i>
         @if (cartCount > 0) {
           <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-pink" style="font-size: 0.55rem;">
@@ -119,7 +101,6 @@
   <div class="modal-backdrop-custom position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
     <div class="modal-dialog-custom bg-white rounded-4 shadow-lg overflow-hidden d-flex flex-column">
       
-      <!-- Modal Başlık -->
       <div class="p-4 border-bottom d-flex justify-content-between align-items-center bg-light">
         <div class="d-flex align-items-center gap-2">
           <i class="bi bi-bag-check-fill text-pink fs-4"></i>
@@ -128,21 +109,17 @@
         <button type="button" class="btn-close shadow-none" (click)="closeOrdersModal()"></button>
       </div>
 
-      <!-- Modal Gövdesi (Sipariş Listesi) -->
       <div class="p-4 overflow-y-auto flex-grow-1" style="max-height: 65vh;">
         @if (userOrders.length > 0) {
           <div class="d-flex flex-column gap-3">
             @for (order of userOrders; track order.id) {
               <div class="border rounded-3 p-3 bg-white shadow-sm">
-                
                 <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
                   <div>
                     <span class="fw-bold text-dark me-2">Sipariş #{{ order.id }}</span>
                     <span class="text-muted small">{{ order.date | date:'dd.MM.yyyy HH:mm' }}</span>
                   </div>
-                  <span class="badge bg-pink-soft text-pink px-2.5 py-1.5 rounded-pill fw-medium">
-                    {{ order.status }}
-                  </span>
+                  <span class="badge bg-pink-soft text-pink px-2.5 py-1.5 rounded-pill fw-medium">{{ order.status }}</span>
                 </div>
 
                 <div class="d-flex flex-column gap-2 mb-3">
@@ -161,7 +138,6 @@
                   <span class="text-muted small">Toplam Tutar:</span>
                   <span class="fw-bold text-pink fs-6">{{ order.totalAmount | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
                 </div>
-
               </div>
             }
           </div>
@@ -174,7 +150,6 @@
         }
       </div>
 
-      <!-- Modal Altı -->
       <div class="p-3 border-top bg-light text-end">
         <button type="button" class="btn btn-outline-dark btn-sm px-4 rounded-3" (click)="closeOrdersModal()">Kapat</button>
       </div>
@@ -197,13 +172,11 @@
     @for (item of wishlistItems; track item.id) {
       <div class="wishlist-item d-flex gap-3 align-items-center p-2 mb-2 rounded-3 bg-light border position-relative">
         <img [src]="item.imageUrl" [alt]="item.name" class="rounded-3 object-fit-cover" style="width: 60px; height: 60px;">
-        
         <div class="flex-grow-1 overflow-hidden">
           <h6 class="small fw-semibold mb-1 text-truncate text-dark">{{ item.name }}</h6>
           <span class="fw-bold text-pink small">{{ item.price | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
         </div>
-
-        <button type="button" class="btn btn-sm text-danger border-0 px-2" (click)="removeItem(item.id, $event)" title="Favorilerden Çıkar">
+        <button type="button" class="btn btn-sm text-danger border-0 px-2" (click)="removeItem(item.id, $event)">
           <i class="bi bi-trash fs-6"></i>
         </button>
       </div>
@@ -216,7 +189,6 @@
   </div>
 </div>
 
-<!-- Arka Plan Karartması -->
 @if (isWishlistOpen || isUserMenuOpen) {
   <div class="drawer-backdrop position-fixed" (click)="closeAllModals()"></div>
 }

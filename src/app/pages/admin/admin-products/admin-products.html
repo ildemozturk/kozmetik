@@ -1,1 +1,369 @@
-<p>admin-products works!</p>
+<div class="lumiere-panel-wrapper d-flex">
+  
+  <!-- SOL MENÜ (SIDEBAR) -->
+  <aside class="sidebar bg-white border-end d-flex flex-column justify-content-between">
+    <div>
+      <!-- Marka Logosu -->
+      <div class="sidebar-brand text-center py-4 border-bottom">
+        <h2 class="brand-logo-text mb-0">LUMIÈRE</h2>
+        <span class="brand-sub-text text-uppercase">Cosmetics</span>
+      </div>
+
+      <!-- Menü Listesi (Mesajlar kaldırıldı, sadece yönetim linkleri) -->
+      <nav class="sidebar-nav p-3">
+        <ul class="nav flex-column gap-1">
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2.5 text-muted" href="javascript:void(0)">
+              <i class="bi bi-grid fs-5"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active d-flex align-items-center gap-2.5" routerLink="/admin/products">
+              <i class="bi bi-box-seam fs-5"></i>
+              <span>Ürün Yönetimi</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center justify-content-between text-muted" href="javascript:void(0)">
+              <div class="d-flex align-items-center gap-2.5">
+                <i class="bi bi-file-earmark-text fs-5"></i>
+                <span>Siparişler</span>
+              </div>
+              <i class="bi bi-chevron-down small"></i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center justify-content-between text-muted" href="javascript:void(0)">
+              <div class="d-flex align-items-center gap-2.5">
+                <i class="bi bi-people fs-5"></i>
+                <span>Müşteriler</span>
+              </div>
+              <i class="bi bi-chevron-down small"></i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center justify-content-between text-muted" href="javascript:void(0)">
+              <div class="d-flex align-items-center gap-2.5">
+                <i class="bi bi-tags fs-5"></i>
+                <span>Kampanyalar</span>
+              </div>
+              <i class="bi bi-chevron-down small"></i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center justify-content-between text-muted" href="javascript:void(0)">
+              <div class="d-flex align-items-center gap-2.5">
+                <i class="bi bi-info-circle fs-5"></i>
+                <span>Hakkımızda & İçerik</span>
+              </div>
+              <i class="bi bi-chevron-down small"></i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center justify-content-between text-muted" href="javascript:void(0)">
+              <div class="d-flex align-items-center gap-2.5">
+                <i class="bi bi-gear fs-5"></i>
+                <span>Genel Ayarlar</span>
+              </div>
+              <i class="bi bi-chevron-down small"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- SAĞ ANA İÇERİK ALANI -->
+  <div class="main-panel flex-grow-1 bg-panel">
+    
+    <!-- ÜST HEADER (Arama çubuğu kaldırıldı, sadece başlık ve profil var) -->
+    <header class="panel-header bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="fw-bold mb-0 text-dark">LUMIÈRE PANELİ - Yönetim Paneli</h5>
+        <span class="text-muted small">Yönetim &gt; Ürünler</span>
+      </div>
+
+      <!-- Sağ Profil & Bildirim -->
+      <div class="d-flex align-items-center gap-3">
+        <button type="button" class="btn p-0 text-muted fs-5 border-0 bg-transparent" title="Takvim">
+          <i class="bi bi-calendar3"></i>
+        </button>
+
+        <button type="button" class="btn p-0 text-muted fs-5 border-0 bg-transparent position-relative" title="Bildirimler">
+          <i class="bi bi-bell"></i>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-pink-primary" style="font-size: 0.55rem; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;">
+            1
+          </span>
+        </button>
+
+        <div class="d-flex align-items-center gap-2 ms-2 ps-3 border-start">
+          <div class="user-avatar-circle text-pink-primary fw-bold">
+            <i class="bi bi-person-fill fs-5"></i>
+          </div>
+          <span class="fw-semibold text-dark small">{{ currentUser?.fullName || 'İldem' }}</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- İÇERİK BODY -->
+    <div class="p-4">
+      
+      <!-- Üst Butonlar -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold text-dark mb-0">Ürün Yönetimi</h4>
+
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-pink-primary btn-sm rounded-3 px-3 py-2 fw-semibold d-flex align-items-center gap-1.5 shadow-sm">
+            <i class="bi bi-plus-lg"></i>
+            <span>Yeni Ürün Ekle</span>
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 px-3 py-2 fw-medium d-flex align-items-center gap-1.5 bg-white">
+            <i class="bi bi-pencil-square"></i>
+            <span>Düzenle</span>
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 px-3 py-2 fw-medium d-flex align-items-center gap-1.5 bg-white" (click)="exportToExcel()">
+            <i class="bi bi-file-earmark-excel text-success"></i>
+            <span>Excel'e Aktar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- İKİ KOLONLU DÜZEN: Tablo (Sol) + Widget'lar (Sağ) -->
+      <div class="row g-4">
+        
+        <!-- SOL: ÜRÜN LİSTESİ TABLOSU -->
+        <div class="col-12 col-xl-8">
+          <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            
+            <!-- Tablo Üst Butonları -->
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <h6 class="fw-bold mb-0 text-dark">Ürün Listesi</h6>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-pink-primary btn-sm rounded-3 px-2.5 py-1.5 fw-medium">
+                  <i class="bi bi-plus-lg me-1"></i>Yeni Ürün Ekle
+                </button>
+                <button type="button" class="btn btn-light border btn-sm rounded-3 px-2.5 py-1.5 fw-medium text-dark">
+                  <i class="bi bi-grid me-1"></i>Kategorileri Düzenle
+                </button>
+                <button type="button" class="btn btn-light border btn-sm rounded-3 px-2.5 py-1.5 fw-medium text-dark" (click)="exportToExcel()">
+                  <i class="bi bi-download me-1"></i>Excel'e Aktar
+                </button>
+              </div>
+            </div>
+
+            <!-- Tablo -->
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0 custom-panel-table">
+                <thead>
+                  <tr class="table-pink-head">
+                    <th class="ps-4 py-3">Ürün Görseli</th>
+                    <th class="py-3">Ürün Adı</th>
+                    <th class="py-3">Kategori</th>
+                    <th class="py-3">Fiyat</th>
+                    <th class="py-3 text-center" style="width: 170px;">Stok Miktarı</th>
+                    <th class="pe-4 py-3 text-start" style="width: 130px;">Eylemler</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of filteredProducts; track item.id) {
+                    <tr>
+                      <!-- Görsel -->
+                      <td class="ps-4 py-3">
+                        <div class="table-img-box rounded-3 overflow-hidden shadow-xs">
+                          <img [src]="item.imageUrl" [alt]="item.name" class="w-100 h-100 object-fit-cover">
+                        </div>
+                      </td>
+
+                      <!-- Ürün Adı -->
+                      <td class="py-3 fw-semibold text-dark">
+                        {{ item.name }}
+                      </td>
+
+                      <!-- Kategori -->
+                      <td class="py-3 text-muted small">
+                        {{ item.category }}
+                      </td>
+
+                      <!-- Fiyat -->
+                      <td class="py-3 fw-bold text-dark">
+                        {{ item.price | currency:'TRY':'symbol-narrow':'1.2-2' }}
+                      </td>
+
+                      <!-- Stok Miktarı Butonları -->
+                      <td class="py-3 text-center">
+                        <div class="d-inline-flex flex-column align-items-center">
+                          <div class="d-flex align-items-center stock-btn-group rounded-2 overflow-hidden border"
+                               [class.stock-low]="item.stockQuantity <= 2"
+                               [class.stock-good]="item.stockQuantity > 2">
+                            
+                            <button type="button" 
+                                    class="btn btn-stock-action" 
+                                    [disabled]="item.stockQuantity <= 0 || item.isUpdating"
+                                    (click)="adjustStock(item, -1)">
+                              <i class="bi bi-dash"></i>
+                            </button>
+
+                            <input type="number" 
+                                   class="form-control text-center border-0 p-0 stock-val-input" 
+                                   [value]="item.stockQuantity"
+                                   (blur)="onStockInputChange(item, $event)"
+                                   min="0">
+
+                            <button type="button" 
+                                    class="btn btn-stock-action" 
+                                    [disabled]="item.isUpdating"
+                                    (click)="adjustStock(item, 1)">
+                              <i class="bi bi-plus"></i>
+                            </button>
+                          </div>
+                          
+                          <div class="d-flex justify-content-between w-100 text-muted px-1 mt-1" style="font-size: 0.68rem;">
+                            <span>Stok Azalt</span>
+                            <span>Arttır</span>
+                          </div>
+                        </div>
+                      </td>
+
+                      <!-- Eylemler -->
+                      <td class="pe-4 py-3">
+                        <div class="d-flex flex-column gap-1 action-links small">
+                          <a href="javascript:void(0)" class="text-decoration-none text-dark d-flex align-items-center gap-1.5 action-link">
+                            <i class="bi bi-pencil small"></i> Düzenle
+                          </a>
+                          <a href="javascript:void(0)" (click)="deleteProduct(item)" class="text-decoration-none text-dark d-flex align-items-center gap-1.5 action-link">
+                            <i class="bi bi-trash small"></i> Sil
+                          </a>
+                          <a href="javascript:void(0)" class="text-decoration-none text-dark d-flex align-items-center gap-1.5 action-link">
+                            <i class="bi bi-clock-history small"></i> Stok Takip
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2 text-pink-primary opacity-50"></i>
+                        <span>Veritabanında ürün bulunamadı.</span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SAĞ: WIDGET'LAR -->
+        <div class="col-12 col-xl-4">
+          <div class="d-flex flex-column gap-3">
+            
+            <!-- 1. Hızlı Stok Kontrolü Kartı -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+              <h6 class="fw-bold text-dark mb-3">Hızlı Stok Kontrolü</h6>
+              
+              <div class="d-flex flex-column gap-2 mb-3">
+                <div class="alert-box alert-yellow p-2.5 rounded-3 d-flex align-items-center gap-2">
+                  <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+                  <div>
+                    <span class="d-block small fw-bold text-dark">Düşük stoklu sayısı</span>
+                    <span class="small text-muted">{{ lowStockProductsCount }} Ürün kritik seviyede</span>
+                  </div>
+                </div>
+
+                <div class="alert-box alert-red p-2.5 rounded-3 d-flex align-items-center gap-2">
+                  <i class="bi bi-exclamation-circle-fill text-danger fs-5"></i>
+                  <div>
+                    <span class="d-block small fw-bold text-dark">Tükenen ürünlü sayısı</span>
+                    <span class="small text-muted">{{ outOfStockProductsCount }} Ürün stokta yok</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex flex-column gap-2">
+                <button type="button" class="btn btn-pink-outline rounded-3 py-2 small fw-semibold">
+                  Yeni Ürün Ekle
+                </button>
+                <button type="button" class="btn btn-outline-secondary rounded-3 py-2 small fw-semibold d-flex align-items-center justify-content-center gap-1.5">
+                  <i class="bi bi-pencil-square"></i> Kategorileri Düzenle
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. Sayısal Özet Kartı -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+              <div class="mb-3 border-bottom pb-2">
+                <span class="text-muted small d-block">Toplam Aktif Ürün Sayısı</span>
+                <h4 class="fw-bold text-dark mb-0">{{ totalActiveProducts }}</h4>
+              </div>
+
+              <div class="mb-3 border-bottom pb-2">
+                <span class="text-muted small d-block">Düşük Stoklu Ürün Sayısı</span>
+                <h4 class="fw-bold text-warning mb-0">{{ lowStockProductsCount }}</h4>
+              </div>
+
+              <div>
+                <span class="text-muted small d-block">Tükenen Ürün Sayısı</span>
+                <h4 class="fw-bold text-danger mb-0">{{ outOfStockProductsCount }}</h4>
+              </div>
+            </div>
+
+            <!-- 3. Satış Overview (Grafik Görünümü) -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+              <h6 class="fw-bold text-dark mb-2">Satış Overview</h6>
+              
+              <div class="chart-container my-2">
+                <svg viewBox="0 0 300 120" class="w-100" style="height: 100px;">
+                  <defs>
+                    <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#c9667e" stop-opacity="0.35"/>
+                      <stop offset="100%" stop-color="#c9667e" stop-opacity="0.0"/>
+                    </linearGradient>
+                    <linearGradient id="chartGradYellow" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.35"/>
+                      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.0"/>
+                    </linearGradient>
+                  </defs>
+                  
+                  <line x1="0" y1="30" x2="300" y2="30" stroke="#f1f5f9" stroke-width="1" />
+                  <line x1="0" y1="60" x2="300" y2="60" stroke="#f1f5f9" stroke-width="1" />
+                  <line x1="0" y1="90" x2="300" y2="90" stroke="#f1f5f9" stroke-width="1" />
+                  
+                  <path d="M0,80 Q50,30 100,60 T200,40 T300,50 L300,120 L0,120 Z" fill="url(#chartGrad)" />
+                  <path d="M0,80 Q50,30 100,60 T200,40 T300,50" fill="none" stroke="#c9667e" stroke-width="2" />
+                  
+                  <path d="M0,100 Q60,70 120,90 T240,30 T300,40 L300,120 L0,120 Z" fill="url(#chartGradYellow)" />
+                  <path d="M0,100 Q60,70 120,90 T240,30 T300,40" fill="none" stroke="#f59e0b" stroke-width="2" />
+                </svg>
+                <div class="d-flex justify-content-between text-muted" style="font-size: 0.68rem;">
+                  <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Dec</span>
+                </div>
+              </div>
+
+              <div class="d-flex flex-column gap-1 mt-2 small" style="font-size: 0.76rem;">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="legend-dot" style="background-color: #c9667e;"></span>
+                  <span class="text-muted">Aylık Satış</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="legend-dot" style="background-color: #f59e0b;"></span>
+                  <span class="text-muted">Düşük Stoklu Ürün Sayısı</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="legend-dot" style="background-color: #ef4444;"></span>
+                  <span class="text-muted">Tükenen Ürün Sayısı</span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
