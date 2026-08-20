@@ -1,162 +1,154 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../../services/toast.service';
-import { AuthService } from '../../../services/auth.service';
 
-export interface AdminProductItem {
+export interface ProductItem {
   id: number;
   name: string;
-  category: string;
   price: number;
-  imageUrl: string;
-  stockQuantity: number;
-  isUpdating?: boolean;
+  imageUrl?: string;
+  categoryName?: string;
+  category?: { name: string };
+  stockQuantity?: number;
+  stock?: { quantity: number };
 }
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe, FormsModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './admin-products.html',
   styleUrl: './admin-products.css'
 })
 export class AdminProducts implements OnInit {
-  products: AdminProductItem[] = [];
-  filteredProducts: AdminProductItem[] = [];
+  products: ProductItem[] = [];
   isLoading: boolean = false;
-  searchTerm: string = '';
-  currentUser: any = null;
+
+  private apiUrl = 'http://localhost:5246/api';
 
   constructor(
     private http: HttpClient,
     private toastService: ToastService,
-    public authService: AuthService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    const userStr = localStorage.getItem('lumiere_user');
-    this.currentUser = userStr ? JSON.parse(userStr) : { fullName: 'İldem' };
-
-    this.loadProductsFromDatabase();
+    this.fetchProducts();
   }
 
-  // Veritabanından (API) ürünleri güvenle çekiyoruz
-  loadProductsFromDatabase(): void {
-    this.isLoading = true;
-    this.http.get<any>('http://localhost:5246/api/Products').subscribe({
-      next: (res) => {
-        let rawList: any[] = [];
-        if (Array.isArray(res)) {
-          rawList = res;
-        } else if (res && Array.isArray(res.data)) {
-          rawList = res.data;
-        } else if (res && Array.isArray(res.items)) {
-          rawList = res.items;
-        } else if (res && Array.isArray(res.$values)) {
-          rawList = res.$values;
-        }
-
-        this.products = rawList.map((p) => ({
-          id: p.id,
-          name: p.name,
-          category: p.category?.name || p.categoryName || 'Tüm Ürünler',
-          price: p.price,
-          imageUrl: p.imageUrl || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500',
-          stockQuantity: p.stock?.quantity ?? p.stockQuantity ?? 1,
-          isUpdating: false
-        }));
-        
-        this.filteredProducts = [...this.products];
-        this.isLoading = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.isLoading = false;
-        this.toastService.error('Ürünler veri tabanından çekilemedi.');
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  get totalActiveProducts(): number {
+  get activeProductCount(): number {
     return this.products.length;
   }
 
-  get lowStockProductsCount(): number {
-    return this.products.filter(p => p.stockQuantity > 0 && p.stockQuantity <= 5).length;
+  get lowStockCount(): number {
+    return this.products.filter(p => {
+      const qty = p.stock?.quantity ?? p.stockQuantity ?? 0;
+      return qty > 0 && qty <= 3;
+    }).length;
   }
 
-  get outOfStockProductsCount(): number {
-    return this.products.filter(p => p.stockQuantity <= 0).length;
+  get outOfStockCount(): number {
+    return this.products.filter(p => {
+      const qty = p.stock?.quantity ?? p.stockQuantity ?? 0;
+      return qty === 0;
+    }).length;
   }
 
-  onSearch(): void {
-    if (!this.searchTerm.trim()) {
-      this.filteredProducts = [...this.products];
-      return;
-    }
-    const term = this.searchTerm.toLowerCase().trim();
-    this.filteredProducts = this.products.filter(p =>
-      p.name.toLowerCase().includes(term) ||
-      p.category.toLowerCase().includes(term) ||
-      p.id.toString().includes(term)
-    );
-  }
+  fetchProducts(): void {
+    this.isLoading = true;
+    this.http.get<any>(`${this.apiUrl}/Products`).subscribe({
+      next: (res) => {
+        if (Array.isArray(res)) this.products = res;
+        else if (res && Array.isArray(res.data)) this.products = res.data;
+        else if (res && Array.isArray(res.items)) this.products = res.items;
+        else if (res && Array.isArray(res.$values)) this.products = res.$values;
+        else this.products = [];
 
-  adjustStock(product: AdminProductItem, delta: number): void {
-    const newQty = Math.max(0, product.stockQuantity + delta);
-    this.updateStockInBackend(product, newQty);
-  }
-
-  onStockInputChange(product: AdminProductItem, event: Event): void {
-    const input = event.target as HTMLInputElement;
-    let newQty = parseInt(input.value, 10);
-    if (isNaN(newQty) || newQty < 0) newQty = 0;
-    this.updateStockInBackend(product, newQty);
-  }
-
-  private updateStockInBackend(product: AdminProductItem, newQty: number): void {
-    if (product.stockQuantity === newQty) return;
-
-    product.isUpdating = true;
-    product.stockQuantity = newQty;
-
-    this.http.put(`http://localhost:5246/api/Products/${product.id}/stock`, { quantity: newQty }).subscribe({
-      next: () => {
-        product.isUpdating = false;
-        this.toastService.success(`"${product.name}" stoğu güncellendi (${newQty})`);
+        this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: () => {
-        product.isUpdating = false;
-        this.toastService.success(`"${product.name}" güncel stoğu: ${newQty}`);
+        this.isLoading = false;
+        this.toastService.error('Ürün listesi yüklenemedi.');
         this.cdr.detectChanges();
       }
     });
   }
 
-  deleteProduct(product: AdminProductItem): void {
-    if (confirm(`"${product.name}" adlı ürünü silmek istediğinize emin misiniz?`)) {
-      this.http.delete(`http://localhost:5246/api/Products/${product.id}`).subscribe({
-        next: () => {
-          this.products = this.products.filter(p => p.id !== product.id);
-          this.onSearch();
-          this.toastService.success('Ürün başarıyla silindi.');
-        },
-        error: () => {
-          this.products = this.products.filter(p => p.id !== product.id);
-          this.onSearch();
-          this.toastService.success('Ürün listeden kaldırıldı.');
-        }
-      });
+  increaseStock(product: ProductItem): void {
+    if (product.stock) {
+      product.stock.quantity++;
+    } else {
+      product.stockQuantity = (product.stockQuantity ?? 0) + 1;
     }
+
+    const newQty = product.stock?.quantity ?? product.stockQuantity ?? 1;
+    this.http.put(`${this.apiUrl}/Products/${product.id}/stock`, { quantity: newQty }).subscribe({
+      next: () => {
+        this.toastService.success(`${product.name} stoğu artırıldı.`);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  decreaseStock(product: ProductItem): void {
+    const currentQty = product.stock?.quantity ?? product.stockQuantity ?? 0;
+    if (currentQty <= 0) return;
+
+    if (product.stock) {
+      product.stock.quantity--;
+    } else {
+      product.stockQuantity = currentQty - 1;
+    }
+
+    const newQty = product.stock?.quantity ?? product.stockQuantity ?? 0;
+    this.http.put(`${this.apiUrl}/Products/${product.id}/stock`, { quantity: newQty }).subscribe({
+      next: () => {
+        this.toastService.success(`${product.name} stoğu azaltıldı.`);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  deleteProduct(productId: number): void {
+    if (!confirm('Bu ürünü silmek istediğinize emin misiniz?')) return;
+
+    this.http.delete(`${this.apiUrl}/Products/${productId}`).subscribe({
+      next: () => {
+        this.products = this.products.filter(p => p.id !== productId);
+        this.toastService.success('Ürün başarıyla silindi.');
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.toastService.error('Ürün silinirken bir hata oluştu.');
+      }
+    });
+  }
+
+  openAddModal(): void {
+    this.toastService.show('Yeni ürün ekleme modalı yakında eklenecektir.');
+  }
+
+  openEditModal(product: ProductItem): void {
+    this.toastService.show(`${product.name} için düzenleme modalı yakında eklenecektir.`);
+  }
+
+  openCategoryModal(): void {
+    this.toastService.show('Kategori yönetimi modalı yakında eklenecektir.');
+  }
+
+  openStockTracking(product: ProductItem): void {
+    this.toastService.show(`${product.name} stok geçmişi görüntüleniyor.`);
   }
 
   exportToExcel(): void {
-    this.toastService.success('Excel dışa aktarma işlemi başlatıldı.');
+    this.toastService.success('Ürün listesi Excel formatında dışa aktarılıyor...');
   }
 }

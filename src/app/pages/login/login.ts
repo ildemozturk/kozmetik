@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 import { UserLoginDto } from '../../models/auth';
@@ -21,18 +21,24 @@ export class Login implements OnInit {
 
   errorMessage: string = '';
   isLoading: boolean = false;
-  returnUrl: string = '/';
 
   constructor(
     private authService: AuthService,
     private toastService: ToastService,
     private router: Router,
-    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    const userStr = localStorage.getItem('lumiere_user') || localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        if (u.role === 'Admin') {
+          this.router.navigate(['/admin/dashboard'], { replaceUrl: true });
+        }
+      } catch {}
+    }
   }
 
   onSubmit(): void {
@@ -49,10 +55,8 @@ export class Login implements OnInit {
         this.isLoading = false;
         this.toastService.success(`Hoş geldiniz, ${res.fullName}!`);
         
-        if (this.returnUrl && this.returnUrl !== '/') {
-          this.router.navigateByUrl(this.returnUrl, { replaceUrl: true });
-        } else if (res.role === 'Admin') {
-          // Admin girişi yapıldığı anda doğrudan Dashboard açılır
+        // Admin kontrolü (sadece res.role üzerinden)
+        if (res.role === 'Admin') {
           this.router.navigate(['/admin/dashboard'], { replaceUrl: true });
         } else {
           this.router.navigate(['/'], { replaceUrl: true });

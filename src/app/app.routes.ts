@@ -9,48 +9,39 @@ import { CheckoutComponent } from './pages/checkout/checkout';
 import { OrderSuccessComponent } from './pages/order-success/order-success';
 import { ProductDetailComponent } from './pages/product-detail/product-detail';
 
-// Auth & Admin Sayfaları
+// Auth & Admin
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { AdminDashboard } from './pages/admin/admin-dashboard/admin-dashboard';
 
-// Guard Tanımları
+// Guards
 import { authGuard } from './guards/auth-guard';
 import { adminGuard } from './guards/admin-guard';
+import { noAdminOnStoreGuard } from './guards/admin-redirect-guard';
 
 export const routes: Routes = [
-  // Ana Sayfa
-  { path: '', component: HomeComponent },
+  // Mağaza Rotaları (Adminler Giremez)
+  { path: '', component: HomeComponent, canActivate: [noAdminOnStoreGuard] },
+  { path: 'urunler', component: ProductsComponent, canActivate: [noAdminOnStoreGuard] },
+  { path: 'products', redirectTo: 'urunler', pathMatch: 'full' },
+  { path: 'urunler/:id', component: ProductDetailComponent, canActivate: [noAdminOnStoreGuard] },
+  { path: 'products/:id', component: ProductDetailComponent, canActivate: [noAdminOnStoreGuard] },
+  { path: 'hakkimizda', component: About, canActivate: [noAdminOnStoreGuard] },
+  { path: 'sss', component: Faq, canActivate: [noAdminOnStoreGuard] },
+  { path: 'iletisim', component: Contact, canActivate: [noAdminOnStoreGuard] },
+  { path: 'cart', component: CartComponent, canActivate: [noAdminOnStoreGuard] },
+  { path: 'sepet', redirectTo: 'cart', pathMatch: 'full' },
+  { path: 'odeme', component: CheckoutComponent, canActivate: [authGuard, noAdminOnStoreGuard] },
+  { path: 'checkout', redirectTo: 'odeme', pathMatch: 'full' },
+  { path: 'siparis-basarili', component: OrderSuccessComponent, canActivate: [noAdminOnStoreGuard] },
 
-  // Kimlik Doğrulama
+  // Auth Rotaları
   { path: 'login', component: Login },
   { path: 'giris', redirectTo: 'login', pathMatch: 'full' },
   { path: 'register', component: Register },
   { path: 'kayit', redirectTo: 'register', pathMatch: 'full' },
 
-  // Ürünler & Detay
-  { path: 'urunler', component: ProductsComponent },
-  { path: 'products', redirectTo: 'urunler', pathMatch: 'full' },
-  { path: 'urunler/:id', component: ProductDetailComponent },
-  { path: 'products/:id', component: ProductDetailComponent },
-
-  // Kurumsal Sayfalar
-  { path: 'hakkimizda', component: About },
-  { path: 'sss', component: Faq },
-  { path: 'iletisim', component: Contact },
-
-  // Sepet & Sipariş
-  { path: 'cart', component: CartComponent },
-  { path: 'sepet', redirectTo: 'cart', pathMatch: 'full' },
-  { 
-    path: 'odeme', 
-    component: CheckoutComponent, 
-    canActivate: [authGuard] 
-  },
-  { path: 'checkout', redirectTo: 'odeme', pathMatch: 'full' },
-  { path: 'siparis-basarili', component: OrderSuccessComponent },
-
-  // Admin Paneli (Doğrudan Dashboard Açılır)
+  // Admin Paneli (Sadece Adminler İçin)
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
