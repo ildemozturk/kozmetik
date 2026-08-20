@@ -16,7 +16,6 @@
       <a routerLink="/hakkimizda" routerLinkActive="active-nav-link" class="text-decoration-none text-muted fw-medium nav-link-custom">Hakkımızda</a>
       <a routerLink="/sss" routerLinkActive="active-nav-link" class="text-decoration-none text-muted fw-medium nav-link-custom">S.S.S.</a>
       <a routerLink="/iletisim" routerLinkActive="active-nav-link" class="text-decoration-none text-muted fw-medium nav-link-custom">İletişim</a>
-
     </nav>
 
     <!-- Sağ Taraf: Profil, Favoriler, Sepet -->
@@ -43,17 +42,17 @@
             </div>
 
             <div class="py-1">
-              <!-- Siparişlerim: Sadece normal kullanıcıda gözükür, adminde gizlidir -->
+              <!-- Siparişlerim: Sadece normal kullanıcıda gözükür -->
               @if (!isAdmin) {
                 <button type="button" (click)="openOrdersModal()" class="dropdown-item py-2 px-3 small text-dark d-flex align-items-center gap-2 border-0 bg-transparent w-100 text-start">
                   <i class="bi bi-bag-check text-pink"></i> Siparişlerim
                 </button>
               }
 
-              <!-- Admin için Stok Yönetimi / Yönetim Paneli Linki -->
+              <!-- Admin için Stok Yönetimi -->
               @if (isAdmin) {
                 <a routerLink="/admin/dashboard" (click)="isUserMenuOpen = false" class="dropdown-item py-2 px-3 small text-dark d-flex align-items-center gap-2">
-                  <i class="bi bi-boxes text-pink"></i> Stok Yönetimi
+                  <i class="bi bi-boxes text-pink"></i> Yönetim Paneli
                 </a>
               }
             </div>
@@ -91,3 +90,162 @@
 
   </div>
 </header>
+
+<!-- ========================================================================= -->
+<!-- 1. GÖRSEL VE MODERN CARD YAPILI SİPARİŞLERİM MODALI -->
+<!-- ========================================================================= -->
+@if (isOrdersModalOpen) {
+  <div class="custom-modal-backdrop d-flex align-items-center justify-content-center" (click)="closeOrdersModal()">
+    <div class="custom-modal-content bg-white rounded-4 shadow-lg p-4" (click)="$event.stopPropagation()" style="max-width: 680px; width: 92%; max-height: 88vh; overflow-y: auto;">
+      
+      <!-- Modal Başlık -->
+      <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+        <div class="d-flex align-items-center gap-2.5">
+          <div class="order-header-icon bg-pink-soft text-pink rounded-circle d-flex align-items-center justify-content-center">
+            <i class="bi bi-bag-check fs-5"></i>
+          </div>
+          <div>
+            <h5 class="fw-bold text-dark mb-0">Sipariş Geçmişim</h5>
+            <span class="text-muted small">Tüm alışverişlerinizin detayları ve durumu</span>
+          </div>
+        </div>
+        <button type="button" class="btn-close" (click)="closeOrdersModal()"></button>
+      </div>
+
+      <!-- Yükleniyor Durumu -->
+      @if (isLoadingOrders) {
+        <div class="text-center py-5 text-muted">
+          <div class="spinner-border spinner-border-sm text-pink mb-2" role="status"></div>
+          <div class="small">Siparişleriniz yükleniyor...</div>
+        </div>
+      } 
+      <!-- Sipariş Kartları Listesi -->
+      @else if (userOrders.length > 0) {
+        <div class="d-flex flex-column gap-3.5">
+          @for (order of userOrders; track order.id) {
+            
+            <!-- TEKİL SİPARİŞ KARTI -->
+            <div class="order-main-card rounded-4 border p-3.5 bg-white shadow-xs">
+              
+              <!-- Kart Üst Çubuğu: Sipariş No, Tarih & Durum Rozeti -->
+              <div class="d-flex justify-content-between align-items-center pb-2.5 mb-3 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge bg-pink-soft text-pink fw-bold px-2.5 py-1.5 rounded-3 font-monospace">
+                    {{ order.orderNo }}
+                  </span>
+                  <span class="text-muted small">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    {{ order.createdDate ? (order.createdDate | date:'dd MMM yyyy, HH:mm') : 'Bugün' }}
+                  </span>
+                </div>
+
+                <!-- Dinamik Durum Rozeti -->
+                <span class="badge status-pill px-3 py-1.5 fw-semibold"
+                      [class.status-delivered]="order.status === 'Teslim Edildi'"
+                      [class.status-shipping]="order.status === 'Kargoda'"
+                      [class.status-preparing]="order.status === 'Hazırlanıyor'"
+                      [class.status-cancelled]="order.status === 'İptal Edildi'">
+                  <i class="bi me-1"
+                     [class.bi-check2-circle]="order.status === 'Teslim Edildi'"
+                     [class.bi-truck]="order.status === 'Kargoda'"
+                     [class.bi-hourglass-split]="order.status === 'Hazırlanıyor'"
+                     [class.bi-x-circle]="order.status === 'İptal Edildi'"></i>
+                  {{ order.status }}
+                </span>
+              </div>
+
+              <!-- Kart Orta Alanı: Ürünler (Fotoğraflı Kartlar) -->
+              <div class="d-flex flex-column gap-2 mb-3">
+                @for (item of order.items; track item.productId) {
+                  <div class="order-product-item p-2 rounded-3 border bg-light-panel d-flex align-items-center justify-content-between">
+                    
+                    <div class="d-flex align-items-center gap-2.5">
+                      <!-- Ürün Fotoğrafı -->
+                      <div class="product-thumb-container rounded-2 overflow-hidden bg-white border d-flex align-items-center justify-content-center">
+                        @if (item.imageUrl) {
+                          <img [src]="item.imageUrl" [alt]="item.productName" class="product-thumb-img">
+                        } @else {
+                          <i class="bi bi-image text-muted fs-5"></i>
+                        }
+                      </div>
+
+                      <!-- Ürün İsmi & Adet -->
+                      <div>
+                        <h6 class="mb-0 text-dark small fw-bold text-truncate" style="max-width: 280px;">{{ item.productName }}</h6>
+                        <span class="text-muted" style="font-size: 0.75rem;">Adet: <strong>{{ item.quantity }}</strong></span>
+                      </div>
+                    </div>
+
+                    <!-- Fiyat -->
+                    <div class="text-end">
+                      <span class="fw-bold text-dark small">₺{{ (item.unitPrice * item.quantity) | number:'1.2-2' }}</span>
+                      @if (item.quantity > 1) {
+                        <span class="d-block text-muted" style="font-size: 0.68rem;">(Birim: ₺{{ item.unitPrice | number:'1.2-2' }})</span>
+                      }
+                    </div>
+
+                  </div>
+                }
+              </div>
+
+              <!-- Kart Alt Çubuğu: Toplam Ödenen Tutar -->
+              <div class="d-flex justify-content-between align-items-center pt-2.5 border-top bg-light-panel px-3 py-2 rounded-3">
+                <span class="small fw-semibold text-muted">Toplam Sipariş Tutarı:</span>
+                <span class="fw-bold text-pink fs-6">₺{{ order.totalAmount | number:'1.2-2' }}</span>
+              </div>
+
+            </div>
+
+          }
+        </div>
+      } 
+      <!-- Sipariş Yoksa -->
+      @else {
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-inbox fs-1 text-pink opacity-50 d-block mb-2"></i>
+          <h6 class="fw-bold text-dark">Henüz siparişiniz bulunmuyor</h6>
+          <p class="small text-muted mb-3">Beğendiğiniz kozmetik ürünlerini sepetinize ekleyip ilk siparişinizi verebilirsiniz.</p>
+          <button type="button" class="btn btn-pink rounded-pill px-4 py-2 text-white fw-semibold small" (click)="closeOrdersModal()" routerLink="/urunler">
+            Alışverişe Başla
+          </button>
+        </div>
+      }
+
+    </div>
+  </div>
+}
+
+<!-- ========================================================================= -->
+<!-- 2. FAVORİLER MODALI -->
+<!-- ========================================================================= -->
+@if (isWishlistOpen) {
+  <div class="custom-modal-backdrop d-flex align-items-center justify-content-center" (click)="toggleWishlistModal()">
+    <div class="custom-modal-content bg-white rounded-4 shadow-lg p-4" (click)="$event.stopPropagation()" style="max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+      <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+        <h5 class="fw-bold text-dark mb-0">Favorilerim ({{ wishlistCount }})</h5>
+        <button type="button" class="btn-close" (click)="toggleWishlistModal()"></button>
+      </div>
+
+      @if (wishlistItems.length > 0) {
+        <div class="d-flex flex-column gap-3">
+          @for (product of wishlistItems; track product.id) {
+            <div class="d-flex align-items-center justify-content-between p-2 border rounded-3">
+              <div class="d-flex align-items-center gap-3">
+                <img [src]="product.imageUrl" [alt]="product.name" style="width: 45px; height: 45px; object-fit: cover;" class="rounded-2">
+                <div>
+                  <h6 class="mb-0 text-dark small fw-bold">{{ product.name }}</h6>
+                  <span class="text-pink small fw-bold">₺{{ product.price | number:'1.2-2' }}</span>
+                </div>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-danger border-0" (click)="removeItem(product.id, $event)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="text-center py-4 text-muted small">Favori listeniz henüz boş.</div>
+      }
+    </div>
+  </div>
+}

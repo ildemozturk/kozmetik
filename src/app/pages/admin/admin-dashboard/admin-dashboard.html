@@ -1,5 +1,6 @@
 <div class="dashboard-wrapper d-flex" [class.sidebar-collapsed]="isSidebarCollapsed">
   
+  <!-- SOL YAN MENÜ -->
   <aside class="sidebar bg-white border-end d-flex flex-column justify-content-between">
     <div>
       <div class="sidebar-header d-flex align-items-center justify-content-between px-3 py-4 border-bottom position-relative">
@@ -75,10 +76,18 @@
     </div>
   </aside>
 
+  <!-- SAĞ İÇERİK ALANI -->
   <main class="main-content flex-grow-1 bg-light-panel">
     
+    <!-- TOPBAR -->
     <header class="topbar bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
       <h5 class="fw-bold mb-0 text-dark">Yönetim Paneli</h5>
+
+      <div class="d-flex align-items-center gap-3">
+        <button type="button" class="btn btn-notification position-relative bg-light rounded-circle text-muted">
+          <i class="bi bi-bell"></i>
+          <span class="position-absolute top-0 start-100 translate-middle p-1 bg-pink border border-light rounded-circle"></span>
+        </button>
 
         <div class="position-relative">
           <div class="d-flex align-items-center gap-2 ps-2 cursor-pointer profile-trigger" (click)="toggleProfileMenu()">
@@ -90,6 +99,7 @@
               <span class="text-muted" style="font-size: 0.72rem;">{{ adminRole }}</span>
             </div>
             <i class="bi bi-chevron-down small text-muted ms-1"></i>
+          </div>
 
           @if (isProfileMenuOpen) {
             <div class="admin-dropdown-menu bg-white rounded-3 shadow-lg border p-2 position-absolute end-0 mt-2">
@@ -108,6 +118,7 @@
       </div>
     </header>
 
+    <!-- DASHBOARD GÖVDE -->
     <div class="p-4 dashboard-body">
       
       <div class="mb-4">
@@ -115,12 +126,13 @@
         <p class="text-muted small mb-0">Lumière Cosmetics satış ve stok durumuna ait anlık veritabanı özetleri.</p>
       </div>
 
-      <!-- KPI Kartları -->
+      <!-- 1. DİNAMİK KPI SAYAÇLARI -->
       <div class="row g-3 mb-4">
         <div class="col-12 col-sm-6 col-xl-3">
           <div class="kpi-card bg-white p-3.5 rounded-4 shadow-sm border border-light-subtle h-100">
             <div class="d-flex justify-content-between align-items-start mb-2">
               <span class="text-muted small fw-medium">Toplam Satış</span>
+              <div class="kpi-icon-pill bg-pink-soft text-pink"><i class="bi bi-currency-dollar"></i></div>
             </div>
             <h3 class="fw-bold text-dark mb-1">₺{{ summary.totalSales | number:'1.2-2' }}</h3>
           </div>
@@ -130,8 +142,10 @@
           <div class="kpi-card bg-white p-3.5 rounded-4 shadow-sm border border-light-subtle h-100">
             <div class="d-flex justify-content-between align-items-start mb-2">
               <span class="text-muted small fw-medium">Toplam Sipariş</span>
+              <div class="kpi-icon-pill bg-pink-soft text-pink"><i class="bi bi-cart3"></i></div>
             </div>
             <h3 class="fw-bold text-dark mb-1">{{ summary.totalOrdersCount }} adet</h3>
+  
           </div>
         </div>
 
@@ -139,89 +153,88 @@
           <div class="kpi-card bg-white p-3.5 rounded-4 shadow-sm border border-light-subtle h-100">
             <div class="d-flex justify-content-between align-items-start mb-2">
               <span class="text-muted small fw-medium">Kayıtlı Müşteri</span>
+              <div class="kpi-icon-pill bg-pink-soft text-pink"><i class="bi bi-people"></i></div>
             </div>
-            <h3 class="fw-bold text-dark mb-1">{{ summary.activeCustomerCount | number }}</h3>
+            <h3 class="fw-bold text-dark mb-1">{{ summary.activeCustomerCount | number }} Kişi</h3>
+           
           </div>
         </div>
 
         <div class="col-12 col-sm-6 col-xl-3">
           <div class="kpi-card bg-white p-3.5 rounded-4 shadow-sm border border-light-subtle h-100">
             <div class="d-flex justify-content-between align-items-start mb-2">
-              <span class="text-muted small fw-medium">Stokta Ürün</span>
+              <span class="text-muted small fw-medium">Stoktaktai Ürün</span>
+              <div class="kpi-icon-pill bg-pink-soft text-pink"><i class="bi bi-box-seam"></i></div>
             </div>
-            <h3 class="fw-bold text-dark mb-1">{{ summary.inStockVarietyCount }} Çeşit</h3>
-
+            <h3 class="fw-bold text-dark mb-1">{{ summary.inStockVarietyCount }} Tane</h3>
+         
           </div>
         </div>
       </div>
 
-     <!-- 2. GÜNLÜK SATIŞ GRAFİĞİ + KRİTİK STOK -->
-<div class="row g-4 mb-4">
-  <div class="col-12 col-lg-8">
-    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-      <div class="d-flex justify-content-between align-items-start mb-4">
-        <div>
-          <h6 class="fw-bold text-dark mb-1">Günlük Satış Grafiği</h6>
-          <p class="text-muted small mb-0">Geçmiş günlere ve bugüne ait gerçek ciro dağılımı</p>
-        </div>
+      <!-- 2. GÜNLÜK GRAFİK + KRİTİK STOK -->
+      <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-8">
+          <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+              <div>
+                <h6 class="fw-bold text-dark mb-1">Günlük Satış Grafiği</h6>
+                <p class="text-muted small mb-0">Geçmiş günlere ve bugüne ait gerçek ciro dağılımı</p>
+              </div>
 
-        <!-- Gün Filtresi Butonları -->
-        <div class="btn-group p-1 bg-light rounded-pill">
-          <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold btn-period" 
-                  [class.active]="chartDaysRange === 7" 
-                  (click)="setDaysRange(7)">
-            Son 7 Gün
-          </button>
-          <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold btn-period" 
-                  [class.active]="chartDaysRange === 14" 
-                  (click)="setDaysRange(14)">
-            Son 14 Gün
-          </button>
-        </div>
-      </div>
-
-      <!-- Günlük Sütun Grafiği -->
-      <div class="chart-bars-wrapper d-flex justify-content-between align-items-end pt-4 pb-2 px-2">
-        @for (bar of dailySales; track bar.fullDate) {
-          <div class="bar-col d-flex flex-column align-items-center gap-2" [title]="bar.fullDate + ': ₺' + bar.rawAmount">
-            <span class="bar-amount small text-muted">{{ bar.amountText }}</span>
-            <div class="bar-fill rounded-3" [style.height.px]="bar.heightPercent * 1.5"></div>
-            <span class="bar-month small text-muted">{{ bar.dayName }}</span>
-          </div>
-        }
-      </div>
-    </div>
-  </div>
-
-  <div class="col-12 col-lg-4">
-    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-      <h6 class="fw-bold text-dark mb-1">Kritik Stok Uyarıları</h6>
-      <p class="text-muted small mb-3">En kısa sürede tedarik edilmesi gerekenler</p>
-
-      <div class="d-flex flex-column gap-2.5">
-        @for (item of criticalStocks; track item.id) {
-          <div class="critical-stock-row p-2.5 rounded-3 d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="fw-bold text-dark mb-0.5 small">{{ item.name }}</h6>
-              <span class="text-muted" style="font-size: 0.72rem;">{{ item.category }}</span>
+              <div class="btn-group p-1 bg-light rounded-pill">
+                <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold btn-period" [class.active]="chartDaysRange === 7" (click)="setDaysRange(7)">Son 7 Gün</button>
+                <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold btn-period" [class.active]="chartDaysRange === 14" (click)="setDaysRange(14)">Son 14 Gün</button>
+              </div>
             </div>
-            <div class="text-end">
-              <span class="d-block text-danger fw-bold small">{{ item.stockQuantity }} adet kaldı</span>
-              <span class="badge badge-subtle-danger">{{ item.status }}</span>
+
+            <div class="chart-bars-wrapper d-flex justify-content-between align-items-end pt-4 pb-2 px-2">
+              @for (bar of dailySales; track bar.fullDate) {
+                <div class="bar-col d-flex flex-column align-items-center gap-2" [title]="bar.fullDate + ': ₺' + bar.rawAmount">
+                  <span class="bar-amount small text-muted">{{ bar.amountText }}</span>
+                  <div class="bar-fill rounded-3" [style.height.px]="bar.heightPercent * 1.5"></div>
+                  <span class="bar-month small text-muted">{{ bar.dayName }}</span>
+                </div>
+              }
             </div>
           </div>
-        } @empty {
-          <div class="text-center py-4 text-muted small">
-            <i class="bi bi-check-circle fs-3 text-success d-block mb-1"></i>
-            Kritik seviyede ürün bulunmuyor.
-          </div>
-        }
-      </div>
-    </div>
-  </div>
-</div>
+        </div>
 
-      <!-- Tablo -->
+        <div class="col-12 col-lg-4">
+          <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+            <h6 class="fw-bold text-dark mb-1">Kritik Stok Uyarıları</h6>
+            <p class="text-muted small mb-3">En kısa sürede tedarik edilmesi gerekenler</p>
+
+            <div class="d-flex flex-column gap-2.5">
+              @for (item of criticalStocks; track item.id) {
+                <div class="critical-stock-row p-2.5 rounded-3 d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="fw-bold text-dark mb-0.5 small">{{ item.name }}</h6>
+                    <span class="text-muted" style="font-size: 0.72rem;">{{ item.category }}</span>
+                  </div>
+                  <div class="text-end">
+                    <span class="d-block text-danger fw-bold small">
+                      @if (item.stockQuantity === 0) {
+                        Tükendi (0 adet)
+                      } @else {
+                        {{ item.stockQuantity }} adet kaldı
+                      }
+                    </span>
+                    <span class="badge badge-subtle-danger">{{ item.status }}</span>
+                  </div>
+                </div>
+              } @empty {
+                <div class="text-center py-4 text-muted small">
+                  <i class="bi bi-check-circle fs-3 text-success d-block mb-1"></i>
+                  Kritik seviyede ürün bulunmuyor.
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. SON SİPARİŞLER TABLOSU -->
       <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
         <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
           <h6 class="fw-bold mb-0 text-dark">Son Siparişler</h6>

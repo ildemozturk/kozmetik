@@ -1,26 +1,28 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { WishlistService } from '../../services/wishlist.service';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
 import { Product } from '../../models/product';
 
-export interface OrderHistoryItem {
-  id: number;
-  name: string;
-  price: number;
+export interface UserOrderProduct {
+  productId: number;
+  productName: string;
+  imageUrl?: string;
   quantity: number;
-  imageUrl: string;
+  unitPrice: number;
 }
 
 export interface UserOrder {
-  id: string;
-  date: string;
-  status: string;
+  id: number;
+  orderNo: string;
   totalAmount: number;
-  items: OrderHistoryItem[];
+  createdDate?: string;
+  status: string;
+  items: UserOrderProduct[];
 }
 
 @Component({
@@ -34,14 +36,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isWishlistOpen: boolean = false;
   isUserMenuOpen: boolean = false;
   isOrdersModalOpen: boolean = false;
+  isLoadingOrders: boolean = false;
+
   userOrders: UserOrder[] = [];
 
+  private apiUrl = 'http://localhost:5246/api';
   private wishlistSub!: Subscription;
 
   constructor(
     public wishlistService: WishlistService,
     public cartService: CartService,
     public authService: AuthService,
+    private http: HttpClient,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -86,6 +92,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.isWishlistOpen = !this.isWishlistOpen;
     if (this.isWishlistOpen) {
       this.isUserMenuOpen = false;
+      this.isOrdersModalOpen = false;
     }
     this.cdr.detectChanges();
   }
@@ -103,6 +110,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.isUserMenuOpen = !this.isUserMenuOpen;
       if (this.isUserMenuOpen) {
         this.isWishlistOpen = false;
+        this.isOrdersModalOpen = false;
       }
       this.cdr.detectChanges();
     }
@@ -110,8 +118,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   openOrdersModal(): void {
     this.isUserMenuOpen = false;
-    this.loadUserOrders();
+    this.isWishlistOpen = false;
     this.isOrdersModalOpen = true;
+    this.loadUserOrders();
     this.cdr.detectChanges();
   }
 
@@ -121,24 +130,45 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   loadUserOrders(): void {
-    // localStorage'dan kullanıcının vermiş olduğu siparişleri çekiyoruz
-    const savedOrders = localStorage.getItem('lumiere_orders');
-    if (savedOrders) {
-      this.userOrders = JSON.parse(savedOrders);
-    } else {
+    const user = this.currentUser;
+    const email = user?.email;
+
+    if (!email) {
       this.userOrders = [];
+      return;
     }
+
+    this.isLoadingOrders = true;
+    const token = localStorage.getItem('token') || localStorage.getItem('jwt') || localStorage.getItem('lumiere_token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    this.http.get<any>(`${this.apiUrl}/Orders/my-orders?email=${encodeURIComponent(email)}`, { headers }).subscribe({
+      next: (res) => {
+        if (Array.isArray(res)) {
+          this.userOrders = res;
+        } else if (res && Array.isArray(res.data)) {
+          this.userOrders = res.data;
+        } else {
+          this.userOrders = [];
+        }
+        this.isLoadingOrders = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoadingOrders = false;
+        this.userOrders = [];
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   logout(): void {
     this.isUserMenuOpen = false;
+    this.isOrdersModalOpen = false;
     this.authService.logout();
-    this.cdr.detectChanges();
-  }
-
-  closeAllModals(): void {
-    this.isWishlistOpen = false;
-    this.isUserMenuOpen = false;
     this.cdr.detectChanges();
   }
 }

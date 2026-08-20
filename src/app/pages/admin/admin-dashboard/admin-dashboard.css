@@ -247,3 +247,11 @@
   background-color: #fef3c7;
   color: #d97706;
 }
+
+.badge-subtle-warning {
+  background-color: #fef3c7;
+  color: #d97706;
+  font-size: 0.68rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+}

@@ -1,0 +1,100 @@
+<div class="profile-container py-5 bg-light-cream min-vh-100">
+  <div class="container" style="max-width: 900px;">
+    
+    <!-- 1. KULLANICI PROFİL KARTI -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+      <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3 text-center text-sm-start">
+          <div class="avatar-circle rounded-circle bg-pink-soft text-pink d-flex align-items-center justify-content-center">
+            <i class="bi bi-person-fill fs-2"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold text-dark mb-0">{{ userFullName }}</h4>
+            <span class="text-muted small">{{ userEmail }}</span>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-semibold" (click)="logout()">
+          <i class="bi bi-box-arrow-right me-1"></i> Çıkış Yap
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. SİPARİŞLERİM BAŞLIĞI VE LİSTESİ -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+      <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="fw-bold text-dark mb-0">Sipariş Geçmişim</h5>
+          <span class="text-muted small">Verdiğiniz tüm siparişlerin güncel durumunu buradan takip edebilirsiniz.</span>
+        </div>
+        <span class="badge bg-pink-soft text-pink rounded-pill px-3 py-2 fw-bold">
+          {{ myOrders.length }} Sipariş
+        </span>
+      </div>
+
+      <!-- Siparişler Listesi -->
+      <div class="p-4">
+        @if (isLoadingOrders) {
+          <div class="text-center py-5 text-muted small">
+            <div class="spinner-border spinner-border-sm text-pink mb-2" role="status"></div>
+            <div>Siparişleriniz yükleniyor...</div>
+          </div>
+        } @else if (myOrders.length > 0) {
+          <div class="d-flex flex-column gap-3">
+            @for (order of myOrders; track order.id) {
+              <div class="order-card p-3.5 rounded-3 border bg-light-panel">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center pb-2.5 mb-2.5 border-bottom gap-2">
+                  <div>
+                    <span class="fw-bold text-pink me-2">{{ order.orderNo }}</span>
+                    <span class="text-muted small">{{ order.createdDate ? (order.createdDate | date:'dd.MM.yyyy HH:mm') : 'Bugün' }}</span>
+                  </div>
+
+                  <!-- Sipariş Durumu Rozeti -->
+                  <div>
+                    <span class="badge rounded-pill px-3 py-1.5 fw-semibold"
+                          [class.bg-success-subtle]="order.status === 'Teslim Edildi'"
+                          [class.text-success]="order.status === 'Teslim Edildi'"
+                          [class.bg-info-subtle]="order.status === 'Kargoda'"
+                          [class.text-info]="order.status === 'Kargoda'"
+                          [class.bg-warning-subtle]="order.status === 'Hazırlanıyor'"
+                          [class.text-warning]="order.status === 'Hazırlanıyor'"
+                          [class.bg-danger-subtle]="order.status === 'İptal Edildi'"
+                          [class.text-danger]="order.status === 'İptal Edildi'">
+                      {{ order.status }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Sipariş Edilen Ürünler -->
+                <div class="d-flex flex-column gap-1.5 mb-3">
+                  @for (item of order.items; track item.productId) {
+                    <div class="d-flex justify-content-between text-muted small">
+                      <span>{{ item.quantity }}x {{ item.productName }}</span>
+                      <span class="fw-semibold text-dark">₺{{ (item.unitPrice * item.quantity) | number:'1.2-2' }}</span>
+                    </div>
+                  }
+                </div>
+
+                <!-- Toplam Tutar -->
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                  <span class="small fw-semibold text-muted">Ödenen Tutar:</span>
+                  <span class="fw-bold text-dark fs-6">₺{{ order.totalAmount | number:'1.2-2' }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="text-center py-5 text-muted">
+            <i class="bi bi-bag-x fs-1 text-pink opacity-50 d-block mb-2"></i>
+            <h6 class="fw-bold text-dark">Henüz siparişiniz bulunmuyor</h6>
+            <p class="small text-muted mb-3">Beğendiğiniz kozmetik ürünlerini sepetinize ekleyip alışverişe başlayabilirsiniz.</p>
+            <a routerLink="/products" class="btn btn-pink rounded-pill px-4 py-2 text-white fw-semibold small">
+              Alışverişe Başla
+            </a>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+</div>

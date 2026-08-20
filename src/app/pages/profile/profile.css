@@ -1,0 +1,38 @@
+.bg-light-cream {
+  background-color: #fdfbfb;
+}
+
+.bg-light-panel {
+  background-color: #ffffff;
+}
+
+.text-pink {
+  color: #c9667e !important;
+}
+
+.bg-pink-soft {
+  background-color: #fce7ec;
+}
+
+.btn-pink {
+  background-color: #c9667e;
+  border: none;
+}
+
+.btn-pink:hover {
+  background-color: #b5566d;
+}
+
+.avatar-circle {
+  width: 60px;
+  height: 60px;
+}
+
+.order-card {
+  transition: all 0.2s ease;
+  border-color: #f1f5f9 !important;
+}
+
+.order-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}

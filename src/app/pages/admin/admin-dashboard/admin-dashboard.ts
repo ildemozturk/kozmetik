@@ -18,7 +18,7 @@ export interface CriticalStockItem {
   name: string;
   category: string;
   stockQuantity: number;
-  status: 'Kritik' | 'Uyarı';
+  status: 'Tükendi' | 'Kritik' | 'Uyarı';
 }
 
 export interface RecentOrder {
@@ -32,9 +32,9 @@ export interface RecentOrder {
 }
 
 export interface DailyChartData {
-  dayName: string;       // Örn: 'Pzt', 'Sal', '19 Ağu'
-  fullDate: string;      // Örn: '2026-08-19'
-  amountText: string;    // Örn: '₺840'
+  dayName: string;
+  fullDate: string;
+  amountText: string;
   rawAmount: number;
   heightPercent: number;
 }
@@ -61,7 +61,6 @@ export class AdminDashboard implements OnInit {
     inStockVarietyCount: 0
   };
 
-  // 7 Günlük / 14 Günlük Seçenekleri
   chartDaysRange: 7 | 14 = 7;
   dailySales: DailyChartData[] = [];
   rawOrdersList: any[] = [];
@@ -136,35 +135,45 @@ export class AdminDashboard implements OnInit {
     this.isLoading = true;
     const headers = this.getAuthHeaders();
 
-    this.http.get<any>(`${this.apiUrl}/Products`, { headers }).subscribe({
+    // 1. Tüm Ürünleri Çek (Sayfalama sınırını aşmak için all rotası denenir, yoksa normal rota)
+    this.http.get<any>(`${this.apiUrl}/Products/all`, { headers }).subscribe({
       next: (prodRes) => {
         const products = this.extractList(prodRes);
-
-        this.http.get<any>(`${this.apiUrl}/Orders`, { headers }).subscribe({
-          next: (orderRes) => {
-            let orders: any[] = [];
-            let registeredUsersCount = 0;
-
-            if (orderRes && orderRes.orders) {
-              orders = orderRes.orders;
-              registeredUsersCount = orderRes.totalRegisteredUsers ?? 0;
-            } else {
-              orders = this.extractList(orderRes);
-            }
-
-            this.rawOrdersList = orders;
-            this.calculateAndRender(products, orders, registeredUsersCount);
-          },
-          error: () => {
-            this.rawOrdersList = [];
-            this.calculateAndRender(products, [], 0);
-          }
-        });
+        this.fetchOrdersAndRender(products, headers);
       },
       error: () => {
-        this.isLoading = false;
-        this.toastService.error('Veritabanı verileri yüklenemedi.');
-        this.cdr.detectChanges();
+        this.http.get<any>(`${this.apiUrl}/Products`, { headers }).subscribe({
+          next: (prodRes) => {
+            const products = this.extractList(prodRes);
+            this.fetchOrdersAndRender(products, headers);
+          },
+          error: () => {
+            this.fetchOrdersAndRender([], headers);
+          }
+        });
+      }
+    });
+  }
+
+  private fetchOrdersAndRender(products: any[], headers: HttpHeaders): void {
+    this.http.get<any>(`${this.apiUrl}/Orders`, { headers }).subscribe({
+      next: (orderRes) => {
+        let orders: any[] = [];
+        let registeredUsersCount = 0;
+
+        if (orderRes && orderRes.orders) {
+          orders = orderRes.orders;
+          registeredUsersCount = orderRes.totalRegisteredUsers ?? 0;
+        } else {
+          orders = this.extractList(orderRes);
+        }
+
+        this.rawOrdersList = orders;
+        this.calculateAndRender(products, orders, registeredUsersCount);
+      },
+      error: () => {
+        this.rawOrdersList = [];
+        this.calculateAndRender(products, [], 0);
       }
     });
   }
@@ -194,9 +203,27 @@ export class AdminDashboard implements OnInit {
     this.cdr.detectChanges();
   }
 
+  // Bütün olası stok alanlarını (0, null, string, iç içe obje) çözen metod
+  private getProductStock(p: any): number {
+    if (!p) return 0;
+    if (p.stock !== undefined && p.stock !== null) {
+      if (typeof p.stock === 'number') return p.stock;
+      if (typeof p.stock.quantity === 'number') return p.stock.quantity;
+      if (!isNaN(Number(p.stock.quantity))) return Number(p.stock.quantity);
+    }
+    if (p.stockQuantity !== undefined && p.stockQuantity !== null && !isNaN(Number(p.stockQuantity))) {
+      return Number(p.stockQuantity);
+    }
+    if (p.quantity !== undefined && p.quantity !== null && !isNaN(Number(p.quantity))) {
+      return Number(p.quantity);
+    }
+    return 0;
+  }
+
   private extractList(res: any): any[] {
     if (!res) return [];
     if (Array.isArray(res)) return res;
+    if (Array.isArray(res.products)) return res.products;
     if (Array.isArray(res.data)) return res.data;
     if (Array.isArray(res.items)) return res.items;
     if (Array.isArray(res.$values)) return res.$values;
@@ -204,26 +231,31 @@ export class AdminDashboard implements OnInit {
   }
 
   private calculateAndRender(products: any[], orders: any[], registeredUsersCount: number): void {
-    // 1. Stok Çeşidi & Kritik Stoklar
-    const inStock = products.filter(p => (p.stock?.quantity ?? p.stockQuantity ?? 0) > 0);
-    this.summary.inStockVarietyCount = inStock.length > 0 ? inStock.length : products.length;
+    // 1. Stokta Olan Ürün Çeşit Sayısı
+    const inStock = products.filter(p => this.getProductStock(p) > 0);
+    this.summary.inStockVarietyCount = inStock.length;
 
+    // 2. Kritik Stok Listesi (13+ dahil tüm ürünleri tarar, 0 ve düşükler en üstte)
     this.criticalStocks = products
       .map(p => {
-        const qty = p.stock?.quantity ?? p.stockQuantity ?? 0;
+        const qty = this.getProductStock(p);
+        let statusText: 'Tükendi' | 'Kritik' | 'Uyarı' = 'Uyarı';
+        if (qty === 0) statusText = 'Tükendi';
+        else if (qty <= 5) statusText = 'Kritik';
+
         return {
           id: p.id,
           name: p.name,
           category: p.category?.name || p.categoryName || 'Cilt Bakımı',
           stockQuantity: qty,
-          status: (qty <= 5 ? 'Kritik' : 'Uyarı') as 'Kritik' | 'Uyarı'
+          status: statusText
         };
       })
-      .filter(p => p.stockQuantity <= 15)
+      .filter(p => p.stockQuantity <= 10)
       .sort((a, b) => a.stockQuantity - b.stockQuantity)
-      .slice(0, 3);
+      .slice(0, 5);
 
-    // 2. Toplam Satış ve Sipariş Sayısı
+    // 3. Toplam Satış ve Sipariş Sayıları
     let totalSalesSum = 0;
     orders.forEach(o => {
       const amount = Number(o.totalAmount ?? o.totalPrice ?? o.total ?? 0);
@@ -234,7 +266,7 @@ export class AdminDashboard implements OnInit {
     this.summary.totalOrdersCount = orders.length;
     this.summary.activeCustomerCount = registeredUsersCount;
 
-    // 3. Siparişler Tablosu
+    // 4. Siparişler Tablosu
     this.recentOrders = orders.map((o, idx) => {
       const items = o.orderItems || o.items || [];
       const itemSummary = items.length > 0
@@ -252,80 +284,76 @@ export class AdminDashboard implements OnInit {
       };
     });
 
-    // 4. Günlük Grafik Hesaplama
+    // 5. Günlük Grafik
     this.generateDailyChart(orders, this.chartDaysRange);
 
     this.isLoading = false;
     this.cdr.detectChanges();
   }
 
-  // Bugünden geriye doğru günleri oluşturan ve siparişleri gün gün toplayan fonksiyon
   private generateDailyChart(orders: any[], daysCount: number): void {
-  const dayNamesShort = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
-  const now = new Date();
+    const dayNamesShort = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+    const now = new Date();
 
-  // Yıl-Ay-Gün formatlayıcı (Örn: 2026-08-20)
-  const formatDateKey = (d: Date): string => {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
+    const formatDateKey = (d: Date): string => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
 
-  const daysList: { fullDate: string; label: string; total: number }[] = [];
+    const daysList: { fullDate: string; label: string; total: number }[] = [];
 
-  for (let i = daysCount - 1; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(now.getDate() - i);
-    const dateKey = formatDateKey(d);
+    for (let i = daysCount - 1; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      const dateKey = formatDateKey(d);
 
-    const dayName = i === 0 ? 'Bugün' : (i === 1 ? 'Dün' : dayNamesShort[d.getDay()]);
-    const dateLabel = `${d.getDate()}/${d.getMonth() + 1}`;
+      const dayName = i === 0 ? 'Bugün' : (i === 1 ? 'Dün' : dayNamesShort[d.getDay()]);
+      const dateLabel = `${d.getDate()}/${d.getMonth() + 1}`;
 
-    daysList.push({
-      fullDate: dateKey,
-      label: daysCount === 7 ? dayName : dateLabel,
-      total: 0
+      daysList.push({
+        fullDate: dateKey,
+        label: daysCount === 7 ? dayName : dateLabel,
+        total: 0
+      });
+    }
+
+    orders.forEach((o, idx) => {
+      const amount = Number(o.totalAmount ?? o.totalPrice ?? o.total ?? 0);
+      let orderDateKey = '';
+
+      if (o.createdDate) {
+        const d = new Date(o.createdDate);
+        if (!isNaN(d.getTime())) {
+          orderDateKey = formatDateKey(d);
+        }
+      }
+
+      if (!orderDateKey) {
+        const fallbackDate = new Date(now);
+        const dayOffset = Math.min(idx, daysCount - 1);
+        fallbackDate.setDate(now.getDate() - dayOffset);
+        orderDateKey = formatDateKey(fallbackDate);
+      }
+
+      const matchDay = daysList.find(d => d.fullDate === orderDateKey);
+      if (matchDay) {
+        matchDay.total += amount;
+      }
+    });
+
+    const maxVal = Math.max(...daysList.map(d => d.total), 1);
+
+    this.dailySales = daysList.map(d => {
+      const height = d.total === 0 ? 15 : Math.max(25, Math.round((d.total / maxVal) * 100));
+      return {
+        dayName: d.label,
+        fullDate: d.fullDate,
+        amountText: d.total === 0 ? '₺0' : (d.total >= 1000 ? `₺${(d.total / 1000).toFixed(1)}k` : `₺${d.total}`),
+        rawAmount: d.total,
+        heightPercent: height
+      };
     });
   }
-
-  // Siparişleri eşleştir
-  orders.forEach((o, idx) => {
-    const amount = Number(o.totalAmount ?? o.totalPrice ?? o.total ?? 0);
-    let orderDateKey = '';
-
-    if (o.createdDate) {
-      const d = new Date(o.createdDate);
-      if (!isNaN(d.getTime())) {
-        orderDateKey = formatDateKey(d);
-      }
-    }
-
-    // Eğer siparişte geçmiş bir tarih yoksa (eski test kaydıysa) ID sırasına göre geçmiş günlere dağıt
-    if (!orderDateKey) {
-      const fallbackDate = new Date(now);
-      const dayOffset = Math.min(idx, daysCount - 1);
-      fallbackDate.setDate(now.getDate() - dayOffset);
-      orderDateKey = formatDateKey(fallbackDate);
-    }
-
-    const matchDay = daysList.find(d => d.fullDate === orderDateKey);
-    if (matchDay) {
-      matchDay.total += amount;
-    }
-  });
-
-  const maxVal = Math.max(...daysList.map(d => d.total), 1);
-
-  this.dailySales = daysList.map(d => {
-    const height = d.total === 0 ? 15 : Math.max(25, Math.round((d.total / maxVal) * 100));
-    return {
-      dayName: d.label,
-      fullDate: d.fullDate,
-      amountText: d.total === 0 ? '₺0' : (d.total >= 1000 ? `₺${(d.total / 1000).toFixed(1)}k` : `₺${d.total}`),
-      rawAmount: d.total,
-      heightPercent: height
-    };
-  });
-}
 }
