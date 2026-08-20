@@ -52,25 +52,49 @@ export class CartService {
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     if (isPlatformBrowser(this.platformId)) {
-      const saved = localStorage.getItem('cart') || localStorage.getItem('lumiere_cart');
-      if (saved) {
-        try {
-          this.cartItems.set(JSON.parse(saved));
-        } catch (e) {
-          console.error('Cart parse error', e);
+      this.loadUserCart();
+    }
+  }
+
+  // Giriş yapan kullanıcının mailine göre dinamik anahtar üretir
+  private getStorageKey(): string {
+    if (!isPlatformBrowser(this.platformId)) return 'lumiere_cart_guest';
+    const userStr = localStorage.getItem('cosmetic_user') || localStorage.getItem('user') || localStorage.getItem('lumiere_user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.email) {
+          return `lumiere_cart_${user.email.trim().toLowerCase()}`;
         }
+      } catch (e) {}
+    }
+    return 'lumiere_cart_guest';
+  }
+
+  // Kullanıcının kayıtlı sepetini yükle
+  loadUserCart(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const key = this.getStorageKey();
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      try {
+        this.cartItems.set(JSON.parse(saved));
+      } catch (e) {
+        this.cartItems.set([]);
       }
+    } else {
+      this.cartItems.set([]);
     }
   }
 
   private saveCart(items: CartItem[]): void {
     this.cartItems.set(items);
     if (isPlatformBrowser(this.platformId)) {
+      const key = this.getStorageKey();
       if (items.length === 0) {
-        localStorage.removeItem('cart');
-        localStorage.removeItem('lumiere_cart');
+        localStorage.removeItem(key);
       } else {
-        localStorage.setItem('cart', JSON.stringify(items));
+        localStorage.setItem(key, JSON.stringify(items));
       }
     }
   }
@@ -125,11 +149,21 @@ export class CartService {
     this.showToast('Ürün sepetten çıkarıldı.');
   }
 
-  // SEPETİ SIFIRLAMA
+  // Sepeti temizleme metodu (Hem butonla manuel temizlemede hem sipariş tamamlandığında çalışır)
   clearCart(showNotification: boolean = false): void {
     this.saveCart([]);
     if (showNotification) {
       this.showToast('Sepetinizdeki tüm ürünler temizlendi.');
     }
+  }
+
+  // Geriye dönük uyumluluk
+  clearCartAfterOrder(): void {
+    this.clearCart(false);
+  }
+
+  // Çıkış yapıldığında sadece ekrandaki state'i boşaltır (LocalStorage'daki kullanıcı sepetine dokunmaz)
+  resetCartStateOnLogout(): void {
+    this.cartItems.set([]);
   }
 }

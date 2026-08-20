@@ -51,8 +51,13 @@ export class AuthService {
     );
   }
 
+  // ÇIKIŞ YAPILDIĞINDA
   logout(): void {
-    // 1. Auth & Token Verilerini Temizle
+    // 1. Ekrandaki sepet ve favorileri sıfırla (Kullanıcının veritabanı/storage geçmişi kendi mailinde saklı kalır)
+    this.cartService.resetCartStateOnLogout();
+    this.wishlistService.resetWishlistStateOnLogout();
+
+    // 2. Oturum bilgilerini sil
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
     localStorage.removeItem('token');
@@ -61,32 +66,25 @@ export class AuthService {
     localStorage.removeItem('user');
     localStorage.removeItem('lumiere_user');
 
-    // 2. Sepet ve Favori State'lerini ve LocalStorage Kayıtlarını Sıfırla
-    this.cartService.clearCart(false);
-    this.wishlistService.clearWishlist();
-
-    // 3. Varsa Önbellek Siparişleri Temizle
-    localStorage.removeItem('lumiere_orders');
-
-    // 4. Giriş Ekranına Yönlendir
+    // 3. Giriş ekranına yönlendir
     this.router.navigate(['/login']);
   }
 
+  // GİRİŞ YAPILDIĞINDA KULLANICININ ESKİ SEPET VE FAVORİLERİNİ GERİ YÜKLE
   private handleAuthResponse(response: AuthResponseDto): void {
     if (response && response.token) {
       localStorage.setItem(this.TOKEN_KEY, response.token);
-      localStorage.setItem(this.USER_KEY, JSON.stringify({
+      const userData = JSON.stringify({
         fullName: response.fullName,
         email: response.email,
         role: response.role
-      }));
-      // Geriye dönük uyumluluk için genel anahtarları da besle
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify({
-        fullName: response.fullName,
-        email: response.email,
-        role: response.role
-      }));
+      });
+      localStorage.setItem(this.USER_KEY, userData);
+      localStorage.setItem('user', userData);
+
+      // Kullanıcının daha önce sepette veya favorilerde bıraktığı ürünleri geri yükle!
+      this.cartService.loadUserCart();
+      this.wishlistService.loadWishlist();
     }
   }
 

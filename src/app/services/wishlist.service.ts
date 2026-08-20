@@ -13,20 +13,41 @@ export class WishlistService {
     this.loadWishlist();
   }
 
-  private loadWishlist(): void {
-    const saved = localStorage.getItem('wishlist') || localStorage.getItem('lumiere_wishlist');
+  private getStorageKey(): string {
+    const userStr = localStorage.getItem('cosmetic_user') || localStorage.getItem('user') || localStorage.getItem('lumiere_user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.email) {
+          return `lumiere_wishlist_${user.email.trim().toLowerCase()}`;
+        }
+      } catch (e) {}
+    }
+    return 'lumiere_wishlist_guest';
+  }
+
+  loadWishlist(): void {
+    const key = this.getStorageKey();
+    const saved = localStorage.getItem(key);
     if (saved) {
       try {
         this.wishlist = JSON.parse(saved);
       } catch (e) {
         this.wishlist = [];
       }
+    } else {
+      this.wishlist = [];
     }
     this.wishlistSubject.next([...this.wishlist]);
   }
 
   private saveWishlist(): void {
-    localStorage.setItem('wishlist', JSON.stringify(this.wishlist));
+    const key = this.getStorageKey();
+    if (this.wishlist.length === 0) {
+      localStorage.removeItem(key);
+    } else {
+      localStorage.setItem(key, JSON.stringify(this.wishlist));
+    }
     this.wishlistSubject.next([...this.wishlist]);
   }
 
@@ -57,11 +78,9 @@ export class WishlistService {
     this.saveWishlist();
   }
 
-  // FAVORİLERİ SIFIRLAMA
-  clearWishlist(): void {
+  // Çıkış yapıldığında sadece ekrandaki favori state'ini temizler
+  resetWishlistStateOnLogout(): void {
     this.wishlist = [];
-    localStorage.removeItem('wishlist');
-    localStorage.removeItem('lumiere_wishlist');
     this.wishlistSubject.next([]);
   }
 }
