@@ -14,7 +14,7 @@ export class WishlistService {
   }
 
   private loadWishlist(): void {
-    const saved = localStorage.getItem('wishlist');
+    const saved = localStorage.getItem('wishlist') || localStorage.getItem('lumiere_wishlist');
     if (saved) {
       try {
         this.wishlist = JSON.parse(saved);
@@ -55,5 +55,13 @@ export class WishlistService {
   removeFromWishlist(productId: number): void {
     this.wishlist = this.wishlist.filter(item => item.id !== productId);
     this.saveWishlist();
+  }
+
+  // FAVORİLERİ SIFIRLAMA
+  clearWishlist(): void {
+    this.wishlist = [];
+    localStorage.removeItem('wishlist');
+    localStorage.removeItem('lumiere_wishlist');
+    this.wishlistSubject.next([]);
   }
 }

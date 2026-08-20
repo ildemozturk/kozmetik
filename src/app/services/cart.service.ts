@@ -16,7 +16,6 @@ export class CartService {
   toastMessage = signal<string | null>(null);
   toastTimeout: any;
 
-  // KARGO VE TUTAR HESAPLAMALARI
   readonly FREE_SHIPPING_THRESHOLD = 500;
   readonly STANDARD_SHIPPING_FEE = 69.90;
 
@@ -53,7 +52,7 @@ export class CartService {
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     if (isPlatformBrowser(this.platformId)) {
-      const saved = localStorage.getItem('cart');
+      const saved = localStorage.getItem('cart') || localStorage.getItem('lumiere_cart');
       if (saved) {
         try {
           this.cartItems.set(JSON.parse(saved));
@@ -69,6 +68,7 @@ export class CartService {
     if (isPlatformBrowser(this.platformId)) {
       if (items.length === 0) {
         localStorage.removeItem('cart');
+        localStorage.removeItem('lumiere_cart');
       } else {
         localStorage.setItem('cart', JSON.stringify(items));
       }
@@ -126,7 +126,7 @@ export class CartService {
   }
 
   // SEPETİ SIFIRLAMA
-  clearCart(showNotification: boolean = true): void {
+  clearCart(showNotification: boolean = false): void {
     this.saveCart([]);
     if (showNotification) {
       this.showToast('Sepetinizdeki tüm ürünler temizlendi.');
