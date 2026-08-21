@@ -171,7 +171,7 @@
   color: #ffffff;
 }
 
-/* SAYFALAMA (PAGINATION) */
+/* SAYFALAMA */
 .page-link {
   width: 32px;
   height: 32px;
@@ -192,24 +192,43 @@
   color: #c9667e;
 }
 
-/* MODAL */
-.custom-modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4);
-  z-index: 2000;
-  backdrop-filter: blur(2px);
+/* MODAL SABİTLEME & ORTALAMA */
+.custom-modal-backdrop,
+.custom-modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(15, 23, 42, 0.5) !important;
+  backdrop-filter: blur(3px);
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
 }
 
-.custom-modal-content {
-  z-index: 2001;
-  animation: modalScale 0.2s ease-out;
+.custom-modal-content,
+.custom-modal-dialog {
+  position: relative !important;
+  background: #ffffff !important;
+  border-radius: 1rem !important;
+  width: 90% !important;
+  max-width: 420px !important;
+  padding: 1.5rem !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  animation: modalFadeIn 0.2s ease-out;
+  z-index: 100000 !important;
+  margin: auto !important;
 }
 
-@keyframes modalScale {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

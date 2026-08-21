@@ -21,7 +21,7 @@ import { adminGuard } from './guards/admin-guard';
 import { noAdminOnStoreGuard } from './guards/admin-redirect-guard';
 
 export const routes: Routes = [
-  // Mağaza Rotaları (Adminler Giremez)
+  // Mağaza Rotaları
   { path: '', component: HomeComponent, canActivate: [noAdminOnStoreGuard] },
   { path: 'urunler', component: ProductsComponent, canActivate: [noAdminOnStoreGuard] },
   { path: 'products', redirectTo: 'urunler', pathMatch: 'full' },
@@ -42,7 +42,7 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'kayit', redirectTo: 'register', pathMatch: 'full' },
 
-  // Admin Paneli (Sadece Adminler İçin)
+  // Admin Paneli Rotaları
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard],

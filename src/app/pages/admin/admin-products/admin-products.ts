@@ -17,6 +17,15 @@ export interface AdminProductItem {
   status: 'Stokta Var' | 'Kritik' | 'Tükendi';
 }
 
+export interface NewProductModel {
+  name: string;
+  category: string;
+  price: number | null;
+  stockQuantity: number | null;
+  imageUrl: string;
+  description: string;
+}
+
 @Component({
   selector: 'app-admin-products',
   standalone: true,
@@ -39,6 +48,7 @@ export class AdminProducts implements OnInit {
   // Filtreler & Arama
   searchQuery: string = '';
   categories: string[] = ['Tümü', 'Cilt Bakımı', 'Makyaj', 'Parfüm', 'Saç Bakımı'];
+  formCategories: string[] = ['Cilt Bakımı', 'Makyaj', 'Parfüm', 'Saç Bakımı'];
   selectedCategory: string = 'Tümü';
   selectedStockFilter: string = 'all';
 
@@ -47,11 +57,23 @@ export class AdminProducts implements OnInit {
   pageSize: number = 6;
   totalPages: number = 1;
 
-  // Stok Düzenleme Modalı
+  // 1. Stok Düzenleme Modalı
   isEditStockModalOpen: boolean = false;
   selectedProductForEdit: AdminProductItem | null = null;
   newStockQuantity: number = 0;
   isSavingStock: boolean = false;
+
+  // 2. Yeni Ürün Ekleme Modalı
+  isAddProductModalOpen: boolean = false;
+  isSavingNewProduct: boolean = false;
+  newProduct: NewProductModel = {
+    name: '',
+    category: 'Cilt Bakımı',
+    price: null,
+    stockQuantity: null,
+    imageUrl: '',
+    description: ''
+  };
 
   private apiUrl = 'http://localhost:5246/api';
 
@@ -82,11 +104,6 @@ export class AdminProducts implements OnInit {
     }
   }
 
-  get adminFirstName(): string {
-    if (!this.adminFullName) return '';
-    return this.adminFullName.split(' ')[0];
-  }
-
   toggleSidebar(): void {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
   }
@@ -112,6 +129,7 @@ export class AdminProducts implements OnInit {
   }
 
   private extractStock(p: any): number {
+    if (!p) return 0;
     if (p.stock !== undefined && p.stock !== null) {
       if (typeof p.stock === 'number') return p.stock;
       if (typeof p.stock.quantity === 'number') return p.stock.quantity;
@@ -144,7 +162,6 @@ export class AdminProducts implements OnInit {
           },
           error: () => {
             this.isLoading = false;
-            this.toastService.error('Ürünler yüklenemedi.');
             this.cdr.detectChanges();
           }
         });
@@ -196,7 +213,6 @@ export class AdminProducts implements OnInit {
   applyFilters(): void {
     let list = [...this.allProducts];
 
-    // 1. Arama Filtresi
     if (this.searchQuery.trim()) {
       const query = this.searchQuery.toLowerCase().trim();
       list = list.filter(p => 
@@ -206,12 +222,10 @@ export class AdminProducts implements OnInit {
       );
     }
 
-    // 2. Kategori Filtresi
     if (this.selectedCategory !== 'Tümü') {
       list = list.filter(p => p.category.toLowerCase().includes(this.selectedCategory.toLowerCase()));
     }
 
-    // 3. Stok Durumu Filtresi
     if (this.selectedStockFilter === 'inStock') {
       list = list.filter(p => p.stockQuantity > 12);
     } else if (this.selectedStockFilter === 'critical') {
@@ -243,15 +257,20 @@ export class AdminProducts implements OnInit {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
+  // ==========================================
+  // 1. STOK DÜZENLEME
+  // ==========================================
   openEditStockModal(product: AdminProductItem): void {
-    this.selectedProductForEdit = product;
+    this.selectedProductForEdit = { ...product };
     this.newStockQuantity = product.stockQuantity;
     this.isEditStockModalOpen = true;
+    this.cdr.detectChanges();
   }
 
   closeEditStockModal(): void {
     this.isEditStockModalOpen = false;
     this.selectedProductForEdit = null;
+    this.cdr.detectChanges();
   }
 
   saveStock(): void {
@@ -263,10 +282,13 @@ export class AdminProducts implements OnInit {
 
     this.http.put(`${this.apiUrl}/Products/${productId}/update-stock`, { newQuantity: this.newStockQuantity }, { headers }).subscribe({
       next: () => {
-        this.selectedProductForEdit!.stockQuantity = this.newStockQuantity;
-        if (this.newStockQuantity === 0) this.selectedProductForEdit!.status = 'Tükendi';
-        else if (this.newStockQuantity <= 12) this.selectedProductForEdit!.status = 'Kritik';
-        else this.selectedProductForEdit!.status = 'Stokta Var';
+        const target = this.allProducts.find(p => p.id === productId);
+        if (target) {
+          target.stockQuantity = this.newStockQuantity;
+          if (this.newStockQuantity === 0) target.status = 'Tükendi';
+          else if (this.newStockQuantity <= 12) target.status = 'Kritik';
+          else target.status = 'Stokta Var';
+        }
 
         this.toastService.success(`${this.selectedProductForEdit!.name} stoğu ${this.newStockQuantity} adet olarak güncellendi.`);
         this.isSavingStock = false;
@@ -276,6 +298,81 @@ export class AdminProducts implements OnInit {
       error: () => {
         this.isSavingStock = false;
         this.toastService.error('Stok güncellenemedi.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // ==========================================
+  // 2. YENİ ÜRÜN EKLEME
+  // ==========================================
+  openAddProductModal(): void {
+    this.newProduct = {
+      name: '',
+      category: 'Cilt Bakımı',
+      price: null,
+      stockQuantity: null,
+      imageUrl: '',
+      description: ''
+    };
+    this.isAddProductModalOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeAddProductModal(): void {
+    this.isAddProductModalOpen = false;
+    this.cdr.detectChanges();
+  }
+
+  saveNewProduct(): void {
+    if (!this.newProduct.name.trim() || !this.newProduct.price || this.newProduct.stockQuantity === null) {
+      this.toastService.error('Lütfen ürün adı, fiyat ve stok adedini eksiksiz doldurunuz.');
+      return;
+    }
+
+    this.isSavingNewProduct = true;
+    const headers = this.getAuthHeaders();
+
+    const payload = {
+      name: this.newProduct.name.trim(),
+      category: this.newProduct.category,
+      price: Number(this.newProduct.price),
+      stockQuantity: Number(this.newProduct.stockQuantity),
+      imageUrl: this.newProduct.imageUrl.trim() || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=400',
+      description: this.newProduct.description.trim() || `${this.newProduct.name} - Lumière Özel Bakım`
+    };
+
+    this.http.post<any>(`${this.apiUrl}/Products`, payload, { headers }).subscribe({
+      next: () => {
+        this.toastService.success('Yeni ürün başarıyla eklendi!');
+        this.isSavingNewProduct = false;
+        this.closeAddProductModal();
+        this.fetchProducts();
+      },
+      error: (err) => {
+        this.isSavingNewProduct = false;
+        const msg = err.error?.message || 'Ürün eklenirken hata oluştu.';
+        this.toastService.error(msg);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // ==========================================
+  // 3. ÜRÜN SİLME
+  // ==========================================
+  deleteProduct(productId: number, productName: string): void {
+    if (!confirm(`"${productName}" ürününü silmek istediğinize emin misiniz?`)) return;
+
+    const headers = this.getAuthHeaders();
+    this.http.delete(`${this.apiUrl}/Products/${productId}`, { headers }).subscribe({
+      next: () => {
+        this.toastService.success(`"${productName}" başarıyla silindi.`);
+        this.allProducts = this.allProducts.filter(p => p.id !== productId);
+        this.applyFilters();
+      },
+      error: () => {
+        this.toastService.error('Ürün silinirken bir hata oluştu.');
       }
     });
   }
