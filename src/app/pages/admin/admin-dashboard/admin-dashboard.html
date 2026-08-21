@@ -24,7 +24,7 @@
           </li>
 
           <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-3 text-muted" routerLink="/admin/dashboard">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" routerLink="/admin/products">
               <i class="bi bi-box-seam fs-5"></i>
               <span class="nav-text">Ürünler / Stok</span>
             </a>
@@ -83,38 +83,31 @@
     <header class="topbar bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
       <h5 class="fw-bold mb-0 text-dark">Yönetim Paneli</h5>
 
-      <div class="d-flex align-items-center gap-3">
-        <button type="button" class="btn btn-notification position-relative bg-light rounded-circle text-muted">
-          <i class="bi bi-bell"></i>
-          <span class="position-absolute top-0 start-100 translate-middle p-1 bg-pink border border-light rounded-circle"></span>
-        </button>
-
-        <div class="position-relative">
-          <div class="d-flex align-items-center gap-2 ps-2 cursor-pointer profile-trigger" (click)="toggleProfileMenu()">
-            <div class="admin-avatar rounded-circle">
-              <i class="bi bi-person-fill fs-5"></i>
-            </div>
-            <div class="d-none d-md-block text-start">
-              <h6 class="mb-0 fw-bold text-dark small">{{ adminFullName }}</h6>
-              <span class="text-muted" style="font-size: 0.72rem;">{{ adminRole }}</span>
-            </div>
-            <i class="bi bi-chevron-down small text-muted ms-1"></i>
+      <div class="position-relative">
+        <div class="d-flex align-items-center gap-2 ps-2 cursor-pointer profile-trigger" (click)="toggleProfileMenu()">
+          <div class="admin-avatar rounded-circle">
+            <i class="bi bi-person-fill fs-5"></i>
           </div>
-
-          @if (isProfileMenuOpen) {
-            <div class="admin-dropdown-menu bg-white rounded-3 shadow-lg border p-2 position-absolute end-0 mt-2">
-              <div class="px-3 py-2 border-bottom">
-                <span class="text-muted small d-block">Yönetici Oturumu</span>
-                <span class="fw-bold text-dark small text-truncate d-block">{{ adminFullName }}</span>
-              </div>
-              <div class="pt-1">
-                <button type="button" (click)="logout()" class="dropdown-item py-2 px-3 small text-danger d-flex align-items-center gap-2 border-0 bg-transparent w-100 text-start rounded-2">
-                  <i class="bi bi-box-arrow-right"></i> Oturumu Kapat
-                </button>
-              </div>
-            </div>
-          }
+          <div class="d-none d-md-block text-start">
+            <h6 class="mb-0 fw-bold text-dark small">{{ adminFullName }}</h6>
+            <span class="text-muted" style="font-size: 0.72rem;">{{ adminRole }}</span>
+          </div>
+          <i class="bi bi-chevron-down small text-muted ms-1"></i>
         </div>
+
+        @if (isProfileMenuOpen) {
+          <div class="admin-dropdown-menu bg-white rounded-3 shadow-lg border p-2 position-absolute end-0 mt-2">
+            <div class="px-3 py-2 border-bottom">
+              <span class="text-muted small d-block">Yönetici Oturumu</span>
+              <span class="fw-bold text-dark small text-truncate d-block">{{ adminFullName }}</span>
+            </div>
+            <div class="pt-1">
+              <button type="button" (click)="logout()" class="dropdown-item py-2 px-3 small text-danger d-flex align-items-center gap-2 border-0 bg-transparent w-100 text-start rounded-2">
+                <i class="bi bi-box-arrow-right"></i> Oturumu Kapat
+              </button>
+            </div>
+          </div>
+        }
       </div>
     </header>
 
@@ -145,7 +138,6 @@
               <div class="kpi-icon-pill bg-pink-soft text-pink"><i class="bi bi-cart3"></i></div>
             </div>
             <h3 class="fw-bold text-dark mb-1">{{ summary.totalOrdersCount }} adet</h3>
-  
           </div>
         </div>
 
@@ -156,18 +148,16 @@
               <div class="kpi-icon-pill bg-pink-soft text-pink"><i class="bi bi-people"></i></div>
             </div>
             <h3 class="fw-bold text-dark mb-1">{{ summary.activeCustomerCount | number }} Kişi</h3>
-           
           </div>
         </div>
 
         <div class="col-12 col-sm-6 col-xl-3">
           <div class="kpi-card bg-white p-3.5 rounded-4 shadow-sm border border-light-subtle h-100">
             <div class="d-flex justify-content-between align-items-start mb-2">
-              <span class="text-muted small fw-medium">Stoktaktai Ürün</span>
+              <span class="text-muted small fw-medium">Stoktaki Ürün</span>
               <div class="kpi-icon-pill bg-pink-soft text-pink"><i class="bi bi-box-seam"></i></div>
             </div>
-            <h3 class="fw-bold text-dark mb-1">{{ summary.inStockVarietyCount }} Tane</h3>
-         
+            <h3 class="fw-bold text-dark mb-1">{{ summary.inStockVarietyCount }} Çeşit</h3>
           </div>
         </div>
       </div>
@@ -201,35 +191,49 @@
         </div>
 
         <div class="col-12 col-lg-4">
-          <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-            <h6 class="fw-bold text-dark mb-1">Kritik Stok Uyarıları</h6>
-            <p class="text-muted small mb-3">En kısa sürede tedarik edilmesi gerekenler</p>
+          <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <h6 class="fw-bold text-dark mb-0">Kritik Stok Uyarıları</h6>
+                <span class="badge bg-danger-subtle text-danger rounded-pill px-2 py-0.5 small fw-bold">{{ criticalStocks.length }}</span>
+              </div>
+              <p class="text-muted small mb-3">En kısa sürede tedarik edilmesi gerekenler</p>
 
-            <div class="d-flex flex-column gap-2.5">
-              @for (item of criticalStocks; track item.id) {
-                <div class="critical-stock-row p-2.5 rounded-3 d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="fw-bold text-dark mb-0.5 small">{{ item.name }}</h6>
-                    <span class="text-muted" style="font-size: 0.72rem;">{{ item.category }}</span>
+              <div class="d-flex flex-column gap-2.5">
+                @for (item of criticalStocks; track item.id) {
+                  <div class="critical-stock-row p-2.5 rounded-3 d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="fw-bold text-dark mb-0.5 small">{{ item.name }}</h6>
+                      <span class="text-muted" style="font-size: 0.72rem;">{{ item.category }}</span>
+                    </div>
+                    <div class="text-end">
+                      <span class="d-block text-danger fw-bold small">
+                        @if (item.stockQuantity === 0) {
+                          Tükendi (0 adet)
+                        } @else {
+                          {{ item.stockQuantity }} adet kaldı
+                        }
+                      </span>
+                      <span class="badge badge-subtle-danger">{{ item.status }}</span>
+                    </div>
                   </div>
-                  <div class="text-end">
-                    <span class="d-block text-danger fw-bold small">
-                      @if (item.stockQuantity === 0) {
-                        Tükendi (0 adet)
-                      } @else {
-                        {{ item.stockQuantity }} adet kaldı
-                      }
-                    </span>
-                    <span class="badge badge-subtle-danger">{{ item.status }}</span>
+                } @empty {
+                  <div class="text-center py-4 text-muted small">
+                    <i class="bi bi-check-circle fs-3 text-success d-block mb-1"></i>
+                    Kritik seviyede ürün bulunmuyor.
                   </div>
-                </div>
-              } @empty {
-                <div class="text-center py-4 text-muted small">
-                  <i class="bi bi-check-circle fs-3 text-success d-block mb-1"></i>
-                  Kritik seviyede ürün bulunmuyor.
-                </div>
-              }
+                }
+              </div>
             </div>
+
+            <!-- STOĞU DÜZENLE BUTONU -->
+            <div class="pt-3 mt-3 border-top">
+              <a routerLink="/admin/products" class="btn btn-outline-pink w-100 rounded-pill py-2 small fw-semibold d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-box-seam"></i>
+                <span>Stoğu Düzenle</span>
+              </a>
+            </div>
+
           </div>
         </div>
       </div>
@@ -247,37 +251,20 @@
                 <th class="ps-4 py-3">Sipariş No</th>
                 <th class="py-3">Müşteri</th>
                 <th class="py-3">Ürünler</th>
-                <th class="py-3">Tutar</th>
-                <th class="pe-4 py-3" style="width: 170px;">Durum</th>
+                <th class="pe-4 py-3 text-end">Tutar</th>
               </tr>
             </thead>
             <tbody>
               @for (order of recentOrders; track order.id) {
                 <tr>
-                  <td class="ps-4 py-3.5 fw-bold text-pink">{{ order.orderNo }}</td>
+                  <td class="ps-4 py-3.5 fw-bold text-pink font-monospace">{{ order.orderNo }}</td>
                   <td class="py-3.5 fw-semibold text-dark">{{ order.customerName }}</td>
                   <td class="py-3.5 text-muted small">{{ order.itemsSummary }}</td>
-                  <td class="py-3.5 fw-bold text-dark">₺{{ order.totalAmount | number:'1.2-2' }}</td>
-                  <td class="pe-4 py-3.5">
-                    
-                    <select class="form-select form-select-sm status-select fw-semibold"
-                            [disabled]="order.isUpdating"
-                            [class.status-delivered]="order.status === 'Teslim Edildi'"
-                            [class.status-shipping]="order.status === 'Kargoda'"
-                            [class.status-preparing]="order.status === 'Hazırlanıyor'"
-                            [class.status-cancelled]="order.status === 'İptal Edildi'"
-                            [ngModel]="order.status"
-                            (ngModelChange)="onStatusChange(order, $event)">
-                      @for (opt of statusOptions; track opt) {
-                        <option [value]="opt">{{ opt }}</option>
-                      }
-                    </select>
-
-                  </td>
+                  <td class="pe-4 py-3.5 fw-bold text-dark text-end">₺{{ order.totalAmount | number:'1.2-2' }}</td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="5" class="text-center py-5 text-muted small">
+                  <td colspan="4" class="text-center py-5 text-muted small">
                     <i class="bi bi-inbox fs-3 d-block mb-1 text-pink opacity-50"></i>
                     Henüz veritabanında sipariş kaydı bulunmuyor.
                   </td>
