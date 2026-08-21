@@ -1,20 +1,16 @@
-<div class="dashboard-wrapper d-flex" [class.sidebar-collapsed]="isSidebarCollapsed">
+<div class="dashboard-wrapper d-flex">
   
-  <!-- SOL YAN MENÜ -->
+  <!-- SOL YAN MENÜ (SABİT & HER ZAMAN AÇIK) -->
   <aside class="sidebar bg-white border-end d-flex flex-column justify-content-between">
     <div>
-      <div class="sidebar-header d-flex align-items-center justify-content-between px-3 py-4 border-bottom position-relative">
-        <div class="brand-info overflow-hidden">
+      <div class="sidebar-header px-4 py-4 border-bottom">
+        <div class="brand-info">
           <h2 class="brand-title mb-0">LUMIÈRE</h2>
           <span class="brand-subtitle text-uppercase">Admin Console</span>
         </div>
-
-        <button type="button" class="btn btn-toggle-sidebar p-1 text-muted" (click)="toggleSidebar()" title="Menüyü Daralt / Genişlet">
-          <i class="bi" [class.bi-text-indent-left]="!isSidebarCollapsed" [class.bi-text-indent-right]="isSidebarCollapsed"></i>
-        </button>
       </div>
 
-      <nav class="sidebar-nav p-2">
+      <nav class="sidebar-nav p-3">
         <ul class="nav flex-column gap-1.5">
           <li class="nav-item">
             <a class="nav-link active d-flex align-items-center gap-3" routerLink="/admin/dashboard">
@@ -23,12 +19,12 @@
             </a>
           </li>
 
-         <li class="nav-item">
-  <a class="nav-link d-flex align-items-center gap-3 text-muted" routerLink="/admin/products">
-    <i class="bi bi-box-seam fs-5"></i>
-    <span class="nav-text">Ürünler / Stok</span>
-  </a>
-</li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" routerLink="/admin/products">
+              <i class="bi bi-box-seam fs-5"></i>
+              <span class="nav-text">Ürünler / Stok</span>
+            </a>
+          </li>
 
           <li class="nav-item">
             <a class="nav-link d-flex align-items-center gap-3 text-muted" href="javascript:void(0)">
@@ -83,31 +79,15 @@
     <header class="topbar bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
       <h5 class="fw-bold mb-0 text-dark">Yönetim Paneli</h5>
 
-      <div class="position-relative">
-        <div class="d-flex align-items-center gap-2 ps-2 cursor-pointer profile-trigger" (click)="toggleProfileMenu()">
-          <div class="admin-avatar rounded-circle">
-            <i class="bi bi-person-fill fs-5"></i>
-          </div>
-          <div class="d-none d-md-block text-start">
-            <h6 class="mb-0 fw-bold text-dark small">{{ adminFullName }}</h6>
-            <span class="text-muted" style="font-size: 0.72rem;">{{ adminRole }}</span>
-          </div>
-          <i class="bi bi-chevron-down small text-muted ms-1"></i>
+      <!-- Statik Yönetici Rozeti -->
+      <div class="d-flex align-items-center gap-2.5 ps-2">
+        <div class="admin-avatar rounded-circle">
+          <i class="bi bi-person-fill fs-5"></i>
         </div>
-
-        @if (isProfileMenuOpen) {
-          <div class="admin-dropdown-menu bg-white rounded-3 shadow-lg border p-2 position-absolute end-0 mt-2">
-            <div class="px-3 py-2 border-bottom">
-              <span class="text-muted small d-block">Yönetici Oturumu</span>
-              <span class="fw-bold text-dark small text-truncate d-block">{{ adminFullName }}</span>
-            </div>
-            <div class="pt-1">
-              <button type="button" (click)="logout()" class="dropdown-item py-2 px-3 small text-danger d-flex align-items-center gap-2 border-0 bg-transparent w-100 text-start rounded-2">
-                <i class="bi bi-box-arrow-right"></i> Oturumu Kapat
-              </button>
-            </div>
-          </div>
-        }
+        <div class="d-none d-md-block text-start">
+          <h6 class="mb-0 fw-bold text-dark small">{{ adminFullName }}</h6>
+          <span class="text-muted" style="font-size: 0.72rem;">{{ adminRole }}</span>
+        </div>
       </div>
     </header>
 

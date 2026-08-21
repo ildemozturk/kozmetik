@@ -34,9 +34,7 @@ export interface NewProductModel {
   styleUrl: './admin-products.css'
 })
 export class AdminProducts implements OnInit {
-  isSidebarCollapsed: boolean = false;
-  isLoading: boolean = false;
-  isProfileMenuOpen: boolean = false;
+  isLoading: boolean = true;
 
   adminFullName: string = '';
   adminRole: string = '';
@@ -82,7 +80,7 @@ export class AdminProducts implements OnInit {
     public authService: AuthService,
     private toastService: ToastService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef // ChangeDetectorRef eklendi
   ) {}
 
   ngOnInit(): void {
@@ -104,17 +102,8 @@ export class AdminProducts implements OnInit {
     }
   }
 
-  toggleSidebar(): void {
-    this.isSidebarCollapsed = !this.isSidebarCollapsed;
-  }
-
-  toggleProfileMenu(): void {
-    this.isProfileMenuOpen = !this.isProfileMenuOpen;
-  }
-
   logout(): void {
     this.authService.logout();
-    this.isProfileMenuOpen = false;
     this.toastService.success('Başarıyla çıkış yapıldı.');
     this.router.navigate(['/login'], { replaceUrl: true });
   }
@@ -147,6 +136,7 @@ export class AdminProducts implements OnInit {
 
   fetchProducts(): void {
     this.isLoading = true;
+    this.cdr.detectChanges();
     const headers = this.getAuthHeaders();
 
     this.http.get<any>(`${this.apiUrl}/Products/all`, { headers }).subscribe({
@@ -187,31 +177,35 @@ export class AdminProducts implements OnInit {
         imageUrl: p.imageUrl || 'assets/images/default-product.png',
         status: status
       };
-    });
+    }).sort((a, b) => a.id - b.id);
 
     this.applyFilters();
     this.isLoading = false;
-    this.cdr.detectChanges();
+    this.cdr.detectChanges(); // Veri geldiğinde arayüzü anında zorunlu render et
   }
 
   setCategory(cat: string): void {
+    if (this.selectedCategory === cat) return;
     this.selectedCategory = cat;
     this.currentPage = 1;
     this.applyFilters();
+    this.cdr.detectChanges();
   }
 
   onStockFilterChange(): void {
     this.currentPage = 1;
     this.applyFilters();
+    this.cdr.detectChanges();
   }
 
   onSearchChange(): void {
     this.currentPage = 1;
     this.applyFilters();
+    this.cdr.detectChanges();
   }
 
   applyFilters(): void {
-    let list = [...this.allProducts];
+    let list = this.allProducts;
 
     if (this.searchQuery.trim()) {
       const query = this.searchQuery.toLowerCase().trim();
@@ -243,13 +237,13 @@ export class AdminProducts implements OnInit {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
     this.pagedProducts = this.filteredProducts.slice(start, end);
-    this.cdr.detectChanges();
   }
 
   setPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
       this.updatePagedProducts();
+      this.cdr.detectChanges();
     }
   }
 
@@ -257,9 +251,14 @@ export class AdminProducts implements OnInit {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
-  // ==========================================
-  // 1. STOK DÜZENLEME
-  // ==========================================
+  trackByProductId(index: number, product: AdminProductItem): number {
+    return product.id;
+  }
+
+  trackByPageNumber(index: number, page: number): number {
+    return page;
+  }
+
   openEditStockModal(product: AdminProductItem): void {
     this.selectedProductForEdit = { ...product };
     this.newStockQuantity = product.stockQuantity;
@@ -277,6 +276,7 @@ export class AdminProducts implements OnInit {
     if (!this.selectedProductForEdit) return;
 
     this.isSavingStock = true;
+    this.cdr.detectChanges();
     const headers = this.getAuthHeaders();
     const productId = this.selectedProductForEdit.id;
 
@@ -290,10 +290,11 @@ export class AdminProducts implements OnInit {
           else target.status = 'Stokta Var';
         }
 
-        this.toastService.success(`${this.selectedProductForEdit!.name} stoğu ${this.newStockQuantity} adet olarak güncellendi.`);
+        this.toastService.success(`${this.selectedProductForEdit!.name} stoğu güncellendi.`);
         this.isSavingStock = false;
         this.closeEditStockModal();
         this.applyFilters();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isSavingStock = false;
@@ -303,9 +304,6 @@ export class AdminProducts implements OnInit {
     });
   }
 
-  // ==========================================
-  // 2. YENİ ÜRÜN EKLEME
-  // ==========================================
   openAddProductModal(): void {
     this.newProduct = {
       name: '',
@@ -326,11 +324,12 @@ export class AdminProducts implements OnInit {
 
   saveNewProduct(): void {
     if (!this.newProduct.name.trim() || !this.newProduct.price || this.newProduct.stockQuantity === null) {
-      this.toastService.error('Lütfen ürün adı, fiyat ve stok adedini eksiksiz doldurunuz.');
+      this.toastService.error('Lütfen zorunlu alanları doldurunuz.');
       return;
     }
 
     this.isSavingNewProduct = true;
+    this.cdr.detectChanges();
     const headers = this.getAuthHeaders();
 
     const payload = {
@@ -358,9 +357,6 @@ export class AdminProducts implements OnInit {
     });
   }
 
-  // ==========================================
-  // 3. ÜRÜN SİLME
-  // ==========================================
   deleteProduct(productId: number, productName: string): void {
     if (!confirm(`"${productName}" ürününü silmek istediğinize emin misiniz?`)) return;
 
@@ -370,9 +366,11 @@ export class AdminProducts implements OnInit {
         this.toastService.success(`"${productName}" başarıyla silindi.`);
         this.allProducts = this.allProducts.filter(p => p.id !== productId);
         this.applyFilters();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.toastService.error('Ürün silinirken bir hata oluştu.');
+        this.cdr.detectChanges();
       }
     });
   }

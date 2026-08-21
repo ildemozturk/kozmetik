@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -47,9 +47,7 @@ export interface DailyChartData {
   styleUrl: './admin-dashboard.css'
 })
 export class AdminDashboard implements OnInit {
-  isSidebarCollapsed: boolean = false;
-  isLoading: boolean = false;
-  isProfileMenuOpen: boolean = false;
+  isLoading: boolean = true;
 
   adminFullName: string = '';
   adminRole: string = '';
@@ -77,7 +75,8 @@ export class AdminDashboard implements OnInit {
     public authService: AuthService,
     private toastService: ToastService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -107,17 +106,8 @@ export class AdminDashboard implements OnInit {
     return this.adminFullName.split(' ')[0];
   }
 
-  toggleSidebar(): void {
-    this.isSidebarCollapsed = !this.isSidebarCollapsed;
-  }
-
-  toggleProfileMenu(): void {
-    this.isProfileMenuOpen = !this.isProfileMenuOpen;
-  }
-
   logout(): void {
     this.authService.logout();
-    this.isProfileMenuOpen = false;
     this.toastService.success('Başarıyla çıkış yapıldı.');
     this.router.navigate(['/login'], { replaceUrl: true });
   }
@@ -133,9 +123,10 @@ export class AdminDashboard implements OnInit {
 
   fetchRealDashboardData(): void {
     this.isLoading = true;
+    this.cdr.detectChanges();
     const headers = this.getAuthHeaders();
 
-    // 1. Tüm Ürünleri Çek (Sayfalama sınırını aşmak için all rotası denenir, yoksa normal rota)
+    // 1. Tüm Ürünleri Çek
     this.http.get<any>(`${this.apiUrl}/Products/all`, { headers }).subscribe({
       next: (prodRes) => {
         const products = this.extractList(prodRes);
@@ -169,41 +160,26 @@ export class AdminDashboard implements OnInit {
         }
 
         this.rawOrdersList = orders;
-        this.calculateAndRender(products, orders, registeredUsersCount);
+        this.ngZone.run(() => {
+          this.calculateAndRender(products, orders, registeredUsersCount);
+        });
       },
       error: () => {
         this.rawOrdersList = [];
-        this.calculateAndRender(products, [], 0);
-      }
-    });
-  }
-
-  onStatusChange(order: RecentOrder, newStatus: string): void {
-    order.isUpdating = true;
-    order.status = newStatus;
-    const headers = this.getAuthHeaders();
-
-    this.http.put(`${this.apiUrl}/Orders/${order.id}/status`, { status: newStatus }, { headers }).subscribe({
-      next: () => {
-        order.isUpdating = false;
-        this.toastService.success(`${order.orderNo} sipariş durumu "${newStatus}" yapıldı.`);
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        order.isUpdating = false;
-        this.toastService.success(`${order.orderNo} sipariş durumu güncellendi.`);
-        this.cdr.detectChanges();
+        this.ngZone.run(() => {
+          this.calculateAndRender(products, [], 0);
+        });
       }
     });
   }
 
   setDaysRange(days: 7 | 14): void {
+    if (this.chartDaysRange === days) return;
     this.chartDaysRange = days;
     this.generateDailyChart(this.rawOrdersList, days);
     this.cdr.detectChanges();
   }
 
-  // Bütün olası stok alanlarını (0, null, string, iç içe obje) çözen metod
   private getProductStock(p: any): number {
     if (!p) return 0;
     if (p.stock !== undefined && p.stock !== null) {
@@ -231,11 +207,11 @@ export class AdminDashboard implements OnInit {
   }
 
   private calculateAndRender(products: any[], orders: any[], registeredUsersCount: number): void {
-    // 1. Stokta Olan Ürün Çeşit Sayısı
+    // 1. Stoktaki Ürün Çeşidi
     const inStock = products.filter(p => this.getProductStock(p) > 0);
     this.summary.inStockVarietyCount = inStock.length;
 
-    // 2. Kritik Stok Listesi (13+ dahil tüm ürünleri tarar, 0 ve düşükler en üstte)
+    // 2. Kritik Stok Listesi
     this.criticalStocks = products
       .map(p => {
         const qty = this.getProductStock(p);
@@ -243,10 +219,14 @@ export class AdminDashboard implements OnInit {
         if (qty === 0) statusText = 'Tükendi';
         else if (qty <= 5) statusText = 'Kritik';
 
+        const categoryName = typeof p.category === 'string'
+          ? p.category
+          : (p.category?.name || p.categoryName || 'Cilt Bakımı');
+
         return {
           id: p.id,
           name: p.name,
-          category: p.category?.name || p.categoryName || 'Cilt Bakımı',
+          category: categoryName,
           stockQuantity: qty,
           status: statusText
         };
@@ -255,7 +235,7 @@ export class AdminDashboard implements OnInit {
       .sort((a, b) => a.stockQuantity - b.stockQuantity)
       .slice(0, 5);
 
-    // 3. Toplam Satış ve Sipariş Sayıları
+    // 3. Toplam Satış ve Siparişler
     let totalSalesSum = 0;
     orders.forEach(o => {
       const amount = Number(o.totalAmount ?? o.totalPrice ?? o.total ?? 0);
@@ -266,7 +246,7 @@ export class AdminDashboard implements OnInit {
     this.summary.totalOrdersCount = orders.length;
     this.summary.activeCustomerCount = registeredUsersCount;
 
-    // 4. Siparişler Tablosu
+    // 4. Son Siparişler Tablosu
     this.recentOrders = orders.map((o, idx) => {
       const items = o.orderItems || o.items || [];
       const itemSummary = items.length > 0
@@ -288,7 +268,7 @@ export class AdminDashboard implements OnInit {
     this.generateDailyChart(orders, this.chartDaysRange);
 
     this.isLoading = false;
-    this.cdr.detectChanges();
+    this.cdr.detectChanges(); // Veri hesaplanıp bittiği an ekrana basmayı zorunlu kıl
   }
 
   private generateDailyChart(orders: any[], daysCount: number): void {
