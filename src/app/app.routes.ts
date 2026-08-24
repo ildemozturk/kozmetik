@@ -14,6 +14,7 @@ import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { AdminDashboard } from './pages/admin/admin-dashboard/admin-dashboard';
 import { AdminProducts } from './pages/admin/admin-products/admin-products';
+import { AdminOrders } from './pages/admin/admin-orders/admin-orders';
 
 // Guards
 import { authGuard } from './guards/auth-guard';
@@ -50,7 +51,9 @@ export const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: AdminDashboard },
       { path: 'products', component: AdminProducts },
-      { path: 'stok', redirectTo: 'products', pathMatch: 'full' }
+      { path: 'stok', redirectTo: 'products', pathMatch: 'full' },
+      { path: 'orders', component: AdminOrders },
+      { path: 'siparisler', redirectTo: 'orders', pathMatch: 'full' }
     ]
   },
 

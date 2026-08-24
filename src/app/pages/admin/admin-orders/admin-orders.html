@@ -1,0 +1,371 @@
+<div class="dashboard-wrapper d-flex">
+
+  <!-- SOL YAN MENÜ -->
+  <aside class="sidebar bg-white border-end d-flex flex-column justify-content-between">
+    <div>
+      <div class="sidebar-header px-4 py-4 border-bottom">
+        <div class="brand-info">
+          <h2 class="brand-title mb-0">LUMIÈRE</h2>
+          <span class="brand-subtitle text-uppercase">Admin Console</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav p-3">
+        <ul class="nav flex-column gap-1.5">
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" routerLink="/admin/dashboard">
+              <i class="bi bi-grid fs-5"></i>
+              <span class="nav-text">Ana Sayfa</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" routerLink="/admin/products">
+              <i class="bi bi-box-seam fs-5"></i>
+              <span class="nav-text">Ürünler / Stok</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link active d-flex align-items-center gap-3" routerLink="/admin/orders">
+              <i class="bi bi-bag fs-5"></i>
+              <span class="nav-text">Siparişler</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" href="javascript:void(0)">
+              <i class="bi bi-people fs-5"></i>
+              <span class="nav-text">Müşteriler</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" href="javascript:void(0)">
+              <i class="bi bi-tags fs-5"></i>
+              <span class="nav-text">Kampanyalar</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" href="javascript:void(0)">
+              <i class="bi bi-graph-up fs-5"></i>
+              <span class="nav-text">Raporlar</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" href="javascript:void(0)">
+              <i class="bi bi-gear fs-5"></i>
+              <span class="nav-text">Ayarlar</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="p-3 border-top sidebar-footer">
+      <button type="button" (click)="logout()" class="btn btn-outline-danger btn-sm w-100 rounded-pill d-flex align-items-center justify-content-center gap-2">
+        <i class="bi bi-box-arrow-right"></i>
+        <span class="nav-text">Çıkış Yap</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- SAĞ İÇERİK ALANI -->
+  <main class="main-content flex-grow-1 bg-light-panel">
+
+    <!-- TOPBAR -->
+    <header class="topbar bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0 text-dark">Sipariş Takibi</h5>
+
+      <div class="d-flex align-items-center gap-3">
+        <div class="topbar-search position-relative">
+          <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+          <input type="text" class="form-control rounded-pill ps-5 pe-3 py-1.5 small border-light-subtle" 
+                 placeholder="Sistemde ara..." [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()">
+        </div>
+
+        <button type="button" class="btn btn-light rounded-circle p-2 border position-relative" title="Bildirimler">
+          <i class="bi bi-bell text-muted"></i>
+          <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+        </button>
+
+        <div class="d-flex align-items-center gap-2.5 ps-2">
+          <div class="admin-avatar rounded-circle">
+            <i class="bi bi-person-fill fs-5"></i>
+          </div>
+          <div class="d-none d-md-block text-start">
+            <h6 class="mb-0 fw-bold text-dark small">{{ adminFullName }}</h6>
+            <span class="text-muted" style="font-size: 0.72rem;">{{ adminRole }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- GÖVDE -->
+    <div class="p-4">
+
+      <div class="mb-4">
+        <h3 class="fw-bold text-dark mb-1">Müşteri Siparişleri Takip Paneli</h3>
+        <p class="text-muted small mb-0">Müşterilerinizin vermiş olduğu siparişlerin kargo ve ödeme süreçlerini yönetin.</p>
+      </div>
+
+      <!-- Durum Filtre Butonları (Pills) -->
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        @for (tab of statusTabs; track tab) {
+          <button type="button" 
+                  class="btn btn-sm rounded-pill px-4 py-1.5 fw-semibold order-filter-pill"
+                  [class.active]="selectedTab === tab"
+                  (click)="setTab(tab)">
+            {{ tab }}
+          </button>
+        }
+      </div>
+
+      <!-- MASTER - DETAIL GRID DÜZENİ -->
+      <div class="row g-4 align-items-start">
+
+        <!-- SOL: SİPARİŞ TABLOSU -->
+        <div [class.col-12]="!selectedOrder" [class.col-lg-7]="selectedOrder" [class.col-xl-8]="selectedOrder" class="transition-all">
+          <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0 orders-master-table">
+                <thead class="table-light-head">
+                  <tr>
+                    <th class="ps-4 py-3.5">Sipariş</th>
+                    <th class="py-3.5">Tarih</th>
+                    <th class="py-3.5">Müşteri Adı</th>
+                    <th class="py-3.5">Ürünler</th>
+                    <th class="py-3.5">Toplam</th>
+                    <th class="pe-4 py-3.5 text-center">Kargo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (isLoading) {
+                    <tr>
+                      <td colspan="6" class="text-center py-5 text-muted small">
+                        <div class="spinner-border spinner-border-sm text-pink mb-2"></div>
+                        <div>Siparişler yükleniyor...</div>
+                      </td>
+                    </tr>
+                  } @else {
+                    @for (order of filteredOrders; track order.id) {
+                      <tr (click)="selectOrder(order)" 
+                          class="order-row cursor-pointer"
+                          [class.active-selected-order]="selectedOrder?.id === order.id">
+                        
+                        <!-- Sipariş No -->
+                        <td class="ps-4 py-3 fw-bold text-pink font-monospace">{{ order.orderNo }}</td>
+
+                        <!-- Tarih -->
+                        <td class="py-3 text-muted small">{{ order.orderDate }}</td>
+
+                        <!-- Müşteri -->
+                        <td class="py-3 fw-semibold text-dark">{{ order.customerName }}</td>
+
+                        <!-- Ürünler -->
+                        <td class="py-3 text-muted small text-truncate" style="max-width: 140px;">{{ order.itemsSummary }}</td>
+
+                        <!-- Toplam Tutar -->
+                        <td class="py-3 fw-bold text-dark">₺{{ order.totalAmount | number:'1.2-2' }}</td>
+
+                        <!-- Kargo / Durum Rozeti -->
+                        <td class="pe-4 py-3 text-center">
+                          <span class="badge rounded-pill px-3 py-1.5 fw-semibold small"
+                                [class.badge-kargo]="order.status === 'Kargoda'"
+                                [class.badge-teslim]="order.status === 'Teslim Edildi'"
+                                [class.badge-hazir]="order.status === 'Hazırlanıyor'"
+                                [class.badge-bekle]="order.status === 'Beklemede'"
+                                [class.badge-iptal]="order.status === 'İptal'">
+                            {{ order.status }}
+                          </span>
+                        </td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="6" class="text-center py-5 text-muted small">
+                          <i class="bi bi-inbox fs-3 text-pink opacity-50 d-block mb-1"></i>
+                          Kriterlere uygun sipariş bulunamadı.
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAĞ: SİPARİŞ DETAY VE KARGO TAKİP KARTI -->
+        @if (selectedOrder) {
+          <div class="col-12 col-lg-5 col-xl-4 animate-fade-in">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 90px; z-index: 10;">
+
+              <div class="d-flex justify-content-between align-items-start pb-3 border-bottom mb-3">
+                <div>
+                  <h6 class="fw-bold text-dark mb-0">Sipariş Detayı ({{ selectedOrder.orderNo }})</h6>
+                  <span class="text-muted small">Müşteri: <strong>{{ selectedOrder.customerName }}</strong></span>
+                </div>
+                <button type="button" class="btn-close small" (click)="closeDetail()" title="Kapat"></button>
+              </div>
+
+              <!-- KARGO TAKİP TIMELINE -->
+              <div class="mb-4">
+                <span class="text-uppercase text-muted fw-bold tracking-wider mb-3 d-block" style="font-size: 0.72rem;">KARGO TAKİP SÜRECİ</span>
+
+                <div class="timeline-wrapper d-flex flex-column gap-3 ps-2 position-relative">
+                  
+                  <!-- Adım 1: Kargoda -->
+                  <div class="timeline-step d-flex gap-3 align-items-start" 
+                       [class.step-active]="selectedOrder.status === 'Kargoda' || selectedOrder.status === 'Teslim Edildi'">
+                    <div class="timeline-dot rounded-circle"></div>
+                    <div>
+                      <h6 class="mb-0 fw-bold small text-dark">Kargoya Verildi</h6>
+                      <span class="text-muted" style="font-size: 0.72rem;">Bugün, 11:30 | Takip: #{{ selectedOrder.trackingNumber }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Adım 2: Paketlendi -->
+                  <div class="timeline-step d-flex gap-3 align-items-start" 
+                       [class.step-active]="selectedOrder.status !== 'İptal' && selectedOrder.status !== 'Beklemede'">
+                    <div class="timeline-dot rounded-circle"></div>
+                    <div>
+                      <h6 class="mb-0 fw-bold small text-dark">Fatura Kesildi & Paketlendi</h6>
+                      <span class="text-muted" style="font-size: 0.72rem;">Dün, 16:40</span>
+                    </div>
+                  </div>
+
+                  <!-- Adım 3: Sipariş Alındı -->
+                  <div class="timeline-step d-flex gap-3 align-items-start step-active">
+                    <div class="timeline-dot rounded-circle"></div>
+                    <div>
+                      <h6 class="mb-0 fw-bold small text-dark">Sipariş Alındı</h6>
+                      <span class="text-muted" style="font-size: 0.72rem;">{{ selectedOrder.orderDate }}</span>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- FİYAT HESAPLAMA DETAYI -->
+              <div class="border-top pt-3 mb-4">
+                <div class="d-flex justify-content-between text-muted small mb-1.5">
+                  <span>Ara Toplam</span>
+                  <span class="fw-semibold text-dark">₺{{ selectedOrder.subTotal | number:'1.2-2' }}</span>
+                </div>
+                <div class="d-flex justify-content-between text-muted small mb-2">
+                  <span>Kargo Ücreti</span>
+                  <span class="text-success fw-semibold">{{ selectedOrder.shippingFee === 0 ? 'Ücretsiz' : '₺' + selectedOrder.shippingFee }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                  <span class="fw-bold text-dark">Genel Toplam</span>
+                  <span class="fw-bold text-dark fs-5">₺{{ selectedOrder.totalAmount | number:'1.2-2' }}</span>
+                </div>
+              </div>
+
+              <!-- AKSİYON BUTONLARI -->
+              <div class="d-flex flex-column gap-2">
+                <button type="button" 
+                        class="btn btn-pink-nude rounded-3 py-2 fw-semibold small d-flex align-items-center justify-content-center gap-2 shadow-xs"
+                        (click)="openStatusModal()">
+                  <i class="bi bi-truck"></i> Kargoyu Güncelle
+                </button>
+
+                @if (selectedOrder.status !== 'İptal') {
+                  <button type="button" 
+                          class="btn btn-outline-light-cancel rounded-3 py-2 fw-semibold small text-muted border"
+                          (click)="openCancelModal()">
+                    Siparişi İptal Et
+                  </button>
+                } @else {
+                  <div class="text-center py-1.5 bg-danger-subtle text-danger rounded-3 fw-semibold small">
+                    Bu sipariş iptal edilmiştir.
+                  </div>
+                }
+              </div>
+
+            </div>
+          </div>
+        }
+
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- 1. KARGO & DURUM DÜZENLEME MODALI -->
+@if (isStatusModalOpen && selectedOrder) {
+  <div class="custom-modal-backdrop d-flex align-items-center justify-content-center" (click)="closeStatusModal()">
+    <div class="custom-modal-content bg-white rounded-4 shadow-lg p-4" (click)="$event.stopPropagation()" style="max-width: 420px; width: 92%;">
+
+      <div class="d-flex justify-content-between align-items-center pb-2.5 border-bottom mb-3">
+        <h6 class="fw-bold text-dark mb-0">Sipariş Durumunu Değiştir</h6>
+        <button type="button" class="btn-close" (click)="closeStatusModal()"></button>
+      </div>
+
+      <div class="d-flex flex-column gap-3 mb-4">
+        <div>
+          <label class="form-label small fw-semibold text-dark mb-1">Durum Seçin</label>
+          <select class="form-select form-select-sm rounded-3" [(ngModel)]="statusToUpdate">
+            <option value="Beklemede">Beklemede</option>
+            <option value="Hazırlanıyor">Hazırlanıyor</option>
+            <option value="Kargoda">Kargoda</option>
+            <option value="Teslim Edildi">Teslim Edildi</option>
+            <option value="İptal">İptal</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="form-label small fw-semibold text-dark mb-1">Kargo Takip No</label>
+          <input type="text" class="form-control form-control-sm rounded-3" placeholder="Örn: YURTICI983274291" [(ngModel)]="trackingNoInput">
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+        <button type="button" class="btn btn-sm btn-light rounded-pill px-3 py-1.5 fw-semibold" (click)="closeStatusModal()">Vazgeç</button>
+        <button type="button" class="btn btn-sm btn-pink rounded-pill px-4 py-1.5 text-white fw-semibold" [disabled]="isUpdatingStatus" (click)="updateOrderStatus()">
+          @if (isUpdatingStatus) {
+            <span class="spinner-border spinner-border-sm me-1"></span> Güncelleniyor...
+          } @else {
+            Kaydet
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- 2. SİPARİŞ İPTAL ONAY MODALI -->
+@if (isCancelModalOpen && selectedOrder) {
+  <div class="custom-modal-backdrop d-flex align-items-center justify-content-center" (click)="closeCancelModal()">
+    <div class="custom-modal-content bg-white rounded-4 shadow-lg p-4 text-center" (click)="$event.stopPropagation()" style="max-width: 390px; width: 92%;">
+      
+      <div class="mx-auto mb-3 p-3 rounded-circle bg-danger-subtle text-danger d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+        <i class="bi bi-exclamation-triangle fs-4"></i>
+      </div>
+
+      <h6 class="fw-bold text-dark mb-2">Siparişi İptal Et</h6>
+      <p class="text-muted small mb-4">
+        <strong>{{ selectedOrder.orderNo }}</strong> numaralı siparişi iptal etmek istediğinize emin misiniz? Bu işlem geri alınamaz.
+      </p>
+
+      <div class="d-flex justify-content-center gap-2">
+        <button type="button" class="btn btn-sm btn-light rounded-pill px-3.5 py-2 fw-semibold" (click)="closeCancelModal()">
+          Vazgeç
+        </button>
+        <button type="button" class="btn btn-sm btn-danger rounded-pill px-4 py-2 fw-semibold text-white" [disabled]="isCancelling" (click)="confirmCancelOrder()">
+          @if (isCancelling) {
+            <span class="spinner-border spinner-border-sm me-1"></span> İptal Ediliyor...
+          } @else {
+            Evet, İptal Et
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
