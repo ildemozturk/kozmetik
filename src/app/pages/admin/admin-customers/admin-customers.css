@@ -1,0 +1,270 @@
+/* ==========================================================================
+   LUMIÈRE ADMIN - GENEL YERLEŞİM (LAYOUT)
+   ========================================================================== */
+.dashboard-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #fafbfc;
+}
+
+/* ==========================================================================
+   SOL YAN MENÜ (SIDEBAR) - TAMAMEN SABİT (260px)
+   ========================================================================== */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  max-width: 260px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* LOGO & MARKA */
+.brand-title {
+  color: #c9667e !important;
+  font-weight: 700 !important;
+  font-size: 1.35rem !important;
+  letter-spacing: 2px !important;
+  line-height: 1.1 !important;
+}
+
+.brand-subtitle {
+  font-size: 0.68rem !important;
+  color: #a1a1aa !important;
+  letter-spacing: 1.5px !important;
+  font-weight: 600 !important;
+  display: block;
+}
+
+/* MENÜ LİNKLERİ */
+.sidebar-nav .nav-link {
+  color: #71717a;
+  border-radius: 0.65rem;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.sidebar-nav .nav-link:hover {
+  background-color: #fdf2f4;
+  color: #c9667e;
+}
+
+.sidebar-nav .nav-link.active {
+  background-color: #fce7ec !important;
+  color: #c9667e !important;
+  font-weight: 600 !important;
+}
+
+/* SAĞ İÇERİK ALANI & TOPBAR */
+.main-content {
+  min-width: 0;
+  flex: 1 1 0%;
+  background-color: #fafbfc;
+  min-height: 100vh;
+}
+
+.topbar {
+  height: 72px;
+  background-color: #ffffff;
+}
+
+.admin-avatar {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  background-color: #fce7ec;
+  color: #c9667e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* RENKLER VE BUTONLAR */
+.text-pink {
+  color: #c9667e !important;
+}
+
+.bg-pink-soft {
+  background-color: #fce7ec !important;
+}
+
+.bg-pink {
+  background-color: #c9667e !important;
+}
+
+.btn-pink {
+  background-color: #c9667e;
+  border: none;
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.btn-pink:hover {
+  background-color: #b5566d;
+  color: #ffffff;
+}
+
+.btn-outline-pink {
+  border: 1px solid #c9667e;
+  color: #c9667e;
+  background-color: transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-pink:hover {
+  background-color: #c9667e;
+  color: #ffffff;
+}
+
+/* ARAMA VE KATEGORİ FİLTRELERİ */
+.search-input-box {
+  width: 250px;
+}
+
+.search-input-box input {
+  font-size: 0.85rem;
+}
+
+.category-pill-btn {
+  background-color: #ffffff;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.category-pill-btn.active {
+  background-color: #fce7ec !important;
+  color: #c9667e !important;
+  border-color: #c9667e !important;
+}
+
+.category-pill-btn:hover:not(.active) {
+  background-color: #f1f5f9;
+}
+
+.stock-select {
+  width: 210px;
+}
+
+/* TABLO */
+.table-responsive {
+  min-height: 400px;
+}
+
+.table-light-head tr th {
+  background-color: #ffffff;
+  color: #71717a;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-bottom: 1px solid #f4f4f5;
+}
+
+.stock-table tbody tr {
+  height: 58px;
+  border-bottom: 1px solid #fafafa;
+}
+
+.product-avatar-box {
+  width: 44px;
+  height: 44px;
+}
+
+.product-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.status-in-stock {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+
+.status-critical {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.status-out {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.btn-action-edit {
+  width: 32px;
+  height: 32px;
+  background-color: #fce7ec;
+  color: #c9667e;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-action-edit:hover {
+  background-color: #c9667e;
+  color: #ffffff;
+}
+
+.btn-action-delete {
+  width: 32px;
+  height: 32px;
+  background-color: #fee2e2;
+  color: #ef4444;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-action-delete:hover {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.page-link {
+  width: 32px;
+  height: 32px;
+  color: #64748b;
+  background-color: transparent;
+  font-weight: 600;
+  font-size: 0.82rem;
+  transition: all 0.15s ease;
+}
+
+.page-item.active .page-link {
+  background-color: #c9667e !important;
+  color: #ffffff !important;
+}
+
+.page-link:hover:not(.active) {
+  background-color: #fce7ec;
+  color: #c9667e;
+}
+
+/* MODAL */
+.custom-modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(15, 23, 42, 0.5) !important;
+  backdrop-filter: blur(3px);
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.custom-modal-content {
+  position: relative !important;
+  background: #ffffff !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  z-index: 100000 !important;
+}

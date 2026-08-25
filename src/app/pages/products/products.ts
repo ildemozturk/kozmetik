@@ -69,29 +69,28 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   loadCategories(): void {
-    this.productService.getCategories().subscribe(res => {
+    this.productService.getCategories().subscribe((res: string[]) => {
       this.categories = res;
       this.cdr.detectChanges();
     });
   }
 
   loadProducts(): void {
-    // Backend'e tüm filtre parametrelerini geçiyoruz (Filtreleme SQL düzeyinde yapılıyor)
     this.productService.getProducts(
       this.selectedCategory, 
       this.currentPage, 
       this.pageSize, 
       this.selectedSort, 
       this.selectedStockFilter
-    ).subscribe(res => {
-      const fetched = res.data;
+    ).subscribe((res: any) => {
+      const fetched: Product[] = res.data || (Array.isArray(res) ? res : []);
 
-      this.products = fetched.map(p => ({
+      this.products = fetched.map((p: Product) => ({
         ...p,
         isFavorite: this.wishlistService.isFavorite(p.id)
       }));
 
-      this.totalPages = res.totalPages;
+      this.totalPages = res.totalPages || 1;
       this.pagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
       this.cdr.detectChanges();
 

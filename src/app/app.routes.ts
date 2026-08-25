@@ -14,7 +14,6 @@ import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { AdminDashboard } from './pages/admin/admin-dashboard/admin-dashboard';
 import { AdminProducts } from './pages/admin/admin-products/admin-products';
-import { AdminOrders } from './pages/admin/admin-orders/admin-orders';
 
 // Guards
 import { authGuard } from './guards/auth-guard';
@@ -43,7 +42,7 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'kayit', redirectTo: 'register', pathMatch: 'full' },
 
-  // Admin Paneli Rotaları
+  // Admin Paneli Rotaları (Siparişler kaldırıldı)
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
@@ -52,8 +51,9 @@ export const routes: Routes = [
       { path: 'dashboard', component: AdminDashboard },
       { path: 'products', component: AdminProducts },
       { path: 'stok', redirectTo: 'products', pathMatch: 'full' },
-      { path: 'orders', component: AdminOrders },
-      { path: 'siparisler', redirectTo: 'orders', pathMatch: 'full' }
+      // Siparişler rotası kasten dashboard'a yönlendirildi
+      { path: 'orders', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'siparisler', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
 

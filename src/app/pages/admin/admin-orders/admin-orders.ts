@@ -222,10 +222,12 @@ export class AdminOrders implements OnInit {
 
   selectOrder(order: AdminOrderItem): void {
     this.selectedOrder = order;
+    this.cdr.detectChanges();
   }
 
   closeDetail(): void {
     this.selectedOrder = null;
+    this.cdr.detectChanges();
   }
 
   // ==========================================
@@ -236,10 +238,12 @@ export class AdminOrders implements OnInit {
     this.statusToUpdate = this.selectedOrder.status;
     this.trackingNoInput = this.selectedOrder.trackingNumber || '';
     this.isStatusModalOpen = true;
+    this.cdr.detectChanges();
   }
 
   closeStatusModal(): void {
     this.isStatusModalOpen = false;
+    this.cdr.detectChanges();
   }
 
   updateOrderStatus(newStatus?: string): void {
@@ -247,6 +251,7 @@ export class AdminOrders implements OnInit {
 
     const targetStatus = newStatus || this.statusToUpdate;
     this.isUpdatingStatus = true;
+    this.cdr.detectChanges();
     const headers = this.getAuthHeaders();
     const orderId = this.selectedOrder.id;
 
@@ -291,16 +296,19 @@ export class AdminOrders implements OnInit {
   openCancelModal(): void {
     if (!this.selectedOrder) return;
     this.isCancelModalOpen = true;
+    this.cdr.detectChanges();
   }
 
   closeCancelModal(): void {
     this.isCancelModalOpen = false;
+    this.cdr.detectChanges();
   }
 
   confirmCancelOrder(): void {
     if (!this.selectedOrder) return;
 
     this.isCancelling = true;
+    this.cdr.detectChanges();
     const orderId = this.selectedOrder.id;
     const orderNo = this.selectedOrder.orderNo;
     const headers = this.getAuthHeaders();
@@ -315,7 +323,7 @@ export class AdminOrders implements OnInit {
     });
   }
 
- private finalizeCancel(orderId: number, orderNo: string): void {
+  private finalizeCancel(orderId: number, orderNo: string): void {
     if (this.selectedOrder) {
       this.selectedOrder.status = 'İptal';
     }
@@ -330,4 +338,5 @@ export class AdminOrders implements OnInit {
     this.toastService.success(`${orderNo} numaralı sipariş başarıyla iptal edildi.`);
     this.applyFilters();
     this.cdr.detectChanges();
-  }}
+  }
+}
