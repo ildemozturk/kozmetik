@@ -185,3 +185,28 @@
 .product-card-horizontal {
   overflow: visible !important;
 }
+/* Alt Fiyat ve Sepet Buton Alanını Sabitleme */
+.product-card-horizontal .card-bottom-row {
+  min-height: 44px;
+}
+
+/* Sepete Ekle Butonu ve Miktar Sayacını Birebir Eşitleme */
+.product-card-horizontal .btn-add-to-cart,
+.product-card-horizontal .quantity-counter-btn {
+  width: 92px !important;
+  min-width: 92px !important;
+  max-width: 92px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+  font-size: 0.82rem !important;
+}
+
+.product-card-horizontal .quantity-counter-btn {
+  justify-content: space-between !important;
+}

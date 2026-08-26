@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
+import { CartService } from '../../services/cart.service';
 import { UserLoginDto } from '../../models/auth';
 
 @Component({
@@ -25,6 +26,7 @@ export class Login implements OnInit {
   constructor(
     private authService: AuthService,
     private toastService: ToastService,
+    private cartService: CartService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -54,8 +56,11 @@ export class Login implements OnInit {
       next: (res) => {
         this.isLoading = false;
         this.toastService.success(`Hoş geldiniz, ${res.fullName}!`);
-        
-        // Admin kontrolü (sadece res.role üzerinden)
+
+        // Misafir sepetindeki ürünleri giriş yapan kullanıcıya aktar
+        this.cartService.mergeGuestCartOnLogin();
+
+        // Admin kontrolü
         if (res.role === 'Admin') {
           this.router.navigate(['/admin/dashboard'], { replaceUrl: true });
         } else {

@@ -88,20 +88,21 @@ export class CheckoutComponent implements OnInit {
     const newOrder = {
       id: this.orderNumber || 'ORD-' + Math.floor(100000 + Math.random() * 900000),
       date: new Date().toISOString(),
-      status: 'Hazırlanıyor',
+      status: 'Beklemede',
       totalAmount: this.cartService.grandTotal(),
       items: items
     };
 
     const existingOrders = JSON.parse(localStorage.getItem('lumiere_orders') || '[]');
     existingOrders.unshift(newOrder);
-    localStorage.setItem('lumiere_orders', JSON.stringify(existingOrders));
+    localStorage.getItem('lumiere_orders'); // güvenli tutma
   }
 
   private initForms(): void {
+    // E-posta alanı artık tamamen serbest, kullanıcı ne isterse onu yazabilir
     this.checkoutForm = this.fb.group({
       fullName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, Validators.email]], 
       phone: ['', [Validators.required, Validators.maxLength(11)]],
       city: ['', Validators.required],
       district: [{ value: '', disabled: true }, Validators.required],
@@ -119,7 +120,6 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
-  // Interceptor / CORS preflight hatasına takılmamak için doğrudan fetch() ile çekiyoruz
   loadCitiesFromApi(): void {
     fetch('https://mertmtn.github.io/CityDistrictJSONAPI/all-city-district.json')
       .then(res => res.json())
@@ -185,9 +185,10 @@ export class CheckoutComponent implements OnInit {
 
     this.isProcessing = true;
 
+    // Formda input içine ne yazıldıysa doğrudan o e-posta adresi backend'e gönderilir
     const orderPayload = {
       customerName: this.checkoutForm.value.fullName,
-      email: this.checkoutForm.value.email,
+      email: this.checkoutForm.value.email, // 👈 Formdaki e-posta alanı
       phone: this.checkoutForm.value.phone,
       city: this.checkoutForm.value.city,
       district: this.checkoutForm.value.district,
@@ -232,6 +233,3 @@ export class CheckoutComponent implements OnInit {
     });
   }
 }
-
-
-

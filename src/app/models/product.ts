@@ -1,6 +1,7 @@
 export interface Stock {
   id: number;
   quantity: number;
+  lastUpdated?: string;
 }
 
 export interface Product {
@@ -11,8 +12,11 @@ export interface Product {
   oldPrice?: number | null;
   imageUrl: string;
   description: string;
+  sku?: string;
   isFavorite?: boolean;
-  stock?: Stock | null; // Obje olarak tanımladık
+  stock?: Stock | null;
+  stockQuantity?: number; // Bunu ekleyin
+  status?: 'Stokta Var' | 'Kritik' | 'Tükendi';
 }
 
 export interface ProductResponse {

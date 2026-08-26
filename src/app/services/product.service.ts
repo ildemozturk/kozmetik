@@ -28,7 +28,7 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
-  // 1. Kategorileri Getirme (Önbellekli)
+  // 1. Kategorileri Getirme
   getCategories(): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiUrl}/categories`);
   }
@@ -39,7 +39,7 @@ export class ProductService {
       return of(this.cachedProducts);
     }
 
-    return this.http.get<any>(this.apiUrl).pipe(
+    return this.http.get<any>(`${this.apiUrl}/all`).pipe(
       map(res => {
         const list: any[] = res.data || res.products || (Array.isArray(res) ? res : []);
         return list.map((p: any): Product => ({
@@ -62,16 +62,16 @@ export class ProductService {
     );
   }
 
-  // 3. Sayfalamalı / Filtreli Ürün Listesi
-  getProducts(category?: string, page: number = 1, pageSize: number = 10, sort: string = 'default', stockFilter: string = 'all'): Observable<any> {
+  // 3. Sayfalamalı / Filtreli Ürün Listesi (Parametre ismi 'stock' olarak düzeltildi)
+  getProducts(category?: string, page: number = 1, pageSize: number = 12, sort: string = 'default', stockFilter: string = 'all'): Observable<any> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString())
-      .set('sort', sort)
-      .set('stockFilter', stockFilter);
+      .set('sort', sort || 'default')
+      .set('stock', stockFilter || 'all'); // Backend [FromQuery] string? stock bekliyor!
 
-    if (category && category !== 'Tümü' && category !== 'all') {
-      params = params.set('category', category);
+    if (category && category !== 'Tümü' && category !== 'all' && category.trim() !== '') {
+      params = params.set('category', category.trim());
     }
 
     return this.http.get<any>(this.apiUrl, { params }).pipe(
@@ -87,7 +87,7 @@ export class ProductService {
             category: p.category || 'Genel',
             sku: p.sku || `LUM-${p.id}`,
             stockQuantity: p.stockQuantity ?? (p.stock?.quantity ?? 0),
-            status: (p.stockQuantity ?? (p.stock?.quantity ?? 0)) === 0 ? 'Tükendi' : ((p.stockQuantity ?? (p.stock?.quantity ?? 0)) <= 12 ? 'Kritik' : 'Stokta Var')
+            status: (p.stockQuantity ?? (p.stock?.quantity ?? 0)) <= 0 ? 'Tükendi' : ((p.stockQuantity ?? (p.stock?.quantity ?? 0)) <= 12 ? 'Kritik' : 'Stokta Var')
           }));
         }
         return res;
@@ -97,7 +97,7 @@ export class ProductService {
 
   // 4. Çok Satanlar
   getBestSellers(count: number = 4): Observable<Product[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/bestsellers?count=${count}`).pipe(
+    return this.http.get<any[]>(`${this.apiUrl}/best-sellers?count=${count}`).pipe(
       map(list => list.map((p: any): Product => ({
         id: p.id,
         name: p.name,
@@ -108,7 +108,7 @@ export class ProductService {
         category: p.category || 'Genel',
         sku: p.sku || `LUM-${p.id}`,
         stockQuantity: p.stockQuantity ?? (p.stock?.quantity ?? 0),
-        status: (p.stockQuantity ?? (p.stock?.quantity ?? 0)) === 0 ? 'Tükendi' : ((p.stockQuantity ?? (p.stock?.quantity ?? 0)) <= 12 ? 'Kritik' : 'Stokta Var')
+        status: (p.stockQuantity ?? (p.stock?.quantity ?? 0)) <= 0 ? 'Tükendi' : ((p.stockQuantity ?? (p.stock?.quantity ?? 0)) <= 12 ? 'Kritik' : 'Stokta Var')
       })))
     );
   }
@@ -126,14 +126,14 @@ export class ProductService {
         category: p.category || 'Genel',
         sku: p.sku || `LUM-${p.id}`,
         stockQuantity: p.stockQuantity ?? (p.stock?.quantity ?? 0),
-        status: (p.stockQuantity ?? (p.stock?.quantity ?? 0)) === 0 ? 'Tükendi' : ((p.stockQuantity ?? (p.stock?.quantity ?? 0)) <= 12 ? 'Kritik' : 'Stokta Var')
+        status: (p.stockQuantity ?? (p.stock?.quantity ?? 0)) <= 0 ? 'Tükendi' : ((p.stockQuantity ?? (p.stock?.quantity ?? 0)) <= 12 ? 'Kritik' : 'Stokta Var')
       }))
     );
   }
 
-  // 6. Gelince Haber Ver (Stok Bildirimi)
+  // 6. Gelince Haber Ver
   subscribeStockNotification(productId: number, email: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${productId}/notify`, { email });
+    return this.http.post<any>(`${this.apiUrl}/${productId}/subscribe-notification`, { email });
   }
 
   // 7. Cache Üzerinden Arama ve Filtreleme
@@ -145,12 +145,12 @@ export class ProductService {
             p.name.toLowerCase().includes(query.toLowerCase().trim()) ||
             (p.sku && p.sku.toLowerCase().includes(query.toLowerCase().trim()));
 
-          const matchesCategory = category === 'Tümü' || p.category.toLowerCase() === category.toLowerCase();
+          const matchesCategory = !category || category === 'Tümü' || category === 'all' || p.category.toLowerCase() === category.toLowerCase();
 
           let matchesStock = true;
-          if (stockFilter === 'inStock') matchesStock = p.stockQuantity > 12;
+          if (stockFilter === 'in-stock' || stockFilter === 'inStock') matchesStock = p.stockQuantity > 0;
           else if (stockFilter === 'critical') matchesStock = p.stockQuantity > 0 && p.stockQuantity <= 12;
-          else if (stockFilter === 'outOfStock') matchesStock = p.stockQuantity === 0;
+          else if (stockFilter === 'out-of-stock' || stockFilter === 'outOfStock') matchesStock = p.stockQuantity <= 0;
 
           return matchesQuery && matchesCategory && matchesStock;
         });
@@ -158,7 +158,6 @@ export class ProductService {
     );
   }
 
-  // 8. Cache Temizleme
   invalidateCache(): void {
     this.cachedProducts = null;
   }

@@ -120,7 +120,30 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   loadFeaturedProducts(): void {
     this.productService.getProducts('', 1, 30).subscribe(res => {
-      const allProducts: Product[] = res.data;
+      const rawProducts: any[] = res.data || (Array.isArray(res) ? res : []);
+
+      const allProducts: Product[] = rawProducts.map((p: any) => {
+        const qty = Number(
+          p.stockQuantity !== undefined ? p.stockQuantity :
+          (p.stock?.quantity !== undefined ? p.stock.quantity : 50)
+        );
+
+        return {
+          id: p.id,
+          name: p.name,
+          category: p.category,
+          price: Number(p.price),
+          oldPrice: p.oldPrice ? Number(p.oldPrice) : null,
+          imageUrl: p.imageUrl,
+          description: p.description || '',
+          sku: p.sku || `LUM-${p.id}`,
+          stockQuantity: qty,
+          stock: {
+            id: p.stock?.id || p.id,
+            quantity: qty
+          }
+        } as Product;
+      });
 
       this.bestSellers = allProducts.slice(0, 8);
       this.discountedProducts = allProducts.filter((p: Product) => this.isDiscounted(p));
@@ -162,7 +185,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   isOutOfStock(product: Product): boolean {
-    return !product.stock || product.stock.quantity <= 0;
+    const qty = product.stockQuantity ?? product.stock?.quantity ?? 50;
+    return qty <= 0;
   }
 
   scroll(containerType: 'bestSellers' | 'discount', direction: 'left' | 'right'): void {
@@ -179,18 +203,22 @@ export class HomeComponent implements OnInit, OnDestroy {
   toggleFavorite(product: Product & { isFavorite?: boolean }, event: Event): void {
     event.stopPropagation();
     this.wishlistService.toggleWishlist(product);
+    product.isFavorite = this.wishlistService.isFavorite(product.id);
+    this.cdr.detectChanges();
   }
 
   addToCart(product: Product, event: Event): void {
     event.stopPropagation();
     if (this.isOutOfStock(product)) return;
     this.cartService.addToCart(product);
+    this.cdr.detectChanges();
   }
 
   decreaseCartQuantity(product: Product, event: Event): void {
     event.stopPropagation();
     const currentQty = this.cartService.getItemQuantity(product.id);
     this.cartService.updateQuantity(product.id, currentQty - 1);
+    this.cdr.detectChanges();
   }
 
   // MODAL KONTROLLERİ

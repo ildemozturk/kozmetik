@@ -87,6 +87,43 @@ export class CartService {
     }
   }
 
+  // Login olunca misafir sepetini kullanıcının sepetiyle birleştirir
+  mergeGuestCartOnLogin(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    const guestKey = 'lumiere_cart_guest';
+    const guestCartStr = localStorage.getItem(guestKey);
+
+    if (!guestCartStr) {
+      this.loadUserCart();
+      return;
+    }
+
+    try {
+      const guestItems: CartItem[] = JSON.parse(guestCartStr);
+      const userKey = this.getStorageKey();
+      const userCartStr = localStorage.getItem(userKey);
+      let userItems: CartItem[] = userCartStr ? JSON.parse(userCartStr) : [];
+
+      guestItems.forEach(guestItem => {
+        const existing = userItems.find(i => i.product.id === guestItem.product.id);
+        if (existing) {
+          existing.quantity += guestItem.quantity;
+        } else {
+          userItems.push(guestItem);
+        }
+      });
+
+      // Kullanıcının sepetine kaydet ve misafir sepetini sil
+      localStorage.setItem(userKey, JSON.stringify(userItems));
+      localStorage.removeItem(guestKey);
+
+      this.cartItems.set(userItems);
+    } catch (e) {
+      this.loadUserCart();
+    }
+  }
+
   private saveCart(items: CartItem[]): void {
     this.cartItems.set(items);
     if (isPlatformBrowser(this.platformId)) {
@@ -149,7 +186,6 @@ export class CartService {
     this.showToast('Ürün sepetten çıkarıldı.');
   }
 
-  // Sepeti temizleme metodu (Hem butonla manuel temizlemede hem sipariş tamamlandığında çalışır)
   clearCart(showNotification: boolean = false): void {
     this.saveCart([]);
     if (showNotification) {
@@ -157,12 +193,10 @@ export class CartService {
     }
   }
 
-  // Geriye dönük uyumluluk
   clearCartAfterOrder(): void {
     this.clearCart(false);
   }
 
-  // Çıkış yapıldığında sadece ekrandaki state'i boşaltır (LocalStorage'daki kullanıcı sepetine dokunmaz)
   resetCartStateOnLogout(): void {
     this.cartItems.set([]);
   }

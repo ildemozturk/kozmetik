@@ -135,3 +135,27 @@
   color: #d87093;
   font-weight: 600;
 }
+/* Ürün Kataloğu Alt Fiyat ve Buton Sabitleme */
+.product-card .card-bottom-row {
+  min-height: 44px;
+}
+
+.product-card .btn-add-to-cart,
+.product-card .quantity-counter-btn {
+  width: 92px !important;
+  min-width: 92px !important;
+  max-width: 92px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+  font-size: 0.82rem !important;
+}
+
+.product-card .quantity-counter-btn {
+  justify-content: space-between !important;
+}

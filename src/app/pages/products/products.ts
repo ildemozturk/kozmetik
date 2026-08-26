@@ -83,12 +83,33 @@ export class ProductsComponent implements OnInit, OnDestroy {
       this.selectedSort, 
       this.selectedStockFilter
     ).subscribe((res: any) => {
-      const fetched: Product[] = res.data || (Array.isArray(res) ? res : []);
+      const fetched: any[] = res.data || (Array.isArray(res) ? res : []);
 
-      this.products = fetched.map((p: Product) => ({
-        ...p,
-        isFavorite: this.wishlistService.isFavorite(p.id)
-      }));
+      this.products = fetched.map((p: any) => {
+        const qty = Number(
+          p.stockQuantity !== undefined ? p.stockQuantity :
+          (p.stock?.quantity !== undefined ? p.stock.quantity : 0)
+        );
+
+        return {
+          id: p.id,
+          name: p.name,
+          price: Number(p.price),
+          oldPrice: p.oldPrice ? Number(p.oldPrice) : undefined,
+          imageUrl: p.imageUrl,
+          category: p.category,
+          description: p.description || '',
+          stockQuantity: qty,
+          // HTML'in beklediği stock nesnesi eksiksiz oluşturuluyor:
+          stock: {
+            id: p.stock?.id || p.id,
+            quantity: qty,
+            lastUpdated: p.stock?.lastUpdated || new Date().toISOString()
+          },
+          status: qty <= 0 ? 'Tükendi' : (qty <= 12 ? 'Kritik' : 'Stokta Var'),
+          isFavorite: this.wishlistService.isFavorite(p.id)
+        } as (Product & { isFavorite?: boolean });
+      });
 
       this.totalPages = res.totalPages || 1;
       this.pagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
@@ -171,6 +192,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   addToCart(product: Product, event: Event): void {
     event.stopPropagation();
+    const currentStock = (product.stockQuantity ?? product.stock?.quantity ?? 0);
+    if (currentStock <= 0) return;
     this.cartService.addToCart(product);
     this.cdr.detectChanges();
   }

@@ -31,18 +31,15 @@ export class AdminProducts implements OnInit {
   adminFullName: string = 'Derin Aydın';
   adminRole: string = 'Yönetici';
 
-  // ========================================================
-  // CACHE ALANI (Tüm ürünler burada RAM'de tutulur)
-  // ========================================================
+  // Cache Alanı (RAM)
   private cachedProducts: AdminProduct[] = [];
   
-  // Ekranda filtrelenmiş ve sayfalanmış gösterilecek listeler
   filteredProducts: AdminProduct[] = [];
   pagedProducts: AdminProduct[] = [];
 
-  // Filtreler & Arama
-  categories: string[] = ['Tümü', 'Serum', 'Krem', 'Temizleyici', 'Göz Bakımı', 'Güneş Koruması', 'Maske & Peeling'];
-  formCategories: string[] = ['Serum', 'Krem', 'Temizleyici', 'Göz Bakımı', 'Güneş Koruması', 'Maske & Peeling'];
+  // Kategoriler (Cilt Bakımı ve tüm kategoriler eklendi)
+  categories: string[] = ['Tümü', 'Cilt Bakımı', 'Serum', 'Krem', 'Temizleyici', 'Göz Bakımı', 'Güneş Koruması', 'Maske & Peeling'];
+  formCategories: string[] = ['Cilt Bakımı', 'Serum', 'Krem', 'Temizleyici', 'Göz Bakımı', 'Güneş Koruması', 'Maske & Peeling'];
   selectedCategory: string = 'Tümü';
   selectedStockFilter: string = 'all';
   searchQuery: string = '';
@@ -52,12 +49,12 @@ export class AdminProducts implements OnInit {
   pageSize: number = 8;
   totalPages: number = 1;
 
-  // Yeni Ürün Ekle Modalı
+  // Yeni Ürün Modalı
   isAddProductModalOpen: boolean = false;
   isSavingNewProduct: boolean = false;
   newProduct = {
     name: '',
-    category: 'Serum',
+    category: 'Cilt Bakımı',
     price: 0,
     oldPrice: null as number | null,
     stockQuantity: 50,
@@ -65,13 +62,13 @@ export class AdminProducts implements OnInit {
     description: ''
   };
 
-  // Ürün Düzenleme Modalı
+  // Düzenleme Modalı
   isEditProductModalOpen: boolean = false;
   isUpdatingProduct: boolean = false;
   editProductForm = {
     id: 0,
     name: '',
-    category: 'Serum',
+    category: 'Cilt Bakımı',
     price: 0,
     oldPrice: null as number | null,
     stockQuantity: 0,
@@ -121,9 +118,6 @@ export class AdminProducts implements OnInit {
     return headers;
   }
 
-  // ========================================================
-  // 1. VERİLERİ BACKEND'DEN ÇEKİP CACHE'E (RAM) YAZMA
-  // ========================================================
   fetchProducts(): void {
     this.isLoading = true;
     this.cdr.detectChanges();
@@ -133,15 +127,18 @@ export class AdminProducts implements OnInit {
         const rawList: any[] = res.data || (Array.isArray(res) ? res : []);
         
         this.cachedProducts = rawList.map((p, index) => {
-          // Doğrudan backend'den gelen stockQuantity değerini alıyoruz
+          // JSON çıktısındaki stockQuantity ve stock.quantity alanlarını tam garantiye alıyoruz
           const qty = Number(
             p.stockQuantity !== undefined ? p.stockQuantity :
             (p.stock?.quantity !== undefined ? p.stock.quantity : 0)
           );
 
           let status: 'Stokta Var' | 'Kritik' | 'Tükendi' = 'Stokta Var';
-          if (qty === 0) status = 'Tükendi';
-          else if (qty <= 12) status = 'Kritik';
+          if (qty <= 0) {
+            status = 'Tükendi';
+          } else if (qty <= 12) {
+            status = 'Kritik';
+          }
 
           return {
             id: p.id || (index + 1),
@@ -168,9 +165,6 @@ export class AdminProducts implements OnInit {
     });
   }
 
-  // ========================================================
-  // 2. CACHE ÜZERİNDEN SIFIR GECİKMELİ ANLIK ARAMA & FİLTRE
-  // ========================================================
   onSearchChange(): void {
     this.currentPage = 1;
     this.applyFiltersFromCache();
@@ -190,21 +184,18 @@ export class AdminProducts implements OnInit {
   applyFiltersFromCache(): void {
     let list = [...this.cachedProducts];
 
-    // Kategori Filtresi
     if (this.selectedCategory && this.selectedCategory !== 'Tümü') {
       list = list.filter(p => p.category.toLowerCase() === this.selectedCategory.toLowerCase());
     }
 
-    // Stok Durumu Filtresi
     if (this.selectedStockFilter === 'inStock') {
       list = list.filter(p => p.stockQuantity > 12);
     } else if (this.selectedStockFilter === 'critical') {
       list = list.filter(p => p.stockQuantity > 0 && p.stockQuantity <= 12);
     } else if (this.selectedStockFilter === 'outOfStock') {
-      list = list.filter(p => p.stockQuantity === 0);
+      list = list.filter(p => p.stockQuantity <= 0);
     }
 
-    // Arama Kutusu Filtresi (Ürün Adı veya SKU)
     if (this.searchQuery && this.searchQuery.trim()) {
       const q = this.searchQuery.toLowerCase().trim();
       list = list.filter(p =>
@@ -243,13 +234,10 @@ export class AdminProducts implements OnInit {
     return page;
   }
 
-  // ========================================================
-  // 3. YENİ ÜRÜN EKLEME
-  // ========================================================
   openAddProductModal(): void {
     this.newProduct = {
       name: '',
-      category: 'Serum',
+      category: 'Cilt Bakımı',
       price: 0,
       oldPrice: null,
       stockQuantity: 50,
@@ -288,9 +276,6 @@ export class AdminProducts implements OnInit {
     });
   }
 
-  // ========================================================
-  // 4. ÜRÜN DÜZENLEME
-  // ========================================================
   openEditProductModal(product: AdminProduct): void {
     this.editProductForm = {
       id: product.id,
@@ -334,9 +319,6 @@ export class AdminProducts implements OnInit {
     });
   }
 
-  // ========================================================
-  // 5. ÜRÜN SİLME
-  // ========================================================
   deleteProduct(productId: number, productName: string): void {
     if (!confirm(`"${productName}" adlı ürünü silmek istediğinize emin misiniz?`)) return;
 
