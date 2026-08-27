@@ -1,0 +1,286 @@
+<div class="dashboard-wrapper d-flex">
+
+  <!-- SOL YAN MENÜ -->
+  <aside class="sidebar bg-white border-end d-flex flex-column justify-content-between">
+    <div>
+      <div class="sidebar-header px-4 py-4 border-bottom">
+        <div class="brand-info">
+          <h2 class="brand-title mb-0">LUMIÈRE</h2>
+          <span class="brand-subtitle text-uppercase">Admin Console</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav p-3">
+        <ul class="nav flex-column gap-1.5">
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" routerLink="/admin/dashboard">
+              <i class="bi bi-grid fs-5"></i>
+              <span class="nav-text">Ana Sayfa</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" routerLink="/admin/products">
+              <i class="bi bi-box-seam fs-5"></i>
+              <span class="nav-text">Ürünler / Stok</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" routerLink="/admin/orders">
+              <i class="bi bi-bag fs-5"></i>
+              <span class="nav-text">Siparişler</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" routerLink="/admin/customers">
+              <i class="bi bi-people fs-5"></i>
+              <span class="nav-text">Müşteriler</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link active d-flex align-items-center gap-3" routerLink="/admin/campaigns">
+              <i class="bi bi-tags fs-5"></i>
+              <span class="nav-text">Kampanyalar</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="p-3 border-top sidebar-footer">
+      <button type="button" (click)="logout()" class="btn btn-outline-danger btn-sm w-100 rounded-pill d-flex align-items-center justify-content-center gap-2">
+        <i class="bi bi-box-arrow-right"></i>
+        <span class="nav-text">Çıkış Yap</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- SAĞ İÇERİK ALANI -->
+  <main class="main-content flex-grow-1 bg-light-panel">
+
+    <!-- TOPBAR -->
+    <header class="topbar bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0 text-dark">Kampanya & Kupon Yönetimi</h5>
+
+      <div class="d-flex align-items-center gap-3">
+        <div class="topbar-search position-relative">
+          <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+          <input type="text" class="form-control rounded-pill ps-5 pe-3 py-1.5 small border-light-subtle" 
+                 placeholder="Kupon veya kampanya ara..." [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()">
+        </div>
+
+        <div class="d-flex align-items-center gap-2.5 ps-2">
+          <div class="admin-avatar rounded-circle">
+            <i class="bi bi-person-fill fs-5"></i>
+          </div>
+          <div class="d-none d-md-block text-start">
+            <h6 class="mb-0 fw-bold text-dark small">{{ adminFullName }}</h6>
+            <span class="text-muted" style="font-size: 0.72rem;">{{ adminRole }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- GÖVDE -->
+    <div class="p-4">
+
+      <!-- Başlık & Yeni Kupon Ekle Butonu -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="fw-bold text-dark mb-1">İndirim Kuponları & Kampanyalar</h3>
+          <p class="text-muted small mb-0">Sepette geçerli indirim kodları ve kategoriye özel fırsatlar tanımlayın.</p>
+        </div>
+
+        <button type="button" class="btn btn-pink rounded-pill px-4 py-2 text-white fw-semibold small d-flex align-items-center gap-2 shadow-xs" (click)="openAddModal()">
+          <i class="bi bi-plus-lg"></i> Yeni Kupon Tanımla
+        </button>
+      </div>
+
+      <!-- KATEGORİ FİLTRELEME PİLLERİ -->
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        @for (cat of categories; track cat) {
+          <button type="button" 
+                  class="btn btn-sm rounded-pill px-3.5 py-1.5 fw-semibold filter-pill"
+                  [class.active]="selectedCategoryFilter === cat"
+                  (click)="setCategoryFilter(cat)">
+            {{ cat }}
+          </button>
+        }
+      </div>
+
+      <!-- KUPON KARTLARI GRID YAPISI -->
+      <div class="row g-3">
+        @for (c of filteredCoupons; track c.id) {
+          <div class="col-12 col-md-6 col-xl-4">
+            <div class="coupon-card bg-white rounded-4 shadow-sm border border-light-subtle p-3.5 h-100 d-flex flex-column justify-content-between"
+                 [class.coupon-disabled]="!c.isActive">
+
+              <div>
+                <!-- Üst Başlık & Durum Switch -->
+                <div class="d-flex justify-content-between align-items-start mb-2.5">
+                  <span class="badge rounded-pill px-2.5 py-1 small fw-semibold"
+                        [class.badge-category-all]="c.categoryScope === 'Tümü'"
+                        [class.badge-category-specific]="c.categoryScope !== 'Tümü'">
+                    <i class="bi bi-tag-fill me-1"></i> {{ c.categoryScope }}
+                  </span>
+
+                  <div class="form-check form-switch mb-0">
+                    <input class="form-check-input cursor-pointer" type="checkbox" role="switch"
+                           [checked]="c.isActive" (change)="toggleStatus(c, $event)" title="Aktif/Pasif Yap">
+                  </div>
+                </div>
+
+                <!-- Kampanya İsmi & İndirim Değeri -->
+                <h6 class="fw-bold text-dark mb-1">{{ c.title }}</h6>
+                <div class="d-flex align-items-baseline gap-2 mb-3">
+                  <span class="fs-4 fw-bold text-pink">
+                    @if (c.discountType === 'PERCENTAGE') {
+                      %{{ c.discountValue }} İndirim
+                    } @else {
+                      ₺{{ c.discountValue }} İndirim
+                    }
+                  </span>
+                  @if (c.minOrderAmount > 0) {
+                    <span class="text-muted small">({{ c.minOrderAmount }} TL üzeri)</span>
+                  }
+                </div>
+
+                <!-- Kupon Kodu Kutu Tasarımı (Kopya Butonlu) -->
+                <div class="coupon-ticket-box d-flex justify-content-between align-items-center p-2.5 rounded-3 mb-3 bg-light border border-dashed">
+                  <span class="font-monospace fw-bold text-dark tracking-wider">{{ c.code }}</span>
+                  <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5 py-0.5 small" (click)="copyCode(c.code, $event)">
+                    <i class="bi bi-copy"></i> Kopyala
+                  </button>
+                </div>
+
+                <!-- İlerleme Çubuğu & Kullanım Oranı -->
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between text-muted small mb-1" style="font-size: 0.75rem;">
+                    <span>Kullanım Limiti</span>
+                    <span class="fw-semibold text-dark">{{ c.usedCount }} / {{ c.usageLimit }}</span>
+                  </div>
+                  <div class="progress rounded-pill" style="height: 6px;">
+                    <div class="progress-bar bg-pink" role="progressbar" 
+                         [style.width.%]="(c.usedCount / c.usageLimit) * 100"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Alt Bilgiler & Aksiyon Butonları -->
+              <div class="pt-2.5 border-top d-flex justify-content-between align-items-center text-muted small">
+                <span style="font-size: 0.72rem;">
+                  <i class="bi bi-clock me-1"></i> Son: {{ c.expiryDate }}
+                </span>
+
+                <div class="d-inline-flex gap-1.5">
+                  <button type="button" class="btn btn-action-edit rounded-circle" (click)="openEditModal(c, $event)" title="Düzenle">
+                    <i class="bi bi-pencil small"></i>
+                  </button>
+                  <button type="button" class="btn btn-action-delete rounded-circle" (click)="deleteCoupon(c, $event)" title="Sil">
+                    <i class="bi bi-trash small"></i>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        } @empty {
+          <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+              <i class="bi bi-tags fs-1 text-pink opacity-50 mb-2"></i>
+              <h6 class="fw-bold text-dark">Kupon Bulunamadı</h6>
+              <p class="text-muted small mb-0">Arama kriterlerinize uygun indirim kuponu bulunmuyor.</p>
+            </div>
+          </div>
+        }
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- KUPON EKLE / DÜZENLE MODALI -->
+@if (isModalOpen) {
+  <div class="custom-modal-backdrop d-flex align-items-center justify-content-center" (click)="closeModal()">
+    <div class="custom-modal-content bg-white rounded-4 shadow-lg p-4" (click)="$event.stopPropagation()" style="max-width: 480px; width: 92%;">
+      
+      <div class="d-flex justify-content-between align-items-center pb-2.5 border-bottom mb-3">
+        <h6 class="fw-bold text-dark mb-0">{{ isEditing ? 'Kuponu Düzenle' : 'Yeni Kupon Oluştur' }}</h6>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+
+      <div class="d-flex flex-column gap-3 mb-4">
+        
+        <!-- Kupon Kodu & Başlık -->
+        <div>
+          <label class="form-label small fw-semibold text-dark mb-1">Kupon Kodu *</label>
+          <input type="text" class="form-control form-control-sm rounded-3 font-monospace text-uppercase" 
+                 placeholder="Örn: CILT20" [(ngModel)]="couponForm.code">
+        </div>
+
+        <div>
+          <label class="form-label small fw-semibold text-dark mb-1">Kampanya Başlığı *</label>
+          <input type="text" class="form-control form-control-sm rounded-3" 
+                 placeholder="Örn: Cilt Bakımında %20 Fırsat" [(ngModel)]="couponForm.title">
+        </div>
+
+        <!-- İndirim Türü ve Değeri -->
+        <div class="row g-2">
+          <div class="col-6">
+            <label class="form-label small fw-semibold text-dark mb-1">İndirim Türü</label>
+            <select class="form-select form-select-sm rounded-3" [(ngModel)]="couponForm.discountType">
+              <option value="PERCENTAGE">Yüzdesel (%)</option>
+              <option value="FIXED">Sabit Tutar (₺)</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-semibold text-dark mb-1">İndirim Miktarı *</label>
+            <input type="number" class="form-control form-control-sm rounded-3" [(ngModel)]="couponForm.discountValue">
+          </div>
+        </div>
+
+        <!-- Kategori Kapsamı -->
+        <div>
+          <label class="form-label small fw-semibold text-dark mb-1">Geçerli Olduğu Kategori</label>
+          <select class="form-select form-select-sm rounded-3" [(ngModel)]="couponForm.categoryScope">
+            @for (cat of categories; track cat) {
+              <option [value]="cat">{{ cat }}</option>
+            }
+          </select>
+          <small class="text-muted" style="font-size: 0.72rem;">* 'Tümü' seçilirse sepetteki her üründe geçerli olur.</small>
+        </div>
+
+        <!-- Min Sepet Tutarı & Kullanım Limiti -->
+        <div class="row g-2">
+          <div class="col-6">
+            <label class="form-label small fw-semibold text-dark mb-1">Min. Sepet Tutarı (₺)</label>
+            <input type="number" class="form-control form-control-sm rounded-3" [(ngModel)]="couponForm.minOrderAmount">
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-semibold text-dark mb-1">Kullanım Limiti</label>
+            <input type="number" class="form-control form-control-sm rounded-3" [(ngModel)]="couponForm.usageLimit">
+          </div>
+        </div>
+
+        <!-- Son Kullanma Tarihi -->
+        <div>
+          <label class="form-label small fw-semibold text-dark mb-1">Son Kullanma Tarihi</label>
+          <input type="date" class="form-control form-control-sm rounded-3" [(ngModel)]="couponForm.expiryDate">
+        </div>
+
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+        <button type="button" class="btn btn-sm btn-light rounded-pill px-3.5 py-1.5 fw-semibold" (click)="closeModal()">Vazgeç</button>
+        <button type="button" class="btn btn-sm btn-pink rounded-pill px-4 py-1.5 text-white fw-semibold" [disabled]="isSaving" (click)="saveCoupon()">
+          @if (isSaving) { <span class="spinner-border spinner-border-sm me-1"></span> Kaydediliyor... } @else { Kaydet }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
