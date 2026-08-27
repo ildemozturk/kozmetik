@@ -21,7 +21,6 @@
               </span>
               <span class="text-pink fw-bold">500 TL</span>
             </div>
-            <!-- İlerleme Çubuğu -->
             <div class="progress" style="height: 6px;">
               <div class="progress-bar bg-pink rounded-pill" 
                    role="progressbar" 
@@ -40,8 +39,10 @@
           </div>
 
           @for (item of cartService.cartItems(); track item.product.id) {
-            <div class="d-flex gap-3 align-items-center py-3 border-bottom position-relative">
-              <img [src]="item.product.imageUrl" [alt]="item.product.name" class="rounded-3 object-fit-cover" style="width: 80px; height: 80px;">
+            <div class="d-flex gap-3 align-items-center py-3 border-bottom position-relative cart-item-row">
+              <div class="cart-img-wrapper">
+                <img [src]="item.product.imageUrl" [alt]="item.product.name" class="rounded-3 object-fit-cover" style="width: 80px; height: 80px;">
+              </div>
               
               <div class="flex-grow-1">
                 <h6 class="fw-bold text-dark mb-1">{{ item.product.name }}</h6>
@@ -50,7 +51,7 @@
               </div>
 
               <!-- Adet Butonları -->
-              <div class="quantity-counter-btn d-flex align-items-center justify-content-between rounded-pill px-2 py-1 shadow-sm">
+              <div class="quantity-counter-btn d-flex align-items-center justify-content-between rounded-pill px-2 py-1 shadow-sm border">
                 <button type="button" class="btn btn-sm p-0 border-0 text-pink fw-bold d-flex align-items-center justify-content-center" 
                         style="width: 24px; height: 24px;" 
                         (click)="decreaseQuantity(item)">
@@ -75,17 +76,54 @@
         </div>
       </div>
 
-      <!-- Sağ Taraf: Sipariş Özeti -->
+      <!-- Sağ Taraf: Sipariş Özeti & Kupon Alanı -->
       <div class="col-lg-4">
         <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 100px;">
           <h5 class="fw-bold text-dark mb-3">Sipariş Özeti</h5>
 
+          <!-- KUPON GİRİŞ ALANI -->
+          <div class="mb-4 pb-3 border-bottom">
+            <label class="form-label small fw-semibold text-muted mb-1.5">İndirim Kuponu</label>
+            
+            @if (!appliedCoupon) {
+              <div class="input-group">
+                <input type="text" class="form-control rounded-start-pill ps-3 font-monospace text-uppercase small" 
+                       placeholder="KUPON KODU" [(ngModel)]="couponInput" (keyup.enter)="applyCoupon()">
+                <button class="btn btn-pink text-white rounded-end-pill px-3.5 small fw-semibold" 
+                        type="button" [disabled]="isApplyingCoupon" (click)="applyCoupon()">
+                  @if (isApplyingCoupon) { <span class="spinner-border spinner-border-sm"></span> } @else { Uygula }
+                </button>
+              </div>
+            } @else {
+              <!-- UYGULANAN KUPON ROZETİ -->
+              <div class="p-2.5 rounded-3 bg-light border border-dashed border-success d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="fw-bold text-success font-monospace small">
+                    <i class="bi bi-check-circle-fill me-1"></i> {{ appliedCoupon.code }}
+                  </div>
+                  <span class="text-muted" style="font-size: 0.72rem;">{{ appliedCoupon.title }}</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-link text-danger text-decoration-none p-0 fw-semibold small" (click)="removeCoupon()">
+                  Kaldır
+                </button>
+              </div>
+            }
+          </div>
+
+          <!-- FİYAT DETAYLARI -->
           <div class="d-flex justify-content-between mb-2 text-muted">
             <span>Ara Toplam</span>
             <span class="fw-medium text-dark">{{ cartService.subtotal() | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
           </div>
 
-          <!-- Kargo Ücreti Gösterimi -->
+          @if (discountAmount > 0) {
+            <div class="d-flex justify-content-between mb-2 text-success fw-semibold">
+              <span>Kupon İndirimi</span>
+              <span>-{{ discountAmount | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
+            </div>
+          }
+
+          <!-- Kargo Ücreti -->
           <div class="d-flex justify-content-between mb-3 text-muted">
             <span>Kargo Ücreti</span>
             @if (cartService.shippingFee() === 0) {
@@ -99,11 +137,11 @@
 
           <div class="d-flex justify-content-between mb-4">
             <span class="fw-bold text-dark fs-5">Toplam</span>
-            <span class="fw-bold text-pink fs-4">{{ cartService.grandTotal() | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
+            <span class="fw-bold text-pink fs-4">{{ finalGrandTotal | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
           </div>
 
           <!-- ÖDEME SAYFASINA YÖNLENDİREN BUTON -->
-          <a routerLink="/odeme" class="btn btn-pink w-100 rounded-pill py-2 fw-semibold shadow-sm text-center text-decoration-none">
+          <a routerLink="/odeme" class="btn btn-pink w-100 rounded-pill py-2.5 fw-semibold shadow-sm text-center text-decoration-none text-white">
             Sepeti Onayla <i class="bi bi-arrow-right ms-1"></i>
           </a>
         </div>
@@ -116,7 +154,7 @@
       <i class="bi bi-bag-x display-1 text-pink opacity-50 d-block mb-3"></i>
       <h4 class="fw-bold text-dark mb-2">Sepetiniz Boş</h4>
       <p class="text-muted small mb-4">Sepetinizde henüz ürün bulunmuyor. Hemen alışverişe başlayın!</p>
-      <a routerLink="/urunler" class="btn btn-pink rounded-pill px-4 py-2">
+      <a routerLink="/urunler" class="btn btn-pink rounded-pill px-4 py-2 text-white text-decoration-none">
         Alışverişe Başla
       </a>
     </div>

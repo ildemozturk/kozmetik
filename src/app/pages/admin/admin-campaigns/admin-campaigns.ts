@@ -12,7 +12,7 @@ export interface CampaignCoupon {
   title: string;
   discountType: 'PERCENTAGE' | 'FIXED';
   discountValue: number;
-  categoryScope: string; // 'Tümü' | 'Cilt Bakımı' | 'Makyaj' | 'Parfüm' | 'Saç Bakımı' vb.
+  categoryScope: string;
   minOrderAmount: number;
   usageLimit: number;
   usedCount: number;
@@ -114,76 +114,18 @@ export class AdminCampaigns implements OnInit {
 
     this.http.get<any[]>(`${this.apiUrl}/Campaigns`, { headers }).subscribe({
       next: (res) => {
-        const list = Array.isArray(res) && res.length > 0 ? res : this.getMockCoupons();
-        this.coupons = list;
+        this.coupons = Array.isArray(res) ? res : [];
         this.applyFilters();
         this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: () => {
-        this.coupons = this.getMockCoupons();
+        this.coupons = [];
         this.applyFilters();
         this.isLoading = false;
         this.cdr.detectChanges();
       }
     });
-  }
-
-  getMockCoupons(): CampaignCoupon[] {
-    return [
-      {
-        id: 1,
-        code: 'LUMIERE20',
-        title: 'Büyük Yaz İndirimi',
-        discountType: 'PERCENTAGE',
-        discountValue: 20,
-        categoryScope: 'Tümü',
-        minOrderAmount: 500,
-        usageLimit: 200,
-        usedCount: 74,
-        expiryDate: '2026-09-15',
-        isActive: true
-      },
-      {
-        id: 2,
-        code: 'CILT100',
-        title: 'Cilt Bakımına Özel İndirim',
-        discountType: 'FIXED',
-        discountValue: 100,
-        categoryScope: 'Cilt Bakımı',
-        minOrderAmount: 600,
-        usageLimit: 150,
-        usedCount: 62,
-        expiryDate: '2026-09-30',
-        isActive: true
-      },
-      {
-        id: 3,
-        code: 'PARFUM15',
-        title: 'Parfümlerde %15 Fırsatı',
-        discountType: 'PERCENTAGE',
-        discountValue: 15,
-        categoryScope: 'Parfüm',
-        minOrderAmount: 750,
-        usageLimit: 100,
-        usedCount: 29,
-        expiryDate: '2026-10-10',
-        isActive: true
-      },
-      {
-        id: 4,
-        code: 'MAKYAJ50',
-        title: 'Makyaj Ürünlerinde Anında ₺50',
-        discountType: 'FIXED',
-        discountValue: 50,
-        categoryScope: 'Makyaj',
-        minOrderAmount: 300,
-        usageLimit: 50,
-        usedCount: 50,
-        expiryDate: '2026-08-20',
-        isActive: false
-      }
-    ];
   }
 
   applyFilters(): void {
@@ -278,14 +220,19 @@ export class AdminCampaigns implements OnInit {
     this.isSaving = true;
     const headers = this.getAuthHeaders();
 
-    if (this.isEditing) {
+    if (this.isEditing && this.couponForm.id > 0) {
       this.http.put(`${this.apiUrl}/Campaigns/${this.couponForm.id}`, this.couponForm, { headers }).subscribe({
         next: () => this.finalizeSave(),
         error: () => this.finalizeSave()
       });
     } else {
-      this.http.post(`${this.apiUrl}/Campaigns`, this.couponForm, { headers }).subscribe({
-        next: () => this.finalizeSave(),
+      this.http.post<CampaignCoupon>(`${this.apiUrl}/Campaigns`, this.couponForm, { headers }).subscribe({
+        next: (createdItem) => {
+          if (createdItem && createdItem.id) {
+            this.couponForm.id = createdItem.id;
+          }
+          this.finalizeSave();
+        },
         error: () => this.finalizeSave()
       });
     }
@@ -293,12 +240,15 @@ export class AdminCampaigns implements OnInit {
 
   private finalizeSave(): void {
     if (this.isEditing) {
-      const idx = this.coupons.findIndex(c => c.id === this.couponForm.id);
+      const idx = this.coupons.findIndex(c => c.id === this.couponForm.id || c.code === this.couponForm.code);
       if (idx !== -1) this.coupons[idx] = { ...this.couponForm };
       this.toastService.success('Kupon başarıyla güncellendi.');
     } else {
-      const newId = this.coupons.length + 1;
-      this.coupons.unshift({ ...this.couponForm, id: newId });
+      const maxId = this.coupons.reduce((max, item) => item.id > max ? item.id : max, 0);
+      if (this.couponForm.id === 0) {
+        this.couponForm.id = maxId + 1;
+      }
+      this.coupons.unshift({ ...this.couponForm });
       this.toastService.success('Yeni indirim kuponu oluşturuldu.');
     }
 
@@ -314,13 +264,13 @@ export class AdminCampaigns implements OnInit {
 
     const headers = this.getAuthHeaders();
     this.http.delete(`${this.apiUrl}/Campaigns/${c.id}`, { headers }).subscribe({
-      next: () => this.finalizeDelete(c.id),
-      error: () => this.finalizeDelete(c.id)
+      next: () => this.finalizeDelete(c.id, c.code),
+      error: () => this.finalizeDelete(c.id, c.code)
     });
   }
 
-  private finalizeDelete(id: number): void {
-    this.coupons = this.coupons.filter(c => c.id !== id);
+  private finalizeDelete(id: number, code: string): void {
+    this.coupons = this.coupons.filter(c => c.id !== id && c.code !== code);
     this.toastService.success('Kupon silindi.');
     this.applyFilters();
     this.cdr.detectChanges();

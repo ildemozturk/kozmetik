@@ -2,14 +2,20 @@
   color: #e18baf !important;
 }
 
+.bg-pink {
+  background-color: #e18baf !important;
+}
+
 .btn-pink {
   background-color: #e18baf !important;
   border-color: #e18baf !important;
+  color: #ffffff !important;
   transition: all 0.3s ease;
 }
 
 .btn-pink:hover {
   background-color: #d0759d !important;
+  border-color: #d0759d !important;
   box-shadow: 0 5px 15px rgba(225, 139, 175, 0.4);
 }
 

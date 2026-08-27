@@ -113,7 +113,7 @@
 
       <!-- KUPON KARTLARI GRID YAPISI -->
       <div class="row g-3">
-        @for (c of filteredCoupons; track c.id) {
+        @for (c of filteredCoupons; track c.code) {
           <div class="col-12 col-md-6 col-xl-4">
             <div class="coupon-card bg-white rounded-4 shadow-sm border border-light-subtle p-3.5 h-100 d-flex flex-column justify-content-between"
                  [class.coupon-disabled]="!c.isActive">

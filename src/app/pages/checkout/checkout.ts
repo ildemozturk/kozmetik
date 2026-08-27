@@ -12,6 +12,15 @@ interface City {
   discrits: string[];
 }
 
+export interface AppliedCoupon {
+  code: string;
+  title: string;
+  discountType: 'PERCENTAGE' | 'FIXED';
+  discountValue: number;
+  categoryScope: string;
+  minOrderAmount: number;
+}
+
 @Component({
   selector: 'app-checkout',
   standalone: true,
@@ -22,6 +31,10 @@ interface City {
 export class CheckoutComponent implements OnInit {
   checkoutForm!: FormGroup;
   isProcessing: boolean = false;
+
+  // Kupon ve İndirim Yönetimi
+  appliedCoupon: AppliedCoupon | null = null;
+  discountAmount: number = 0;
 
   // Başarı Ekranı Durum Yönetimi
   isOrderSuccess: boolean = false;
@@ -51,10 +64,56 @@ export class CheckoutComponent implements OnInit {
     this.initForms();
     this.setupFormatters();
     this.loadCitiesFromApi();
+    this.loadCouponAndCalculateDiscount();
     this.checkPaymentStatus();
   }
 
-  // URL'den Ödeme Durumunu Kontrol Etme & Siparişi Geçmişe Kaydetme
+  // Kuponu localStorage'dan yükleme ve indirimi hesaplama
+  loadCouponAndCalculateDiscount(): void {
+    const savedCoupon = localStorage.getItem('lumiere_applied_coupon');
+    if (savedCoupon) {
+      try {
+        this.appliedCoupon = JSON.parse(savedCoupon);
+        this.calculateDiscount();
+      } catch {
+        this.appliedCoupon = null;
+        this.discountAmount = 0;
+      }
+    } else {
+      this.appliedCoupon = null;
+      this.discountAmount = 0;
+    }
+  }
+
+  calculateDiscount(): void {
+    if (!this.appliedCoupon || this.cartService.cartItems().length === 0) {
+      this.discountAmount = 0;
+      return;
+    }
+
+    let eligibleSubtotal = this.cartService.subtotal();
+
+    if (this.appliedCoupon.categoryScope && this.appliedCoupon.categoryScope !== 'Tümü') {
+      eligibleSubtotal = this.cartService.cartItems()
+        .filter(item => item.product?.category?.toLowerCase() === this.appliedCoupon?.categoryScope.toLowerCase())
+        .reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    }
+
+    if (this.appliedCoupon.discountType === 'PERCENTAGE') {
+      this.discountAmount = (eligibleSubtotal * this.appliedCoupon.discountValue) / 100;
+    } else {
+      this.discountAmount = Math.min(this.appliedCoupon.discountValue, eligibleSubtotal);
+    }
+
+    this.cdr.detectChanges();
+  }
+
+  // İndirim uygulanmış son toplam tutar
+  get finalPayableAmount(): number {
+    const total = this.cartService.subtotal() - this.discountAmount + this.cartService.shippingFee();
+    return total > 0 ? total : 0;
+  }
+
   private checkPaymentStatus(): void {
     this.route.queryParams.subscribe(params => {
       if (params['status'] === 'success') {
@@ -62,11 +121,9 @@ export class CheckoutComponent implements OnInit {
         this.token = params['token'] || '';
         this.orderNumber = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
         
-        // Siparişi Navbar'daki Siparişlerim kısmında görünmesi için localStorage'a kaydediyoruz
         this.saveOrderToHistory();
-
-        // Sepeti temizliyoruz
         this.cartService.clearCart(false);
+        localStorage.removeItem('lumiere_applied_coupon'); // Başarılı sipariş sonrası kuponu temizle
         this.cdr.detectChanges();
       } else if (params['status'] === 'error') {
         this.showToast('Ödeme işlemi başarısız oldu veya iptal edildi.', 'error');
@@ -89,17 +146,16 @@ export class CheckoutComponent implements OnInit {
       id: this.orderNumber || 'ORD-' + Math.floor(100000 + Math.random() * 900000),
       date: new Date().toISOString(),
       status: 'Beklemede',
-      totalAmount: this.cartService.grandTotal(),
+      totalAmount: this.finalPayableAmount,
       items: items
     };
 
     const existingOrders = JSON.parse(localStorage.getItem('lumiere_orders') || '[]');
     existingOrders.unshift(newOrder);
-    localStorage.getItem('lumiere_orders'); // güvenli tutma
+    localStorage.setItem('lumiere_orders', JSON.stringify(existingOrders));
   }
 
   private initForms(): void {
-    // E-posta alanı artık tamamen serbest, kullanıcı ne isterse onu yazabilir
     this.checkoutForm = this.fb.group({
       fullName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]], 
@@ -177,7 +233,7 @@ export class CheckoutComponent implements OnInit {
     }
   }
 
- processPayment(): void {
+  processPayment(): void {
     if (this.checkoutForm.invalid) {
       this.showToast('Lütfen teslimat ve adres bilgilerini eksiksiz doldurunuz.', 'error');
       return;
@@ -185,7 +241,6 @@ export class CheckoutComponent implements OnInit {
 
     this.isProcessing = true;
 
-    // [Timeline Log - 2026.06] Security & Consistency Fix: Always force the authenticated user's email for the order, preventing cross-account mapping errors.
     let loggedInEmail = '';
     const userStr = localStorage.getItem('lumiere_user') || localStorage.getItem('user') || localStorage.getItem('cosmetic_user');
     if (userStr) {
@@ -197,12 +252,12 @@ export class CheckoutComponent implements OnInit {
 
     const orderPayload = {
       customerName: this.checkoutForm.value.fullName,
-      email: loggedInEmail || this.checkoutForm.value.email, // 👈 Oturumdaki mail yoksa formdakini alır, varsa kesinlikle oturumdakini kullanır
+      email: loggedInEmail || this.checkoutForm.value.email,
       phone: this.checkoutForm.value.phone,
       city: this.checkoutForm.value.city,
       district: this.checkoutForm.value.district,
       address: `${this.checkoutForm.value.city} / ${this.checkoutForm.value.district} - ${this.checkoutForm.value.address}`,
-      totalAmount: this.cartService.grandTotal(),
+      totalAmount: this.finalPayableAmount, // 👈 Kupon indirimi düşülmüş net tutar
       orderItems: this.cartService.cartItems().map(item => ({
         productId: item.product.id,
         quantity: item.quantity,
@@ -211,7 +266,6 @@ export class CheckoutComponent implements OnInit {
     };
 
     this.http.post<any>('http://localhost:5246/api/orders/initiate-payment', orderPayload).subscribe({
-      // ... (Geri kalan kısımlar aynı kalacak)
       next: (res) => {
         this.isProcessing = false;
 

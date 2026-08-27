@@ -89,7 +89,6 @@
             <h5 class="fw-bold text-dark mb-0">
               <i class="bi bi-credit-card text-pink me-2"></i>2. Güvenli Ödeme
             </h5>
-            
           </div>
 
           <!-- IYZICO FORMUNUN DÖKÜLECEĞİ ALAN -->
@@ -108,6 +107,16 @@
             <span class="fw-medium text-dark">{{ cartService.subtotal() | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
           </div>
 
+          <!-- Kupon İndirimi Varsa Göster -->
+          @if (discountAmount > 0) {
+            <div class="d-flex justify-content-between mb-2 text-success fw-semibold">
+              <span>
+                <i class="bi bi-tag-fill me-1"></i> Kupon ({{ appliedCoupon?.code }})
+              </span>
+              <span>-{{ discountAmount | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
+            </div>
+          }
+
           <div class="d-flex justify-content-between mb-3 text-muted">
             <span>Kargo Ücreti</span>
             @if (cartService.shippingFee() === 0) {
@@ -121,11 +130,11 @@
 
           <div class="d-flex justify-content-between mb-4">
             <span class="fw-bold text-dark fs-5">Ödenecek Tutar</span>
-            <span class="fw-bold text-pink fs-4">{{ cartService.grandTotal() | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
+            <span class="fw-bold text-pink fs-4">{{ finalPayableAmount | currency:'TRY':'symbol-narrow':'1.2-2' }}</span>
           </div>
 
           <button type="button" 
-                  class="btn btn-pink w-100 rounded-pill py-3 fw-bold shadow-sm"
+                  class="btn btn-pink w-100 rounded-pill py-3 fw-bold shadow-sm text-white"
                   [disabled]="isProcessing"
                   (click)="processPayment()">
             @if (isProcessing) {
@@ -143,7 +152,7 @@
       <i class="bi bi-cart-x display-1 text-pink opacity-50 d-block mb-3"></i>
       <h4 class="fw-bold text-dark">Sepetinizde Ürün Bulunmuyor</h4>
       <p class="text-muted small mb-4">Ödeme yapabilmek için sepetinize ürün eklemelisiniz.</p>
-      <a routerLink="/urunler" class="btn btn-pink rounded-pill px-4 py-2">Ürünlere Git</a>
+      <a routerLink="/urunler" class="btn btn-pink rounded-pill px-4 py-2 text-white text-decoration-none">Ürünlere Git</a>
     </div>
   }
 
