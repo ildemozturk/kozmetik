@@ -1,3 +1,4 @@
+// [Timeline Log - 2026.06] Architectural Refactor: Profile orders are fetched strictly based on authenticated session email to maintain strict relational data integrity and prevent cross-account mapping issues.
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -80,7 +81,7 @@ export class Profile implements OnInit {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
 
-    // Sadece bu kullanıcıya ait siparişleri çek
+    // [Timeline Log - 2026.06] Security Update: Querying orders directly from backend database using authenticated session email.
     this.http.get<any>(`${this.apiUrl}/Orders/my-orders?email=${encodeURIComponent(this.userEmail)}`, { headers }).subscribe({
       next: (res) => {
         if (Array.isArray(res)) {

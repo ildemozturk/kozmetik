@@ -14,7 +14,8 @@ import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { AdminDashboard } from './pages/admin/admin-dashboard/admin-dashboard';
 import { AdminProducts } from './pages/admin/admin-products/admin-products';
-import { AdminOrders } from './pages/admin/admin-orders/admin-orders'; // 👈 Sipariş bileşeni import edildi (Yolu kendi klasörüne göre kontrol edebilirsin)
+import { AdminOrders } from './pages/admin/admin-orders/admin-orders';
+import { AdminCustomers } from './pages/admin/admin-customers/admin-customers';
 
 // Guards
 import { authGuard } from './guards/auth-guard';
@@ -43,7 +44,7 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'kayit', redirectTo: 'register', pathMatch: 'full' },
 
-  // Admin Paneli Rotaları (Siparişler aktifleşti)
+  // Admin Paneli Rotaları
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
@@ -52,9 +53,10 @@ export const routes: Routes = [
       { path: 'dashboard', component: AdminDashboard },
       { path: 'products', component: AdminProducts },
       { path: 'stok', redirectTo: 'products', pathMatch: 'full' },
-      // Siparişler bileşene bağlandı
       { path: 'orders', component: AdminOrders },
-      { path: 'siparisler', component: AdminOrders }
+      { path: 'siparisler', component: AdminOrders },
+      { path: 'customers', component: AdminCustomers },
+      { path: 'musteriler', component: AdminCustomers }
     ]
   },
 

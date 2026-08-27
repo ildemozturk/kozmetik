@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';
 import { ToastService } from '../../../services/toast.service';
@@ -42,7 +42,7 @@ export interface DailyChartData {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css'
 })
@@ -268,7 +268,7 @@ export class AdminDashboard implements OnInit {
     this.generateDailyChart(orders, this.chartDaysRange);
 
     this.isLoading = false;
-    this.cdr.detectChanges(); // Veri hesaplanıp bittiği an ekrana basmayı zorunlu kıl
+    this.cdr.detectChanges();
   }
 
   private generateDailyChart(orders: any[], daysCount: number): void {

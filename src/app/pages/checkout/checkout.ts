@@ -177,7 +177,7 @@ export class CheckoutComponent implements OnInit {
     }
   }
 
-  processPayment(): void {
+ processPayment(): void {
     if (this.checkoutForm.invalid) {
       this.showToast('Lütfen teslimat ve adres bilgilerini eksiksiz doldurunuz.', 'error');
       return;
@@ -185,10 +185,19 @@ export class CheckoutComponent implements OnInit {
 
     this.isProcessing = true;
 
-    // Formda input içine ne yazıldıysa doğrudan o e-posta adresi backend'e gönderilir
+    // [Timeline Log - 2026.06] Security & Consistency Fix: Always force the authenticated user's email for the order, preventing cross-account mapping errors.
+    let loggedInEmail = '';
+    const userStr = localStorage.getItem('lumiere_user') || localStorage.getItem('user') || localStorage.getItem('cosmetic_user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.email) loggedInEmail = user.email.trim().toLowerCase();
+      } catch {}
+    }
+
     const orderPayload = {
       customerName: this.checkoutForm.value.fullName,
-      email: this.checkoutForm.value.email, // 👈 Formdaki e-posta alanı
+      email: loggedInEmail || this.checkoutForm.value.email, // 👈 Oturumdaki mail yoksa formdakini alır, varsa kesinlikle oturumdakini kullanır
       phone: this.checkoutForm.value.phone,
       city: this.checkoutForm.value.city,
       district: this.checkoutForm.value.district,
@@ -202,6 +211,7 @@ export class CheckoutComponent implements OnInit {
     };
 
     this.http.post<any>('http://localhost:5246/api/orders/initiate-payment', orderPayload).subscribe({
+      // ... (Geri kalan kısımlar aynı kalacak)
       next: (res) => {
         this.isProcessing = false;
 
