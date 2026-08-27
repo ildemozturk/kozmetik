@@ -8,7 +8,7 @@
 }
 
 /* ==========================================================================
-   SOL YAN MENÜ (SIDEBAR) - SABİT PİKSEL & GEÇİŞLER
+   SOL YAN MENÜ (SIDEBAR)
    ========================================================================== */
 .sidebar {
   width: 260px;
@@ -21,7 +21,6 @@
   transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Sidebar Daraltılmış Hali */
 .dashboard-wrapper.sidebar-collapsed .sidebar {
   width: 80px;
   min-width: 80px;
@@ -243,4 +242,63 @@
 
 .orders-table tbody tr {
   border-bottom: 1px solid #fafafa;
+}
+
+/* ==========================================================================
+   MODAL & POPUP PENCERELER (EKRAN ORTASINDA SABİT TUTAN ALAN)
+   ========================================================================== */
+.custom-modal-backdrop {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(0, 0, 0, 0.45) !important;
+  z-index: 1050 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.custom-modal-content {
+  position: relative !important;
+  z-index: 1060 !important;
+  background: #ffffff;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: scaleUp 0.2s ease-out;
+}
+
+.btn-action-edit, .btn-action-delete {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dee2e6;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.btn-action-edit:hover {
+  background-color: #c9667e;
+  color: #ffffff;
+  border-color: #c9667e;
+}
+
+.btn-action-delete:hover {
+  background-color: #dc3545;
+  color: #ffffff;
+  border-color: #dc3545;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
