@@ -40,14 +40,14 @@ export class AdminCampaigns implements OnInit {
   categories: string[] = [
     'Tümü',
     'Cilt Bakımı',
-    'Makyaj',
-    'Parfüm',
-    'Saç Bakımı',
-    'Güneş Ürünleri',
-    'Vücut Bakımı'
+    'Serum',
+    'Krem',
+    'Temizleyici',
+    'Göz Bakımı',
+    'Güneş Koruması',
+    'Maske & Peeling'
   ];
 
-  // Modal Durumları
   isModalOpen: boolean = false;
   isSaving: boolean = false;
   isEditing: boolean = false;
@@ -120,7 +120,7 @@ export class AdminCampaigns implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.coupons = [];
+        this.coupons = []; // 👈 Mock yerine doğrudan boş dizi
         this.applyFilters();
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -222,40 +222,31 @@ export class AdminCampaigns implements OnInit {
 
     if (this.isEditing && this.couponForm.id > 0) {
       this.http.put(`${this.apiUrl}/Campaigns/${this.couponForm.id}`, this.couponForm, { headers }).subscribe({
-        next: () => this.finalizeSave(),
-        error: () => this.finalizeSave()
+        next: () => {
+          this.fetchCoupons();
+          this.isSaving = false;
+          this.closeModal();
+          this.toastService.success('Kupon başarıyla güncellendi.');
+        },
+        error: () => {
+          this.isSaving = false;
+          this.toastService.error('Kupon güncellenirken hata oluştu.');
+        }
       });
     } else {
       this.http.post<CampaignCoupon>(`${this.apiUrl}/Campaigns`, this.couponForm, { headers }).subscribe({
-        next: (createdItem) => {
-          if (createdItem && createdItem.id) {
-            this.couponForm.id = createdItem.id;
-          }
-          this.finalizeSave();
+        next: () => {
+          this.fetchCoupons();
+          this.isSaving = false;
+          this.closeModal();
+          this.toastService.success('Yeni indirim kuponu oluşturuldu.');
         },
-        error: () => this.finalizeSave()
+        error: () => {
+          this.isSaving = false;
+          this.toastService.error('Kupon kaydedilirken hata oluştu.');
+        }
       });
     }
-  }
-
-  private finalizeSave(): void {
-    if (this.isEditing) {
-      const idx = this.coupons.findIndex(c => c.id === this.couponForm.id || c.code === this.couponForm.code);
-      if (idx !== -1) this.coupons[idx] = { ...this.couponForm };
-      this.toastService.success('Kupon başarıyla güncellendi.');
-    } else {
-      const maxId = this.coupons.reduce((max, item) => item.id > max ? item.id : max, 0);
-      if (this.couponForm.id === 0) {
-        this.couponForm.id = maxId + 1;
-      }
-      this.coupons.unshift({ ...this.couponForm });
-      this.toastService.success('Yeni indirim kuponu oluşturuldu.');
-    }
-
-    this.isSaving = false;
-    this.closeModal();
-    this.applyFilters();
-    this.cdr.detectChanges();
   }
 
   deleteCoupon(c: CampaignCoupon, event: Event): void {
@@ -264,15 +255,15 @@ export class AdminCampaigns implements OnInit {
 
     const headers = this.getAuthHeaders();
     this.http.delete(`${this.apiUrl}/Campaigns/${c.id}`, { headers }).subscribe({
-      next: () => this.finalizeDelete(c.id, c.code),
-      error: () => this.finalizeDelete(c.id, c.code)
+      next: () => {
+        this.coupons = this.coupons.filter(item => item.id !== c.id);
+        this.applyFilters();
+        this.toastService.success('Kupon silindi.');
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.toastService.error('Kupon silinemedi.');
+      }
     });
-  }
-
-  private finalizeDelete(id: number, code: string): void {
-    this.coupons = this.coupons.filter(c => c.id !== id && c.code !== code);
-    this.toastService.success('Kupon silindi.');
-    this.applyFilters();
-    this.cdr.detectChanges();
   }
 }

@@ -52,6 +52,8 @@ export class CheckoutComponent implements OnInit {
   toastType: 'success' | 'error' = 'success';
   private toastTimeout: any;
 
+  private apiUrl = 'http://localhost:5246/api';
+
   constructor(
     public cartService: CartService,
     private fb: FormBuilder,
@@ -114,18 +116,33 @@ export class CheckoutComponent implements OnInit {
     return total > 0 ? total : 0;
   }
 
+  // URL'den Ödeme Durumunu Kontrol Etme & Siparişi Geçmişe Kaydetme
   private checkPaymentStatus(): void {
     this.route.queryParams.subscribe(params => {
       if (params['status'] === 'success') {
         this.isOrderSuccess = true;
         this.token = params['token'] || '';
         this.orderNumber = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+
+        // Kullanılan kuponu al ve veritabanında sayacı 1 artır
+        const usedCouponCode = localStorage.getItem('lumiere_pending_coupon') || this.appliedCoupon?.code;
         
+        if (usedCouponCode) {
+          this.http.post(`${this.apiUrl}/Campaigns/use/${usedCouponCode}`, {}).subscribe({
+            next: (res: any) => {
+              console.log(`Kupon (${usedCouponCode}) sayacı başarıyla güncellendi:`, res);
+              localStorage.removeItem('lumiere_pending_coupon');
+            },
+            error: (err) => console.error('Kupon kullanım sayacı güncellenemedi:', err)
+          });
+        }
+
         this.saveOrderToHistory();
         this.cartService.clearCart(false);
-        localStorage.removeItem('lumiere_applied_coupon'); // Başarılı sipariş sonrası kuponu temizle
+        localStorage.removeItem('lumiere_applied_coupon');
         this.cdr.detectChanges();
       } else if (params['status'] === 'error') {
+        localStorage.removeItem('lumiere_pending_coupon');
         this.showToast('Ödeme işlemi başarısız oldu veya iptal edildi.', 'error');
       }
     });
@@ -241,6 +258,11 @@ export class CheckoutComponent implements OnInit {
 
     this.isProcessing = true;
 
+    // Kupon kodunu ödeme dönüşü için geçici hafızaya al
+    if (this.appliedCoupon && this.appliedCoupon.code) {
+      localStorage.setItem('lumiere_pending_coupon', this.appliedCoupon.code);
+    }
+
     let loggedInEmail = '';
     const userStr = localStorage.getItem('lumiere_user') || localStorage.getItem('user') || localStorage.getItem('cosmetic_user');
     if (userStr) {
@@ -257,7 +279,8 @@ export class CheckoutComponent implements OnInit {
       city: this.checkoutForm.value.city,
       district: this.checkoutForm.value.district,
       address: `${this.checkoutForm.value.city} / ${this.checkoutForm.value.district} - ${this.checkoutForm.value.address}`,
-      totalAmount: this.finalPayableAmount, // 👈 Kupon indirimi düşülmüş net tutar
+      totalAmount: this.finalPayableAmount,
+      couponCode: this.appliedCoupon?.code || '', // Backend'e kupon kodunu iletiyoruz
       orderItems: this.cartService.cartItems().map(item => ({
         productId: item.product.id,
         quantity: item.quantity,
@@ -265,7 +288,7 @@ export class CheckoutComponent implements OnInit {
       }))
     };
 
-    this.http.post<any>('http://localhost:5246/api/orders/initiate-payment', orderPayload).subscribe({
+    this.http.post<any>(`${this.apiUrl}/orders/initiate-payment`, orderPayload).subscribe({
       next: (res) => {
         this.isProcessing = false;
 

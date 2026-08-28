@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';
 import { ToastService } from '../../../services/toast.service';
@@ -28,7 +28,7 @@ export interface AdminCustomerItem {
 @Component({
   selector: 'app-admin-customers',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
   templateUrl: './admin-customers.html',
   styleUrl: './admin-customers.css'
 })
@@ -42,8 +42,6 @@ export class AdminCustomers implements OnInit {
   selectedCustomer: AdminCustomerItem | null = null;
 
   searchQuery: string = '';
-
-  // Dinamik Ay İsmi
   currentMonthName: string = new Intl.DateTimeFormat('tr-TR', { month: 'long' }).format(new Date());
 
   metrics = {
@@ -121,93 +119,18 @@ export class AdminCustomers implements OnInit {
           }
         }
 
-        if (rawList && rawList.length > 0) {
-          this.processCustomers(rawList);
-        } else {
-          this.processCustomers(this.getMockCustomers());
-        }
+        this.processCustomers(rawList);
       },
       error: (err) => {
         console.error('Müşteri API çağrısı hatası:', err);
-        this.processCustomers(this.getMockCustomers());
+        this.processCustomers([]); // 👈 Mock yerine doğrudan boş dizi gönderiyoruz
       }
     });
   }
 
-  private getMockCustomers(): AdminCustomerItem[] {
-    return [
-      {
-        id: 1,
-        customerNo: '#M1001',
-        fullName: 'Aylin Yılmaz',
-        email: 'aylin.yilmaz@email.com',
-        phone: '0532 444 11 22',
-        orderCount: 8,
-        totalSpent: 4820.00,
-        registeredDate: '10 Ağu, 2026',
-        recentOrders: [
-          { orderNo: '#1024', date: 'Bugün, 14:32', totalAmount: 840.00, status: 'Teslim Edildi' }
-        ]
-      },
-      {
-        id: 2,
-        customerNo: '#M1002',
-        fullName: 'Melis Şen',
-        email: 'melis.sen@email.com',
-        phone: '0544 555 22 33',
-        orderCount: 5,
-        totalSpent: 2750.00,
-        registeredDate: '14 Ağu, 2026',
-        recentOrders: [
-          { orderNo: '#1023', date: 'Bugün, 11:15', totalAmount: 1150.00, status: 'Kargoda' }
-        ]
-      },
-      {
-        id: 3,
-        customerNo: '#M1003',
-        fullName: 'Canan Demir',
-        email: 'canan.d@email.com',
-        phone: '0555 666 33 44',
-        orderCount: 3,
-        totalSpent: 1490.00,
-        registeredDate: '20 Ağu, 2026',
-        recentOrders: [
-          { orderNo: '#1022', date: 'Dün, 18:45', totalAmount: 590.00, status: 'Hazırlanıyor' }
-        ]
-      },
-      {
-        id: 4,
-        customerNo: '#M1004',
-        fullName: 'Ebru Kaya',
-        email: 'ebru.kaya@email.com',
-        phone: '0538 777 44 55',
-        orderCount: 1,
-        totalSpent: 420.00,
-        registeredDate: '22 Ağu, 2026',
-        recentOrders: [
-          { orderNo: '#1021', date: 'Dün, 10:20', totalAmount: 420.00, status: 'Teslim Edildi' }
-        ]
-      },
-      {
-        id: 5,
-        customerNo: '#M1005',
-        fullName: 'Zeynep Aksoy',
-        email: 'zeynep.a@email.com',
-        phone: '0541 888 55 66',
-        orderCount: 12,
-        totalSpent: 8340.00,
-        registeredDate: '25 Ağu, 2026',
-        recentOrders: [
-          { orderNo: '#1023', date: 'Bugün, 11:15', totalAmount: 1150.00, status: 'Kargoda' },
-          { orderNo: '#1018', date: '12 Ağu, 14:20', totalAmount: 3420.00, status: 'Teslim Edildi' }
-        ]
-      }
-    ];
-  }
-
   private processCustomers(rawList: any[]): void {
     this.allCustomers = rawList.map((c, i) => {
-      let regDateStr = c.registeredDate || c.RegisteredDate || '27 Ağu, 2026';
+      let regDateStr = c.registeredDate || c.RegisteredDate || 'Bugün';
       
       return {
         id: Number(c.id ?? c.Id ?? (i + 1)),
@@ -227,9 +150,8 @@ export class AdminCustomers implements OnInit {
       };
     });
 
-    // Metrikleri dinamik ve eksiksiz hesapla
     this.metrics.totalCustomers = this.allCustomers.length;
-    this.metrics.newThisMonth = this.allCustomers.length; // Eklenen tüm müşteriler doğrudan ay sayısına yansır
+    this.metrics.newThisMonth = this.allCustomers.length;
     this.metrics.activeCustomers = this.allCustomers.filter(x => x.orderCount > 0).length;
     
     const totalRev = this.allCustomers.reduce((acc, curr) => acc + curr.totalSpent, 0);
@@ -359,33 +281,17 @@ export class AdminCustomers implements OnInit {
       password: this.addForm.password || '123456',
       role: 'User'
     }, { headers }).subscribe({
-      next: () => this.finalizeAdd(),
-      error: () => this.finalizeAdd()
+      next: () => {
+        this.fetchCustomers();
+        this.isSavingAdd = false;
+        this.closeAddModal();
+        this.toastService.success('Yeni müşteri başarıyla eklendi.');
+      },
+      error: () => {
+        this.isSavingAdd = false;
+        this.toastService.error('Müşteri eklenirken hata oluştu.');
+      }
     });
-  }
-
-  private finalizeAdd(): void {
-    const newId = this.allCustomers.length + 1;
-    const newCustomer: AdminCustomerItem = {
-      id: newId,
-      customerNo: `#M${1000 + newId}`,
-      fullName: this.addForm.fullName,
-      email: this.addForm.email,
-      phone: this.addForm.phone || '0532 000 00 00',
-      orderCount: 0,
-      totalSpent: 0,
-      registeredDate: 'Bugün',
-      recentOrders: []
-    };
-
-    this.allCustomers.unshift(newCustomer);
-    this.metrics.totalCustomers++;
-    this.metrics.newThisMonth++;
-    this.isSavingAdd = false;
-    this.closeAddModal();
-    this.toastService.success('Yeni müşteri başarıyla eklendi.');
-    this.applyFilters();
-    this.cdr.detectChanges();
   }
 
   openDeleteModal(c?: AdminCustomerItem): void {
@@ -415,8 +321,7 @@ export class AdminCustomers implements OnInit {
 
   private finalizeDelete(id: number, name: string): void {
     this.allCustomers = this.allCustomers.filter(c => c.id !== id);
-    this.metrics.totalCustomers--;
-    this.metrics.newThisMonth = Math.max(0, this.metrics.newThisMonth - 1);
+    this.metrics.totalCustomers = this.allCustomers.length;
     this.selectedCustomer = this.allCustomers[0] || null;
     this.isDeleting = false;
     this.closeDeleteModal();
