@@ -42,7 +42,7 @@ export class CartComponent implements OnInit {
     if (savedCoupon) {
       try {
         this.appliedCoupon = JSON.parse(savedCoupon);
-        this.recalculateDiscount();
+        this.recalculateDiscount(false);
       } catch {
         this.appliedCoupon = null;
       }
@@ -56,22 +56,37 @@ export class CartComponent implements OnInit {
 
   increaseQuantity(item: CartItem): void {
     this.cartService.updateQuantity(item.product.id, item.quantity + 1);
-    this.recalculateDiscount();
+    this.recalculateDiscount(false);
   }
 
   decreaseQuantity(item: CartItem): void {
     this.cartService.updateQuantity(item.product.id, item.quantity - 1);
-    this.recalculateDiscount();
+    this.recalculateDiscount(false);
   }
 
   removeItem(productId: number): void {
+    const item = this.cartService.cartItems().find(i => i.product.id === productId);
+    const productName = item?.product?.name || 'Ürün';
+
     this.cartService.removeFromCart(productId);
-    this.recalculateDiscount();
+    this.toastService.success(`${productName} sepetten çıkarıldı.`);
+
+    // Sepetteki ürün değişince kupon geçerliliğini sessizce kontrol et
+    this.recalculateDiscount(true);
   }
 
   clearCart(): void {
     this.cartService.clearCart();
-    this.removeCoupon();
+    
+    // Kupon varsa sessizce temizle
+    if (this.appliedCoupon) {
+      this.appliedCoupon = null;
+      this.discountAmount = 0;
+      localStorage.removeItem('lumiere_applied_coupon');
+    }
+
+    this.toastService.success('Sepetiniz başarıyla temizlendi.');
+    this.cdr.detectChanges();
   }
 
   applyCoupon(): void {
@@ -98,7 +113,7 @@ export class CartComponent implements OnInit {
           return;
         }
 
-        // Min sepet tutarı kontrolü
+        // Minimum sepet tutarı kontrolü
         if (coupon.minOrderAmount > 0 && this.cartService.subtotal() < coupon.minOrderAmount) {
           this.toastService.error(`Bu kupon en az ₺${coupon.minOrderAmount} tutarındaki sepetlerde geçerlidir.`);
           return;
@@ -127,7 +142,7 @@ export class CartComponent implements OnInit {
 
         localStorage.setItem('lumiere_applied_coupon', JSON.stringify(this.appliedCoupon));
         this.couponInput = '';
-        this.recalculateDiscount();
+        this.recalculateDiscount(false);
         this.toastService.success(`"${coupon.code}" kuponu başarıyla uygulandı!`);
         this.cdr.detectChanges();
       },
@@ -138,29 +153,54 @@ export class CartComponent implements OnInit {
     });
   }
 
-  removeCoupon(): void {
-    this.appliedCoupon = null;
-    this.discountAmount = 0;
-    localStorage.removeItem('lumiere_applied_coupon');
-    this.toastService.success('Kupon kaldırıldı.');
-    this.cdr.detectChanges();
+  // Kullanıcı butona basarak kuponu kaldırdığında çağrılır
+  removeCoupon(showToast: boolean = true): void {
+    if (this.appliedCoupon) {
+      this.appliedCoupon = null;
+      this.discountAmount = 0;
+      localStorage.removeItem('lumiere_applied_coupon');
+      if (showToast) {
+        this.toastService.success('Kupon kaldırıldı.');
+      }
+      this.cdr.detectChanges();
+    }
   }
 
-  recalculateDiscount(): void {
-    if (!this.appliedCoupon || this.cartService.cartItems().length === 0) {
+  recalculateDiscount(notifyIfInvalid: boolean = false): void {
+    if (!this.appliedCoupon) {
       this.discountAmount = 0;
+      return;
+    }
+
+    // Sepette ürün kalmadıysa kuponu temizle
+    if (this.cartService.cartItems().length === 0) {
+      this.removeCoupon(false);
+      return;
+    }
+
+    // Minimum sepet tutarı artık karşılanmıyorsa
+    if (this.appliedCoupon.minOrderAmount > 0 && this.cartService.subtotal() < this.appliedCoupon.minOrderAmount) {
+      if (notifyIfInvalid) {
+        this.toastService.error(`Sepet tutarı ₺${this.appliedCoupon.minOrderAmount} altına düştüğü için "${this.appliedCoupon.code}" kuponu iptal edildi.`);
+      }
+      this.removeCoupon(false);
       return;
     }
 
     let eligibleSubtotal = this.cartService.subtotal();
 
+    // Özel kategori kontrolü
     if (this.appliedCoupon.categoryScope && this.appliedCoupon.categoryScope !== 'Tümü') {
       eligibleSubtotal = this.cartService.cartItems()
         .filter(item => item.product?.category?.toLowerCase() === this.appliedCoupon?.categoryScope.toLowerCase())
         .reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
+      // Kategoriye ait ürün sepetten çıkarıldıysa kupon iptal edilir
       if (eligibleSubtotal === 0) {
-        this.removeCoupon();
+        if (notifyIfInvalid) {
+          this.toastService.error(`"${this.appliedCoupon.categoryScope}" kategorisindeki ürün sepetten çıkarıldığı için "${this.appliedCoupon.code}" kuponu iptal edildi.`);
+        }
+        this.removeCoupon(false);
         return;
       }
     }

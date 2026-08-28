@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LUMIÈRE ADMIN - GENEL YERLEŞİM (LAYOUT)
+   GENEL YERLEŞİM (LAYOUT)
    ========================================================================== */
 .dashboard-wrapper {
   min-height: 100vh;
@@ -7,100 +7,6 @@
   background-color: #fafbfc;
 }
 
-/* ==========================================================================
-   SOL YAN MENÜ (SIDEBAR)
-   ========================================================================== */
-.sidebar {
-  width: 260px;
-  min-width: 260px;
-  max-width: 260px;
-  height: 100vh;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.dashboard-wrapper.sidebar-collapsed .sidebar {
-  width: 80px;
-  min-width: 80px;
-  max-width: 80px;
-}
-
-.dashboard-wrapper.sidebar-collapsed .brand-info,
-.dashboard-wrapper.sidebar-collapsed .nav-text {
-  display: none !important;
-}
-
-.dashboard-wrapper.sidebar-collapsed .sidebar-header {
-  justify-content: center !important;
-  padding-left: 0.5rem !important;
-  padding-right: 0.5rem !important;
-}
-
-.dashboard-wrapper.sidebar-collapsed .sidebar-nav .nav-link {
-  justify-content: center !important;
-  padding: 0.65rem 0 !important;
-}
-
-/* ==========================================================================
-   LOGO & MARKA ALANI
-   ========================================================================== */
-.brand-title {
-  color: #c9667e !important;
-  font-weight: 700 !important;
-  font-size: 1.35rem !important;
-  letter-spacing: 2px !important;
-  line-height: 1.1 !important;
-  font-family: inherit;
-}
-
-.brand-subtitle {
-  font-size: 0.68rem !important;
-  color: #a1a1aa !important;
-  letter-spacing: 1.5px !important;
-  font-weight: 600 !important;
-  display: block;
-}
-
-.btn-toggle-sidebar {
-  border: none;
-  background: transparent;
-  font-size: 1.25rem;
-  line-height: 1;
-  transition: color 0.2s;
-}
-
-.btn-toggle-sidebar:hover {
-  color: #c9667e !important;
-}
-
-/* ==========================================================================
-   MENÜ LİNKLERİ
-   ========================================================================== */
-.sidebar-nav .nav-link {
-  color: #71717a;
-  border-radius: 0.65rem;
-  padding: 0.65rem 1rem;
-  font-weight: 500;
-  font-size: 0.88rem;
-  transition: all 0.2s ease;
-}
-
-.sidebar-nav .nav-link:hover {
-  background-color: #fdf2f4;
-  color: #c9667e;
-}
-
-.sidebar-nav .nav-link.active {
-  background-color: #fce7ec !important;
-  color: #c9667e !important;
-  font-weight: 600 !important;
-}
-
-/* ==========================================================================
-   SAĞ İÇERİK ALANI & TOPBAR
-   ========================================================================== */
 .main-content {
   min-width: 0;
   flex: 1 1 0%;
@@ -113,15 +19,68 @@
   background-color: #ffffff;
 }
 
+.bg-light-panel {
+  background-color: #fafbfc;
+}
+
 /* ==========================================================================
-   YÖNETİCİ PROFİL ROZETİ (SAĞ ÜST)
+   SOL YAN MENÜ (SIDEBAR) & LOGO
+   ========================================================================== */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  max-width: 260px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.brand-title {
+  color: #e18baf !important;
+  font-weight: 700 !important;
+  font-size: 1.35rem !important;
+  letter-spacing: 2px !important;
+  line-height: 1.1 !important;
+}
+
+.brand-subtitle {
+  font-size: 0.68rem !important;
+  color: #a1a1aa !important;
+  letter-spacing: 1.5px !important;
+  font-weight: 600 !important;
+  display: block;
+}
+
+.sidebar-nav .nav-link {
+  color: #71717a;
+  border-radius: 0.65rem;
+  padding: 0.65rem 1rem;
+  font-weight: 500;
+  font-size: 0.88rem;
+  transition: all 0.2s ease;
+}
+
+.sidebar-nav .nav-link:hover {
+  background-color: #fff0f5;
+  color: #e18baf;
+}
+
+.sidebar-nav .nav-link.active {
+  background-color: #fce7ec !important;
+  color: #e18baf !important;
+  font-weight: 600 !important;
+}
+
+/* ==========================================================================
+   YÖNETİCİ PROFİL ALANI (SAĞ ÜST)
    ========================================================================== */
 .admin-avatar {
   width: 38px;
   height: 38px;
   min-width: 38px;
   background-color: #fce7ec;
-  color: #c9667e;
+  color: #e18baf;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -131,121 +90,104 @@
    RENKLER VE BUTONLAR
    ========================================================================== */
 .text-pink {
-  color: #c9667e !important;
-}
-
-.bg-pink-soft {
-  background-color: #fce7ec !important;
+  color: #e18baf !important;
 }
 
 .bg-pink {
-  background-color: #c9667e !important;
+  background-color: #e18baf !important;
 }
 
 .btn-pink {
-  background-color: #c9667e;
-  border: none;
+  background-color: #e18baf;
+  border-color: #e18baf;
   color: #ffffff;
   transition: all 0.2s ease;
 }
 
 .btn-pink:hover {
-  background-color: #b5566d;
+  background-color: #d07a9e;
+  border-color: #d07a9e;
   color: #ffffff;
 }
 
-.btn-outline-pink {
-  border: 1px solid #c9667e;
-  color: #c9667e;
-  background-color: transparent;
-  transition: all 0.2s ease;
-}
-
-.btn-outline-pink:hover {
-  background-color: #c9667e;
-  color: #ffffff;
-}
-
-/* KPI KARTLARI */
-.kpi-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.kpi-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05) !important;
-}
-
-.kpi-icon-pill {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-}
-
-/* GRAFİK BARI */
-.btn-period {
-  color: #71717a;
-  border: none;
-  font-size: 0.78rem;
-}
-
-.btn-period.active {
-  background-color: #ffffff !important;
-  color: #18181b !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.bar-col {
-  flex: 1;
-  max-width: 44px;
-}
-
-.bar-fill {
-  width: 100%;
-  min-height: 8px;
-  background-color: #c9667e;
-  transition: height 0.4s ease;
-}
-
-/* KRİTİK STOK LİSTESİ */
-.critical-stock-row {
-  background-color: #fafbfc;
-  border: 1px solid #f4f4f5;
-  transition: background-color 0.2s;
-}
-
-.critical-stock-row:hover {
-  background-color: #f4f4f5;
-}
-
-.badge-subtle-danger {
-  background-color: #fee2e2;
-  color: #dc2626;
-  font-size: 0.7rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: 9999px;
-  font-weight: 600;
-}
-
-/* SİPARİŞLER TABLOSU */
-.table-light-head tr th {
-  background-color: #ffffff;
-  color: #71717a;
-  font-size: 0.8rem;
-  font-weight: 600;
-  border-bottom: 1px solid #f4f4f5;
-}
-
-.orders-table tbody tr {
-  border-bottom: 1px solid #fafafa;
+.shadow-xs {
+  box-shadow: 0 4px 12px rgba(225, 139, 175, 0.2);
 }
 
 /* ==========================================================================
-   MODAL & POPUP PENCERELER (EKRAN ORTASINDA SABİT TUTAN ALAN)
+   KAMPANYA KATEGORİ FİLTRELERİ
+   ========================================================================== */
+.filter-pill {
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  transition: all 0.2s ease;
+}
+
+.filter-pill.active {
+  background-color: #e18baf !important;
+  border-color: #e18baf !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   KUPON KARTLARI
+   ========================================================================== */
+.coupon-card {
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.coupon-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(225, 139, 175, 0.12) !important;
+}
+
+.coupon-disabled {
+  opacity: 0.6;
+  filter: grayscale(0.5);
+}
+
+.badge-category-all {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.badge-category-specific {
+  background-color: #fff0f3;
+  color: #c94a73;
+}
+
+.coupon-ticket-box {
+  background-color: #fafbfc;
+  border: 1.5px dashed #d0d7de !important;
+}
+
+.btn-action-edit, .btn-action-delete {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dee2e6;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.btn-action-edit:hover {
+  background-color: #e18baf;
+  color: #ffffff;
+  border-color: #e18baf;
+}
+
+.btn-action-delete:hover {
+  background-color: #dc3545;
+  color: #ffffff;
+  border-color: #dc3545;
+}
+
+/* ==========================================================================
+   KUPON EKLE / DÜZENLE POPUP MODAL
    ========================================================================== */
 .custom-modal-backdrop {
   position: fixed !important;
@@ -268,29 +210,6 @@
   max-height: 90vh;
   overflow-y: auto;
   animation: scaleUp 0.2s ease-out;
-}
-
-.btn-action-edit, .btn-action-delete {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #dee2e6;
-  background-color: #ffffff;
-  transition: all 0.2s ease;
-}
-
-.btn-action-edit:hover {
-  background-color: #c9667e;
-  color: #ffffff;
-  border-color: #c9667e;
-}
-
-.btn-action-delete:hover {
-  background-color: #dc3545;
-  color: #ffffff;
-  border-color: #dc3545;
 }
 
 @keyframes fadeIn {
