@@ -6,17 +6,17 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';
 import { ToastService } from '../../../services/toast.service';
 
-export interface CampaignCoupon {
+export interface CouponItem {
   id: number;
   code: string;
   title: string;
-  discountType: 'PERCENTAGE' | 'FIXED';
+  discountType: 'PERCENTAGE' | 'FIXED' | 'Percentage' | 'FixedAmount';
   discountValue: number;
   categoryScope: string;
   minOrderAmount: number;
-  usageLimit: number;
   usedCount: number;
-  expiryDate: string;
+  usageLimit: number;
+  expiryDate?: string;
   isActive: boolean;
 }
 
@@ -28,45 +28,38 @@ export interface CampaignCoupon {
   styleUrl: './admin-campaigns.css'
 })
 export class AdminCampaigns implements OnInit {
-  isLoading: boolean = false;
+  isLoading: boolean = true;
   adminFullName: string = 'Derin Aydın';
   adminRole: string = 'Yönetici';
 
-  coupons: CampaignCoupon[] = [];
-  filteredCoupons: CampaignCoupon[] = [];
+  // HTML'in beklediği dizi isimleri
+  coupons: CouponItem[] = [];
+  filteredCoupons: CouponItem[] = [];
+
   searchQuery: string = '';
   selectedCategoryFilter: string = 'Tümü';
+  categories: string[] = ['Tümü', 'Tüm Ürünler', 'Cilt Bakımı', 'Makyaj', 'Parfüm', 'Saç Bakımı'];
 
-  categories: string[] = [
-    'Tümü',
-    'Cilt Bakımı',
-    'Serum',
-    'Krem',
-    'Temizleyici',
-    'Göz Bakımı',
-    'Güneş Koruması',
-    'Maske & Peeling'
-  ];
-
+  // Modal ve Form Alanları
   isModalOpen: boolean = false;
-  isSaving: boolean = false;
   isEditing: boolean = false;
+  isSaving: boolean = false;
 
-  couponForm: CampaignCoupon = {
+  couponForm: CouponItem = {
     id: 0,
     code: '',
     title: '',
     discountType: 'PERCENTAGE',
-    discountValue: 15,
-    categoryScope: 'Tümü',
+    discountValue: 10,
+    categoryScope: 'Tüm Ürünler',
     minOrderAmount: 0,
     usageLimit: 100,
     usedCount: 0,
-    expiryDate: '2026-09-30',
+    expiryDate: '',
     isActive: true
   };
 
-  private apiUrl = 'http://localhost:5246/api';
+  private apiUrl = 'http://localhost:5246/api/Campaigns';
 
   constructor(
     private http: HttpClient,
@@ -78,7 +71,7 @@ export class AdminCampaigns implements OnInit {
 
   ngOnInit(): void {
     this.loadAdminProfile();
-    this.fetchCoupons();
+    this.fetchCampaigns();
   }
 
   loadAdminProfile(): void {
@@ -108,21 +101,52 @@ export class AdminCampaigns implements OnInit {
     return headers;
   }
 
-  fetchCoupons(): void {
+  fetchCampaigns(): void {
     this.isLoading = true;
+    this.cdr.detectChanges();
     const headers = this.getAuthHeaders();
 
-    this.http.get<any[]>(`${this.apiUrl}/Campaigns`, { headers }).subscribe({
+    this.http.get<any>(this.apiUrl, { headers }).subscribe({
       next: (res) => {
-        this.coupons = Array.isArray(res) ? res : [];
+        const rawList: any[] = Array.isArray(res) ? res : (res?.data || res?.campaigns || []);
+
+        this.coupons = rawList.map((c: any): CouponItem => {
+          const uLimit = Number(c.usageLimit ?? c.UsageLimit ?? 0);
+          const uCount = Number(c.usedCount ?? c.UsedCount ?? 0);
+          const isLimitReached = uLimit > 0 && uCount >= uLimit;
+          const activeStatus = c.isActive !== undefined ? c.isActive : (c.IsActive !== undefined ? c.IsActive : true);
+          
+          let dType: 'PERCENTAGE' | 'FIXED' = 'PERCENTAGE';
+          const incomingType = (c.discountType || c.DiscountType || '').toString().toUpperCase();
+          if (incomingType.includes('FIXED')) {
+            dType = 'FIXED';
+          }
+
+          return {
+            id: Number(c.id ?? c.Id ?? 0),
+            code: c.code || c.Code || '',
+            title: c.title || c.Title || '',
+            discountType: dType,
+            discountValue: Number(c.discountValue ?? c.DiscountValue ?? 0),
+            categoryScope: c.categoryScope || c.CategoryScope || 'Tüm Ürünler',
+            minOrderAmount: Number(c.minOrderAmount ?? c.MinOrderAmount ?? 0),
+            usedCount: uCount,
+            usageLimit: uLimit,
+            expiryDate: c.expiryDate || c.ExpiryDate || '',
+            isActive: isLimitReached ? false : activeStatus
+          };
+        });
+
         this.applyFilters();
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.coupons = []; // 👈 Mock yerine doğrudan boş dizi
-        this.applyFilters();
+      error: (err) => {
+        console.error('Kupon API Hatası:', err);
         this.isLoading = false;
+        this.coupons = [];
+        this.filteredCoupons = [];
+        this.toastService.error('Kuponlar veritabanından alınamadı.');
         this.cdr.detectChanges();
       }
     });
@@ -131,16 +155,19 @@ export class AdminCampaigns implements OnInit {
   applyFilters(): void {
     let list = this.coupons;
 
-    if (this.selectedCategoryFilter !== 'Tümü') {
-      list = list.filter(c => c.categoryScope.toLowerCase() === this.selectedCategoryFilter.toLowerCase());
+    if (this.selectedCategoryFilter && this.selectedCategoryFilter !== 'Tümü') {
+      const selectedLower = this.selectedCategoryFilter.toLowerCase().trim();
+      list = list.filter(c => {
+        const scopeLower = (c.categoryScope || '').toLowerCase().trim();
+        return scopeLower === selectedLower || scopeLower === 'tüm ürünler' || scopeLower === 'tümü';
+      });
     }
 
-    if (this.searchQuery.trim()) {
+    if (this.searchQuery && this.searchQuery.trim()) {
       const q = this.searchQuery.toLowerCase().trim();
-      list = list.filter(c =>
-        c.code.toLowerCase().includes(q) ||
-        c.title.toLowerCase().includes(q) ||
-        c.categoryScope.toLowerCase().includes(q)
+      list = list.filter(c => 
+        (c.code && c.code.toLowerCase().includes(q)) || 
+        (c.title && c.title.toLowerCase().includes(q))
       );
     }
 
@@ -157,27 +184,43 @@ export class AdminCampaigns implements OnInit {
     this.applyFilters();
   }
 
-  toggleStatus(coupon: CampaignCoupon, event: Event): void {
+  toggleStatus(item: CouponItem, event: Event): void {
     event.stopPropagation();
-    coupon.isActive = !coupon.isActive;
+
+    if (item.usageLimit > 0 && item.usedCount >= item.usageLimit) {
+      this.toastService.error(`"${item.code}" kuponunun kullanım limiti dolduğu için aktif edilemez.`);
+      item.isActive = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const newStatus = !item.isActive;
     const headers = this.getAuthHeaders();
 
-    this.http.put(`${this.apiUrl}/Campaigns/${coupon.id}/toggle-status`, { isActive: coupon.isActive }, { headers }).subscribe({
+    this.http.put(`${this.apiUrl}/${item.id}/toggle-status`, { isActive: newStatus }, { headers }).subscribe({
       next: () => {
-        this.toastService.success(`"${coupon.code}" durumu güncellendi.`);
+        item.isActive = newStatus;
+        this.toastService.success(`Kupon durumu ${newStatus ? 'Aktif' : 'Pasif'} olarak güncellendi.`);
+        this.cdr.detectChanges();
       },
-      error: () => {
-        this.toastService.success(`"${coupon.code}" durumu güncellendi.`);
+      error: (err) => {
+        const msg = err.error?.message || 'Durum güncellenirken hata oluştu.';
+        this.toastService.error(msg);
+        this.cdr.detectChanges();
       }
     });
   }
 
   copyCode(code: string, event: Event): void {
     event.stopPropagation();
-    navigator.clipboard.writeText(code);
-    this.toastService.success(`"${code}" panoya kopyalandı!`);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(code).then(() => {
+        this.toastService.success(`"${code}" kopyalandı.`);
+      });
+    }
   }
 
+  // Modal Yönetimi
   openAddModal(): void {
     this.isEditing = false;
     this.couponForm = {
@@ -185,22 +228,22 @@ export class AdminCampaigns implements OnInit {
       code: '',
       title: '',
       discountType: 'PERCENTAGE',
-      discountValue: 15,
-      categoryScope: 'Tümü',
+      discountValue: 10,
+      categoryScope: 'Tüm Ürünler',
       minOrderAmount: 0,
       usageLimit: 100,
       usedCount: 0,
-      expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      expiryDate: '',
       isActive: true
     };
     this.isModalOpen = true;
     this.cdr.detectChanges();
   }
 
-  openEditModal(c: CampaignCoupon, event: Event): void {
-    event.stopPropagation();
+  openEditModal(item: CouponItem, event?: Event): void {
+    if (event) event.stopPropagation();
     this.isEditing = true;
-    this.couponForm = { ...c };
+    this.couponForm = { ...item };
     this.isModalOpen = true;
     this.cdr.detectChanges();
   }
@@ -211,58 +254,65 @@ export class AdminCampaigns implements OnInit {
   }
 
   saveCoupon(): void {
-    if (!this.couponForm.code.trim() || !this.couponForm.title.trim() || !this.couponForm.discountValue) {
-      this.toastService.error('Lütfen zorunlu alanları eksiksiz doldurunuz.');
+    if (!this.couponForm.code.trim() || !this.couponForm.title.trim()) {
+      this.toastService.error('Kupon kodu ve başlık alanları zorunludur.');
       return;
     }
 
-    this.couponForm.code = this.couponForm.code.trim().toUpperCase();
     this.isSaving = true;
     const headers = this.getAuthHeaders();
 
-    if (this.isEditing && this.couponForm.id > 0) {
-      this.http.put(`${this.apiUrl}/Campaigns/${this.couponForm.id}`, this.couponForm, { headers }).subscribe({
+    const payload = {
+      ...this.couponForm,
+      code: this.couponForm.code.trim().toUpperCase(),
+      discountType: this.couponForm.discountType === 'FIXED' ? 'FixedAmount' : 'Percentage'
+    };
+
+    if (this.isEditing) {
+      this.http.put(`${this.apiUrl}/${this.couponForm.id}`, payload, { headers }).subscribe({
         next: () => {
-          this.fetchCoupons();
           this.isSaving = false;
           this.closeModal();
           this.toastService.success('Kupon başarıyla güncellendi.');
+          this.fetchCampaigns();
         },
-        error: () => {
+        error: (err) => {
           this.isSaving = false;
-          this.toastService.error('Kupon güncellenirken hata oluştu.');
+          this.toastService.error(err.error?.message || 'Kupon güncellenirken hata oluştu.');
+          this.cdr.detectChanges();
         }
       });
     } else {
-      this.http.post<CampaignCoupon>(`${this.apiUrl}/Campaigns`, this.couponForm, { headers }).subscribe({
+      this.http.post(this.apiUrl, payload, { headers }).subscribe({
         next: () => {
-          this.fetchCoupons();
           this.isSaving = false;
           this.closeModal();
-          this.toastService.success('Yeni indirim kuponu oluşturuldu.');
+          this.toastService.success('Yeni kupon başarıyla oluşturuldu.');
+          this.fetchCampaigns();
         },
-        error: () => {
+        error: (err) => {
           this.isSaving = false;
-          this.toastService.error('Kupon kaydedilirken hata oluştu.');
+          this.toastService.error(err.error?.message || 'Kupon oluşturulurken hata oluştu.');
+          this.cdr.detectChanges();
         }
       });
     }
   }
 
-  deleteCoupon(c: CampaignCoupon, event: Event): void {
-    event.stopPropagation();
-    if (!confirm(`"${c.code}" kodlu kuponu silmek istediğinize emin misiniz?`)) return;
+  deleteCoupon(item: CouponItem, event?: Event): void {
+    if (event) event.stopPropagation();
+    if (!confirm(`"${item.code}" kodlu kuponu silmek istediğinize emin misiniz?`)) return;
 
     const headers = this.getAuthHeaders();
-    this.http.delete(`${this.apiUrl}/Campaigns/${c.id}`, { headers }).subscribe({
+
+    this.http.delete(`${this.apiUrl}/${item.id}`, { headers }).subscribe({
       next: () => {
-        this.coupons = this.coupons.filter(item => item.id !== c.id);
-        this.applyFilters();
-        this.toastService.success('Kupon silindi.');
-        this.cdr.detectChanges();
+        this.toastService.success(`"${item.code}" kuponu başarıyla silindi.`);
+        this.fetchCampaigns();
       },
       error: () => {
-        this.toastService.error('Kupon silinemedi.');
+        this.toastService.error('Kupon silinirken hata oluştu.');
+        this.cdr.detectChanges();
       }
     });
   }
