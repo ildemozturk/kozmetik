@@ -1,10 +1,14 @@
-import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, NgZone, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';
 import { ToastService } from '../../../services/toast.service';
+import { Chart, registerables } from 'chart.js';
+
+// Chart.js modüllerini kaydet
+Chart.register(...registerables);
 
 export interface DashboardSummary {
   totalSales: number;
@@ -46,7 +50,10 @@ export interface DailyChartData {
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css'
 })
-export class AdminDashboard implements OnInit {
+export class AdminDashboard implements OnInit, OnDestroy {
+  @ViewChild('salesChartCanvas') salesChartCanvas!: ElementRef<HTMLCanvasElement>;
+  salesChart: Chart | null = null;
+
   isLoading: boolean = true;
 
   adminFullName: string = '';
@@ -82,6 +89,12 @@ export class AdminDashboard implements OnInit {
   ngOnInit(): void {
     this.loadAdminProfileFromDatabase();
     this.fetchRealDashboardData();
+  }
+
+  ngOnDestroy(): void {
+    if (this.salesChart) {
+      this.salesChart.destroy();
+    }
   }
 
   loadAdminProfileFromDatabase(): void {
@@ -177,6 +190,7 @@ export class AdminDashboard implements OnInit {
     if (this.chartDaysRange === days) return;
     this.chartDaysRange = days;
     this.generateDailyChart(this.rawOrdersList, days);
+    this.renderChartJs(this.rawOrdersList, days);
     this.cdr.detectChanges();
   }
 
@@ -264,11 +278,16 @@ export class AdminDashboard implements OnInit {
       };
     });
 
-    // 5. Günlük Grafik
+    // 5. Günlük Grafik Verileri
     this.generateDailyChart(orders, this.chartDaysRange);
 
     this.isLoading = false;
     this.cdr.detectChanges();
+
+    // 6. Chart.js Çizimi
+    setTimeout(() => {
+      this.renderChartJs(orders, this.chartDaysRange);
+    }, 50);
   }
 
   private generateDailyChart(orders: any[], daysCount: number): void {
@@ -334,6 +353,93 @@ export class AdminDashboard implements OnInit {
         rawAmount: d.total,
         heightPercent: height
       };
+    });
+  }
+
+  private renderChartJs(orders: any[], daysCount: number): void {
+    if (!this.salesChartCanvas) return;
+
+    const ctx = this.salesChartCanvas.nativeElement.getContext('2d');
+    if (!ctx) return;
+
+    const labels = this.dailySales.map(d => d.dayName);
+    const dataValues = this.dailySales.map(d => d.rawAmount);
+
+    // Lumière Pembe Degrade Dolgusu
+    const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+    gradient.addColorStop(0, 'rgba(230, 81, 133, 0.45)');
+    gradient.addColorStop(1, 'rgba(230, 81, 133, 0.01)');
+
+    if (this.salesChart) {
+      this.salesChart.destroy();
+    }
+
+    this.salesChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Günlük Ciro (₺)',
+            data: dataValues,
+            fill: true,
+            backgroundColor: gradient,
+            borderColor: '#e65185',
+            borderWidth: 3,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#e65185',
+            pointBorderWidth: 2.5,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            pointHoverBackgroundColor: '#e65185',
+            pointHoverBorderColor: '#ffffff',
+            pointHoverBorderWidth: 2,
+            tension: 0.4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: '#2b2d42',
+            titleFont: { size: 13, weight: 'bold' },
+            bodyFont: { size: 14 },
+            padding: 12,
+            cornerRadius: 10,
+            displayColors: false,
+            callbacks: {
+              label: (context) => `Ciro: ₺${Number(context.parsed.y).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#8d99ae',
+              font: { size: 12, weight: 'bold' }
+            }
+          },
+          y: {
+            grid: {
+              color: 'rgba(0, 0, 0, 0.04)'
+            },
+            ticks: {
+              color: '#8d99ae',
+              font: { size: 11 },
+              callback: (value) => `₺${Number(value) >= 1000 ? (Number(value) / 1000).toFixed(1) + 'k' : value}`
+            },
+            beginAtZero: true
+          }
+        }
+      }
     });
   }
 }

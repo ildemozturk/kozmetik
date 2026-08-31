@@ -40,14 +40,14 @@
             </a>
           </li>
 
-         <li class="nav-item">
-  <a class="nav-link d-flex align-items-center gap-3 text-muted" 
-     routerLink="/admin/campaigns" 
-     routerLinkActive="active">
-    <i class="bi bi-tags fs-5"></i>
-    <span class="nav-text">Kampanyalar</span>
-  </a>
-</li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" 
+               routerLink="/admin/campaigns" 
+               routerLinkActive="active">
+              <i class="bi bi-tags fs-5"></i>
+              <span class="nav-text">Kampanyalar</span>
+            </a>
+          </li>
         </ul>
       </nav>
     </div>
@@ -73,6 +73,7 @@
         </div>
         <div class="d-none d-md-block text-start">
           <h6 class="mb-0 fw-bold text-dark small">{{ adminFullName }}</h6>
+          <span class="text-muted" style="font-size: 0.72rem;">{{ adminRole }}</span>
         </div>
       </div>
     </header>
@@ -128,14 +129,14 @@
         </div>
       </div>
 
-      <!-- 2. GÜNLÜK GRAFİK + KRİTİK STOK -->
+      <!-- 2. GÜNLÜK GRAFİK (CHART.JS) + KRİTİK STOK -->
       <div class="row g-4 mb-4">
         <div class="col-12 col-lg-8">
           <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-            <div class="d-flex justify-content-between align-items-start mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
               <div>
-                <h6 class="fw-bold text-dark mb-1">Günlük Satış Grafiği</h6>
-                <p class="text-muted small mb-0">Geçmiş günlere ve bugüne ait gerçek ciro dağılımı</p>
+                <h6 class="fw-bold text-dark mb-1">Günlük Satış Trendi</h6>
+                <p class="text-muted small mb-0">Geçmiş günlere ve bugüne ait gerçek veritabanı cirosu</p>
               </div>
 
               <div class="btn-group p-1 bg-light rounded-pill">
@@ -144,14 +145,9 @@
               </div>
             </div>
 
-            <div class="chart-bars-wrapper d-flex justify-content-between align-items-end pt-4 pb-2 px-2">
-              @for (bar of dailySales; track bar.fullDate) {
-                <div class="bar-col d-flex flex-column align-items-center gap-2" [title]="bar.fullDate + ': ₺' + bar.rawAmount">
-                  <span class="bar-amount small text-muted">{{ bar.amountText }}</span>
-                  <div class="bar-fill rounded-3" [style.height.px]="bar.heightPercent * 1.5"></div>
-                  <span class="bar-month small text-muted">{{ bar.dayName }}</span>
-                </div>
-              }
+            <!-- CHART.JS CANVAS ALANI -->
+            <div class="chart-container position-relative" style="height: 270px; width: 100%;">
+              <canvas #salesChartCanvas></canvas>
             </div>
           </div>
         </div>

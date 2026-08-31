@@ -18,7 +18,6 @@ export interface AdminCustomerItem {
   customerNo: string;
   fullName: string;
   email: string;
-  phone: string;
   orderCount: number;
   totalSpent: number;
   registeredDate: string;
@@ -53,11 +52,11 @@ export class AdminCustomers implements OnInit {
 
   isEditModalOpen: boolean = false;
   isSavingEdit: boolean = false;
-  editForm = { id: 0, fullName: '', email: '', phone: '' };
+  editForm = { id: 0, fullName: '', email: '' };
 
   isAddModalOpen: boolean = false;
   isSavingAdd: boolean = false;
-  addForm = { fullName: '', email: '', phone: '', password: '' };
+  addForm = { fullName: '', email: '', password: '' };
 
   isDeleteModalOpen: boolean = false;
   isDeleting: boolean = false;
@@ -123,7 +122,7 @@ export class AdminCustomers implements OnInit {
       },
       error: (err) => {
         console.error('Müşteri API çağrısı hatası:', err);
-        this.processCustomers([]); // 👈 Mock yerine doğrudan boş dizi gönderiyoruz
+        this.processCustomers([]);
       }
     });
   }
@@ -137,7 +136,6 @@ export class AdminCustomers implements OnInit {
         customerNo: c.customerNo || c.CustomerNo || `#M${1001 + i}`,
         fullName: c.fullName || c.FullName || 'Müşteri',
         email: c.email || c.Email || 'musteri@lumiere.com',
-        phone: c.phone || c.Phone || '0532 xxx xx xx',
         orderCount: Number(c.orderCount ?? c.OrderCount ?? 0),
         totalSpent: Number(c.totalSpent ?? c.TotalSpent ?? 0),
         registeredDate: regDateStr,
@@ -181,8 +179,7 @@ export class AdminCustomers implements OnInit {
       list = list.filter(c =>
         c.customerNo.toLowerCase().includes(q) ||
         c.fullName.toLowerCase().includes(q) ||
-        c.email.toLowerCase().includes(q) ||
-        c.phone.includes(q)
+        c.email.toLowerCase().includes(q)
       );
     }
 
@@ -209,8 +206,7 @@ export class AdminCustomers implements OnInit {
     this.editForm = {
       id: target.id,
       fullName: target.fullName,
-      email: target.email,
-      phone: target.phone
+      email: target.email
     };
     this.isEditModalOpen = true;
     this.cdr.detectChanges();
@@ -241,12 +237,10 @@ export class AdminCustomers implements OnInit {
     if (match) {
       match.fullName = this.editForm.fullName;
       match.email = this.editForm.email;
-      match.phone = this.editForm.phone;
     }
     if (this.selectedCustomer?.id === this.editForm.id) {
       this.selectedCustomer.fullName = this.editForm.fullName;
       this.selectedCustomer.email = this.editForm.email;
-      this.selectedCustomer.phone = this.editForm.phone;
     }
     this.isSavingEdit = false;
     this.closeEditModal();
@@ -256,7 +250,7 @@ export class AdminCustomers implements OnInit {
   }
 
   openAddModal(): void {
-    this.addForm = { fullName: '', email: '', phone: '', password: '' };
+    this.addForm = { fullName: '', email: '', password: '' };
     this.isAddModalOpen = true;
     this.cdr.detectChanges();
   }

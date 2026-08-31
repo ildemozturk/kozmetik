@@ -206,15 +206,11 @@
                 <button type="button" class="btn-close small" (click)="closeDetail()" title="Kapat"></button>
               </div>
 
-              <!-- İletişim & Kayıt -->
+              <!-- İletişim & Kayıt (Telefon Alanı Temizlendi) -->
               <div class="d-flex flex-column gap-2 mb-4 text-muted small">
                 <div class="d-flex justify-content-between">
                   <span>E-posta</span>
                   <span class="fw-semibold text-dark">{{ selectedCustomer.email }}</span>
-                </div>
-                <div class="d-flex justify-content-between">
-                  <span>Telefon</span>
-                  <span class="fw-semibold text-dark">{{ selectedCustomer.phone }}</span>
                 </div>
                 <div class="d-flex justify-content-between">
                   <span>Kayıt Tarihi</span>
@@ -258,15 +254,6 @@
                 </div>
               </div>
 
-              <!-- AKSİYON BUTONLARI -->
-              <div class="d-flex flex-column gap-2">
-                <button type="button" class="btn btn-pink-nude rounded-3 py-2 fw-semibold small d-flex align-items-center justify-content-center gap-2" (click)="openEditModal()">
-                  <i class="bi bi-pencil"></i> Müşteri Bilgilerini Düzenle
-                </button>
-                <button type="button" class="btn btn-outline-light-cancel rounded-3 py-2 fw-semibold small text-muted border" (click)="openDeleteModal()">
-                  Müşteriyi Sil
-                </button>
-              </div>
 
             </div>
           </div>
@@ -279,7 +266,7 @@
 
 </div>
 
-<!-- 1. MÜŞTERİ BİLGİSİ DÜZENLEME MODALI -->
+<!-- 1. MÜŞTERİ BİLGİSİ DÜZENLEME MODALI (Telefon Alanı Temizlendi) -->
 @if (isEditModalOpen) {
   <div class="custom-modal-backdrop d-flex align-items-center justify-content-center" (click)="closeEditModal()">
     <div class="custom-modal-content bg-white rounded-4 shadow-lg p-4" (click)="$event.stopPropagation()" style="max-width: 440px; width: 92%;">
@@ -297,10 +284,6 @@
           <label class="form-label small fw-semibold text-dark mb-1">E-posta Adresi *</label>
           <input type="email" class="form-control form-control-sm rounded-3" [(ngModel)]="editForm.email">
         </div>
-        <div>
-          <label class="form-label small fw-semibold text-dark mb-1">Telefon Numarası</label>
-          <input type="text" class="form-control form-control-sm rounded-3" [(ngModel)]="editForm.phone">
-        </div>
       </div>
 
       <div class="d-flex justify-content-end gap-2 pt-2 border-top">
@@ -313,7 +296,7 @@
   </div>
 }
 
-<!-- 2. YENİ MÜŞTERİ EKLEME MODALI -->
+<!-- 2. YENİ MÜŞTERİ EKLEME MODALI (Telefon Alanı Temizlendi) -->
 @if (isAddModalOpen) {
   <div class="custom-modal-backdrop d-flex align-items-center justify-content-center" (click)="closeAddModal()">
     <div class="custom-modal-content bg-white rounded-4 shadow-lg p-4" (click)="$event.stopPropagation()" style="max-width: 440px; width: 92%;">
@@ -325,19 +308,15 @@
       <div class="d-flex flex-column gap-3 mb-4">
         <div>
           <label class="form-label small fw-semibold text-dark mb-1">Ad Soyad *</label>
-          <input type="text" class="form-control form-control-sm rounded-3" placeholder="Örn: Zeynep Aksoy" [(ngModel)]="addForm.fullName">
+          <input type="text" class="form-control form-control-sm rounded-3" placeholder="" [(ngModel)]="addForm.fullName">
         </div>
         <div>
           <label class="form-label small fw-semibold text-dark mb-1">E-posta Adresi *</label>
-          <input type="email" class="form-control form-control-sm rounded-3" placeholder="zeynep@email.com" [(ngModel)]="addForm.email">
-        </div>
-        <div>
-          <label class="form-label small fw-semibold text-dark mb-1">Telefon</label>
-          <input type="text" class="form-control form-control-sm rounded-3" placeholder="0541 888 55 66" [(ngModel)]="addForm.phone">
+          <input type="email" class="form-control form-control-sm rounded-3" placeholder="" [(ngModel)]="addForm.email">
         </div>
         <div>
           <label class="form-label small fw-semibold text-dark mb-1">Şifre</label>
-          <input type="password" class="form-control form-control-sm rounded-3" placeholder="Varsayılan: 123456" [(ngModel)]="addForm.password">
+          <input type="password" class="form-control form-control-sm rounded-3" placeholder="" [(ngModel)]="addForm.password">
         </div>
       </div>
 
