@@ -188,8 +188,12 @@
           <div class="col">
             <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden product-card bg-white position-relative p-2">
               
-              <!-- İndirim Rozeti -->
-              @if (isDiscounted(product)) {
+              <!-- Rozet Alanı (Tükendi veya İndirim) -->
+              @if (isOutOfStock(product)) {
+                <span class="position-absolute top-0 start-0 m-3 badge bg-dark bg-opacity-75 text-white rounded-pill shadow-sm fs-8 z-2">
+                  Tükendi
+                </span>
+              } @else if (isDiscounted(product)) {
                 <span class="position-absolute top-0 start-0 m-3 badge bg-danger rounded-pill shadow-sm fs-8 z-2">
                   İndirim
                 </span>
@@ -238,34 +242,38 @@
                     </span>
                   </div>
 
-                  @if (cartService.getItemQuantity(product.id) > 0) {
-                    <div class="quantity-counter-btn d-flex align-items-center rounded-pill shadow-sm bg-pink-subtle border border-pink">
-                      <button type="button" class="btn btn-sm p-0 border-0 text-pink fw-bold d-flex align-items-center justify-content-center" 
-                              style="width: 20px; height: 20px;" 
-                              (click)="decreaseCartQuantity(product, $event)">
-                        <i class="bi bi-dash"></i>
-                      </button>
-
-                      <span class="fw-bold px-1 text-pink fs-7">{{ cartService.getItemQuantity(product.id) }}</span>
-
-                      <button type="button" class="btn btn-sm p-0 border-0 text-pink fw-bold d-flex align-items-center justify-content-center" 
-                              style="width: 20px; height: 20px;" 
-                              [disabled]="cartService.getItemQuantity(product.id) >= (product.stockQuantity || 50)" 
-                              (click)="addToCart(product, $event)">
-                        <i class="bi bi-plus"></i>
-                      </button>
-                    </div>
-                  } @else {
+                  <!-- Stok Durumuna Göre Aksiyon Butonları -->
+                  @if (isOutOfStock(product)) {
                     <button type="button" 
-                            class="btn btn-outline-pink btn-sm rounded-pill btn-add-to-cart fw-semibold d-flex align-items-center justify-content-center shadow-xs" 
-                            [disabled]="(product.stockQuantity || 50) <= 0" 
-                            (click)="addToCart(product, $event)">
-                      @if ((product.stockQuantity || 50) > 0) {
-                        <i class="bi bi-cart-plus me-1"></i> Ekle
-                      } @else {
-                        <span class="text-danger fw-bold">Tükendi</span>
-                      }
+                            class="btn btn-light text-muted btn-sm rounded-pill px-3 fw-semibold border shadow-xs" 
+                            disabled>
+                      <span class="text-danger fw-bold">Tükendi</span>
                     </button>
+                  } @else {
+                    @if (cartService.getItemQuantity(product.id) > 0) {
+                      <div class="quantity-counter-btn d-flex align-items-center rounded-pill shadow-sm bg-pink-subtle border border-pink">
+                        <button type="button" class="btn btn-sm p-0 border-0 text-pink fw-bold d-flex align-items-center justify-content-center" 
+                                style="width: 20px; height: 20px;" 
+                                (click)="decreaseCartQuantity(product, $event)">
+                          <i class="bi bi-dash"></i>
+                        </button>
+
+                        <span class="fw-bold px-1 text-pink fs-7">{{ cartService.getItemQuantity(product.id) }}</span>
+
+                        <button type="button" class="btn btn-sm p-0 border-0 text-pink fw-bold d-flex align-items-center justify-content-center" 
+                                style="width: 20px; height: 20px;" 
+                                [disabled]="cartService.getItemQuantity(product.id) >= getProductStock(product)" 
+                                (click)="addToCart(product, $event)">
+                          <i class="bi bi-plus"></i>
+                        </button>
+                      </div>
+                    } @else {
+                      <button type="button" 
+                              class="btn btn-outline-pink btn-sm rounded-pill btn-add-to-cart fw-semibold d-flex align-items-center justify-content-center shadow-xs" 
+                              (click)="addToCart(product, $event)">
+                        <i class="bi bi-cart-plus me-1"></i> Ekle
+                      </button>
+                    }
                   }
                 </div>
               </div>

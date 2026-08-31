@@ -88,6 +88,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
 
     this.loadFeaturedProducts();
+    this.loadRealBestSellers();
     this.startAutoSlide();
   }
 
@@ -123,6 +124,24 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.startAutoSlide();
   }
 
+  // 1. Gerçek Backend Best-Sellers Çağrısı (GroupBy / Sum(Quantity) Algoritması)
+  loadRealBestSellers(): void {
+    this.productService.getBestSellers(8).subscribe({
+      next: (data: Product[]) => {
+        if (data && data.length > 0) {
+          this.bestSellers = data.map(p => ({
+            ...p,
+            isFavorite: this.wishlistService.isFavorite(p.id)
+          }));
+          this.cdr.detectChanges();
+        }
+      },
+      error: () => {
+        // Hata durumunda loadFeaturedProducts içerisindeki fallback devrede kalır
+      }
+    });
+  }
+
   loadFeaturedProducts(): void {
     this.productService.getProducts('', 1, 30).subscribe(res => {
       const rawProducts: any[] = res.data || (Array.isArray(res) ? res : []);
@@ -150,7 +169,10 @@ export class HomeComponent implements OnInit, OnDestroy {
         } as Product;
       });
 
-      this.bestSellers = allProducts.slice(0, 8);
+      // Eğer getBestSellers henüz dolmadıysa geçici fallback:
+      if (this.bestSellers.length === 0) {
+        this.bestSellers = allProducts.slice(0, 8);
+      }
       this.discountedProducts = allProducts.filter((p: Product) => this.isDiscounted(p));
       
       this.syncFavoriteStates();
@@ -223,12 +245,26 @@ export class HomeComponent implements OnInit, OnDestroy {
   addToCart(product: Product, event: Event): void {
     event.stopPropagation();
     if (this.isOutOfStock(product)) return;
+
+    if (!this.authService.isLoggedIn()) {
+      this.toastService.error('Sepete ürün eklemek için lütfen giriş yapınız.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.cartService.addToCart(product);
     this.cdr.detectChanges();
   }
 
   decreaseCartQuantity(product: Product, event: Event): void {
     event.stopPropagation();
+
+    if (!this.authService.isLoggedIn()) {
+      this.toastService.error('Lütfen önce giriş yapınız.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
     const currentQty = this.cartService.getItemQuantity(product.id);
     this.cartService.updateQuantity(product.id, currentQty - 1);
     this.cdr.detectChanges();

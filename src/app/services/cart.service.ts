@@ -56,6 +56,13 @@ export class CartService {
     }
   }
 
+  // Kullanıcının oturum durumunu döngüsel servis bağımlılığı olmadan kontrol eder
+  private isUserLoggedIn(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    const token = localStorage.getItem('token') || localStorage.getItem('jwt') || localStorage.getItem('lumiere_token');
+    return !!token;
+  }
+
   // Giriş yapan kullanıcının mailine göre dinamik anahtar üretir
   private getStorageKey(): string {
     if (!isPlatformBrowser(this.platformId)) return 'lumiere_cart_guest';

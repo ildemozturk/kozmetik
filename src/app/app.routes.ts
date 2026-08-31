@@ -16,7 +16,7 @@ import { AdminDashboard } from './pages/admin/admin-dashboard/admin-dashboard';
 import { AdminProducts } from './pages/admin/admin-products/admin-products';
 import { AdminOrders } from './pages/admin/admin-orders/admin-orders';
 import { AdminCustomers } from './pages/admin/admin-customers/admin-customers';
-import { AdminCampaigns } from './pages/admin/admin-campaigns/admin-campaigns'; // 👈 Kampanya bileşeni eklendi
+import { AdminCampaigns } from './pages/admin/admin-campaigns/admin-campaigns';
 
 // Guards
 import { authGuard } from './guards/auth-guard';
@@ -58,7 +58,6 @@ export const routes: Routes = [
       { path: 'siparisler', component: AdminOrders },
       { path: 'customers', component: AdminCustomers },
       { path: 'musteriler', component: AdminCustomers },
-      // Kampanyalar ve Kuponlar
       { path: 'campaigns', component: AdminCampaigns },
       { path: 'kampanyalar', component: AdminCampaigns }
     ]

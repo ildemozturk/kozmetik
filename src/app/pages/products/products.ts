@@ -13,7 +13,7 @@ import { Product } from '../../models/product';
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyPipe, RouterLink],
+  imports: [CommonModule, CurrencyPipe, RouterLink, FormsModule],
   templateUrl: './products.html',
   styleUrl: './products.css'
 })
@@ -92,7 +92,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
       this.products = fetched.map((p: any) => {
         const qty = Number(
           p.stockQuantity !== undefined ? p.stockQuantity :
-          (p.stock?.quantity !== undefined ? p.stock.quantity : 0)
+          (p.stock?.quantity !== undefined ? p.stock.quantity : 
+          (p.quantity !== undefined ? p.quantity : 0))
         );
 
         return {
@@ -126,6 +127,20 @@ export class ProductsComponent implements OnInit, OnDestroy {
         }, 50);
       }
     });
+  }
+
+  getProductStock(product: Product): number {
+    if (product.stockQuantity !== undefined && product.stockQuantity !== null) {
+      return Number(product.stockQuantity);
+    }
+    if (product.stock?.quantity !== undefined && product.stock?.quantity !== null) {
+      return Number(product.stock.quantity);
+    }
+    return 0;
+  }
+
+  isOutOfStock(product: Product): boolean {
+    return this.getProductStock(product) <= 0;
   }
 
   syncFavoriteStates(): void {
@@ -203,14 +218,27 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   addToCart(product: Product, event: Event): void {
     event.stopPropagation();
-    const currentStock = (product.stockQuantity ?? product.stock?.quantity ?? 0);
-    if (currentStock <= 0) return;
+    if (this.isOutOfStock(product)) return;
+
+    if (!this.authService.isLoggedIn()) {
+      this.toastService.error('Sepete ürün eklemek için lütfen giriş yapınız.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.cartService.addToCart(product);
     this.cdr.detectChanges();
   }
 
   decreaseCartQuantity(product: Product, event: Event): void {
     event.stopPropagation();
+
+    if (!this.authService.isLoggedIn()) {
+      this.toastService.error('Lütfen önce giriş yapınız.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
     const currentQty = this.cartService.getItemQuantity(product.id);
     this.cartService.updateQuantity(product.id, currentQty - 1);
     this.cdr.detectChanges();

@@ -1,11 +1,13 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { WishlistService } from '../../services/wishlist.service';
+import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 import { Product } from '../../models/product';
 import emailjs from '@emailjs/browser';
 
@@ -35,14 +37,16 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private productService: ProductService,
     public cartService: CartService,
     public wishlistService: WishlistService,
+    private authService: AuthService,
+    private toastService: ToastService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    // Favori panelinden veya başka bileşenden yapılan favori değişimlerini anlık dinliyoruz
     this.wishlistSub = this.wishlistService.wishlistSubject.subscribe(() => {
       this.syncFavoriteState();
       this.cdr.detectChanges();
@@ -67,11 +71,33 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
 
     this.productService.getProductById(id).subscribe({
-      next: (data) => {
+      next: (data: any) => {
+        let qty = 0;
+        if (data.stockQuantity !== undefined && data.stockQuantity !== null) {
+          qty = Number(data.stockQuantity);
+        } else if (data.stock?.quantity !== undefined && data.stock?.quantity !== null) {
+          qty = Number(data.stock.quantity);
+        } else if (typeof data.stock === 'number') {
+          qty = Number(data.stock);
+        } else if (data.quantity !== undefined && data.quantity !== null) {
+          qty = Number(data.quantity);
+        }
+
         this.product = {
           ...data,
+          id: data.id,
+          name: data.name,
+          price: Number(data.price),
+          oldPrice: data.oldPrice ? Number(data.oldPrice) : undefined,
+          stockQuantity: qty,
+          stock: {
+            id: data.stock?.id || data.id,
+            quantity: qty,
+            lastUpdated: data.stock?.lastUpdated || new Date().toISOString()
+          },
           isFavorite: this.wishlistService.isFavorite(data.id)
         };
+
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -83,7 +109,13 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Favori durumunu WishlistService verisiyle anlık senkronize eden metod
+  get currentProductStock(): number {
+    if (!this.product) return 0;
+    return this.product.stockQuantity !== undefined 
+      ? this.product.stockQuantity 
+      : (this.product.stock?.quantity ?? 0);
+  }
+
   private syncFavoriteState(): void {
     if (this.product) {
       this.product.isFavorite = this.wishlistService.isFavorite(this.product.id);
@@ -91,26 +123,47 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   addToCart(product: Product = this.product!): void {
-    if (product) {
-      this.cartService.addToCart(product);
-      this.cdr.detectChanges();
+    if (!product || this.currentProductStock <= 0) return;
+
+    // 🔒 Üye Girişi Kontrolü
+    if (!this.authService.isLoggedIn()) {
+      this.toastService.error('Sepete ürün eklemek ve satın almak için lütfen giriş yapınız.');
+      this.router.navigate(['/login']);
+      return;
     }
+
+    this.cartService.addToCart(product);
+    this.cdr.detectChanges();
   }
 
   decreaseCartQuantity(product: Product = this.product!): void {
-    if (product) {
-      const currentQty = this.cartService.getItemQuantity(product.id);
-      this.cartService.updateQuantity(product.id, currentQty - 1);
-      this.cdr.detectChanges();
+    if (!product) return;
+
+    // 🔒 Üye Girişi Kontrolü
+    if (!this.authService.isLoggedIn()) {
+      this.toastService.error('Lütfen önce giriş yapınız.');
+      this.router.navigate(['/login']);
+      return;
     }
+
+    const currentQty = this.cartService.getItemQuantity(product.id);
+    this.cartService.updateQuantity(product.id, currentQty - 1);
+    this.cdr.detectChanges();
   }
 
   toggleFavorite(product: Product = this.product!): void {
-    if (product) {
-      this.wishlistService.toggleWishlist(product);
-      this.syncFavoriteState();
-      this.cdr.detectChanges();
+    if (!product) return;
+
+    // 🔒 Üye Girişi Kontrolü
+    if (!this.authService.isLoggedIn()) {
+      this.toastService.error('Ürünü favorilere eklemek için lütfen giriş yapınız.');
+      this.router.navigate(['/login']);
+      return;
     }
+
+    this.wishlistService.toggleWishlist(product);
+    this.syncFavoriteState();
+    this.cdr.detectChanges();
   }
 
   openNotifyModal(): void {

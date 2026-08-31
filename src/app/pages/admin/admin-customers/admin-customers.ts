@@ -121,7 +121,8 @@ export class AdminCustomers implements OnInit {
         this.processCustomers(rawList);
       },
       error: (err) => {
-        console.error('Müşteri API çağrısı hatası:', err);
+        console.error('Müşteri API hatası:', err);
+        this.toastService.error('Müşteri listesi veritabanından alınamadı.');
         this.processCustomers([]);
       }
     });
@@ -129,13 +130,13 @@ export class AdminCustomers implements OnInit {
 
   private processCustomers(rawList: any[]): void {
     this.allCustomers = rawList.map((c, i) => {
-      let regDateStr = c.registeredDate || c.RegisteredDate || 'Bugün';
+      let regDateStr = c.registeredDate || c.RegisteredDate || 'Kayıtlı';
       
       return {
         id: Number(c.id ?? c.Id ?? (i + 1)),
         customerNo: c.customerNo || c.CustomerNo || `#M${1001 + i}`,
         fullName: c.fullName || c.FullName || 'Müşteri',
-        email: c.email || c.Email || 'musteri@lumiere.com',
+        email: c.email || c.Email || '',
         orderCount: Number(c.orderCount ?? c.OrderCount ?? 0),
         totalSpent: Number(c.totalSpent ?? c.TotalSpent ?? 0),
         registeredDate: regDateStr,
@@ -227,8 +228,14 @@ export class AdminCustomers implements OnInit {
     const headers = this.getAuthHeaders();
 
     this.http.put(`${this.apiUrl}/Customers/${this.editForm.id}`, this.editForm, { headers }).subscribe({
-      next: () => this.finalizeEdit(),
-      error: () => this.finalizeEdit()
+      next: () => {
+        this.finalizeEdit();
+      },
+      error: () => {
+        this.isSavingEdit = false;
+        this.toastService.error('Müşteri bilgileri güncellenirken hata oluştu.');
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -284,6 +291,7 @@ export class AdminCustomers implements OnInit {
       error: () => {
         this.isSavingAdd = false;
         this.toastService.error('Müşteri eklenirken hata oluştu.');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -308,8 +316,14 @@ export class AdminCustomers implements OnInit {
     const headers = this.getAuthHeaders();
 
     this.http.delete(`${this.apiUrl}/Customers/${id}`, { headers }).subscribe({
-      next: () => this.finalizeDelete(id, name),
-      error: () => this.finalizeDelete(id, name)
+      next: () => {
+        this.finalizeDelete(id, name);
+      },
+      error: () => {
+        this.isDeleting = false;
+        this.toastService.error('Müşteri silinirken hata oluştu.');
+        this.cdr.detectChanges();
+      }
     });
   }
 

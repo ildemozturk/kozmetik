@@ -58,7 +58,7 @@
         <!-- Stok Durumu & Kargo Rozetleri -->
         <div class="d-flex flex-wrap gap-3 mb-4 border-top border-bottom py-3">
           <div class="d-flex align-items-center gap-2">
-            @if (product.stock && product.stock.quantity > 0) {
+            @if (currentProductStock > 0) {
               <i class="bi bi-check-circle-fill text-success fs-5"></i>
               <span class="text-dark small fw-medium">Stokta Var</span>
             } @else {
@@ -86,7 +86,7 @@
         <div class="d-flex gap-3 align-items-center">
           
           <!-- STOKTA VARSA -->
-          @if (product.stock && product.stock.quantity > 0) {
+          @if (currentProductStock > 0) {
             
             @if (cartService.getItemQuantity(product.id) > 0) {
               <div class="quantity-counter-btn d-flex align-items-center justify-content-between rounded-pill px-3 py-2 shadow-sm flex-grow-1 border border-pink" style="max-width: 220px; height: 52px;">
@@ -100,7 +100,7 @@
 
                 <button type="button" class="btn btn-sm p-0 border-0 text-pink fw-bold d-flex align-items-center justify-content-center" 
                         style="width: 32px; height: 32px;" 
-                        [disabled]="cartService.getItemQuantity(product.id) >= product.stock.quantity"
+                        [disabled]="cartService.getItemQuantity(product.id) >= currentProductStock"
                         (click)="addToCart(product)">
                   <i class="bi bi-plus fs-5"></i>
                 </button>

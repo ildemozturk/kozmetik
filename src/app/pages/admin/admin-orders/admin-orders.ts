@@ -119,6 +119,7 @@ export class AdminOrders implements OnInit {
       },
       error: () => {
         this.isLoading = false;
+        this.toastService.error('Siparişler yüklenirken hata oluştu.');
         this.cdr.detectChanges();
       }
     });
@@ -140,7 +141,8 @@ export class AdminOrders implements OnInit {
         : '1x Kozmetik Paketi';
 
       const total = Number(o.totalAmount || o.totalPrice || o.total || 0);
-      const shipping = total > 500 ? 0 : 49.90;
+      // Standart Kargo Hesabı: >= 500 ücretsiz, altı 69.90 TL
+      const shipping = total >= 500 ? 0 : 69.90;
       const sub = total - shipping;
 
       let rawDate = new Date();
@@ -152,7 +154,7 @@ export class AdminOrders implements OnInit {
         customerName: o.customerName || 'Müşteri',
         customerEmail: o.customerEmail || o.email || 'musteri@lumiere.com',
         customerPhone: o.customerPhone || o.phone || '+90 (555) 000 00 00',
-        address: o.shippingAddress || o.address || 'Bağdat Cad. No: 42 Kadıköy / İstanbul',
+        address: o.shippingAddress || o.address || 'Kayıtlı Adres',
         orderDate: this.formatDate(rawDate),
         rawDate: rawDate,
         itemsSummary: summary,
@@ -280,11 +282,10 @@ export class AdminOrders implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.selectedOrder!.status = targetStatus as any;
-        this.toastService.success(`Sipariş durumu "${targetStatus}" olarak güncellendi.`);
+        // Hata durumunda statü güncellenmez, kullanıcı uyarılır
+        this.toastService.error('Sipariş durumu güncellenirken bir hata oluştu.');
         this.isUpdatingStatus = false;
         this.closeStatusModal();
-        this.applyFilters();
         this.cdr.detectChanges();
       }
     });
@@ -318,7 +319,10 @@ export class AdminOrders implements OnInit {
         this.finalizeCancel(orderId, orderNo);
       },
       error: () => {
-        this.finalizeCancel(orderId, orderNo);
+        this.isCancelling = false;
+        this.closeCancelModal();
+        this.toastService.error(`${orderNo} numaralı sipariş iptal edilemedi.`);
+        this.cdr.detectChanges();
       }
     });
   }
