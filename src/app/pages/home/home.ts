@@ -1,11 +1,13 @@
 import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, CurrencyPipe, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProductService } from '../../services/product.service';
 import { WishlistService } from '../../services/wishlist.service';
 import { CartService } from '../../services/cart.service';
+import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 import { Product } from '../../models/product';
 
 interface Slide {
@@ -72,6 +74,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     private productService: ProductService,
     public wishlistService: WishlistService,
     public cartService: CartService,
+    private authService: AuthService,
+    private toastService: ToastService,
+    private router: Router,
     private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
@@ -202,6 +207,14 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   toggleFavorite(product: Product & { isFavorite?: boolean }, event: Event): void {
     event.stopPropagation();
+
+    // Üye girişi kontrolü
+    if (!this.authService.isLoggedIn()) {
+      this.toastService.error('Ürünü favorilere eklemek için lütfen giriş yapınız.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.wishlistService.toggleWishlist(product);
     product.isFavorite = this.wishlistService.isFavorite(product.id);
     this.cdr.detectChanges();

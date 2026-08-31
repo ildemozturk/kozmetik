@@ -6,6 +6,8 @@ import { Subscription } from 'rxjs';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { WishlistService } from '../../services/wishlist.service';
+import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
 import { Product } from '../../models/product';
 
 @Component({
@@ -37,6 +39,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
     private productService: ProductService,
     public cartService: CartService,
     public wishlistService: WishlistService,
+    private authService: AuthService,
+    private toastService: ToastService,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
     private router: Router
@@ -100,7 +104,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
           category: p.category,
           description: p.description || '',
           stockQuantity: qty,
-          // HTML'in beklediği stock nesnesi eksiksiz oluşturuluyor:
           stock: {
             id: p.stock?.id || p.id,
             quantity: qty,
@@ -185,6 +188,14 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   toggleFavorite(product: Product & { isFavorite?: boolean }, event: Event): void {
     event.stopPropagation();
+
+    // Üye girişi kontrolü
+    if (!this.authService.isLoggedIn()) {
+      this.toastService.error('Ürünü favorilere eklemek için lütfen giriş yapınız.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.wishlistService.toggleWishlist(product);
     product.isFavorite = this.wishlistService.isFavorite(product.id);
     this.cdr.detectChanges();
