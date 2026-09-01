@@ -1,7 +1,6 @@
 <div class="dashboard-wrapper d-flex">
 
   <!-- SOL YAN MENÜ -->
- <!-- SOL YAN MENÜ -->
   <aside class="sidebar bg-white border-end d-flex flex-column justify-content-between">
     <div>
       <div class="sidebar-header px-4 py-4 border-bottom">
@@ -14,41 +13,50 @@
       <nav class="sidebar-nav p-3">
         <ul class="nav flex-column gap-1.5">
           <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-3 text-muted" routerLink="/admin/dashboard">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" 
+               routerLink="/admin/dashboard" 
+               routerLinkActive="active" 
+               [routerLinkActiveOptions]="{ exact: true }">
               <i class="bi bi-grid fs-5"></i>
               <span class="nav-text">Ana Sayfa</span>
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-3 text-muted" routerLink="/admin/products">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" 
+               routerLink="/admin/products" 
+               routerLinkActive="active">
               <i class="bi bi-box-seam fs-5"></i>
               <span class="nav-text">Ürünler / Stok</span>
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link active d-flex align-items-center gap-3" routerLink="/admin/orders">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" 
+               routerLink="/admin/orders" 
+               routerLinkActive="active">
               <i class="bi bi-bag fs-5"></i>
               <span class="nav-text">Siparişler</span>
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-3 text-muted" routerLink="/admin/customers">
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" 
+               routerLink="/admin/customers" 
+               routerLinkActive="active">
               <i class="bi bi-people fs-5"></i>
               <span class="nav-text">Müşteriler</span>
             </a>
           </li>
 
           <li class="nav-item">
-  <a class="nav-link d-flex align-items-center gap-3 text-muted" 
-     routerLink="/admin/campaigns" 
-     routerLinkActive="active">
-    <i class="bi bi-tags fs-5"></i>
-    <span class="nav-text">Kampanyalar</span>
-  </a>
-</li>
+            <a class="nav-link d-flex align-items-center gap-3 text-muted" 
+               routerLink="/admin/campaigns" 
+               routerLinkActive="active">
+              <i class="bi bi-tags fs-5"></i>
+              <span class="nav-text">Kampanyalar</span>
+            </a>
+          </li>
         </ul>
       </nav>
     </div>
@@ -109,8 +117,8 @@
         <div class="d-flex flex-wrap gap-2">
           @for (cat of categories; track cat) {
             <button type="button" 
-                    class="btn btn-sm rounded-pill px-3.5 py-1.5 fw-semibold category-pill-btn"
-                    [class.active]="selectedCategory === cat"
+                    class="btn btn-sm rounded-pill px-3.5 py-1.5 fw-semibold category-pill-btn" 
+                    [class.active]="selectedCategory === cat" 
                     (click)="setCategory(cat)">
               {{ cat }}
             </button>
@@ -184,9 +192,9 @@
                     </td>
 
                     <td class="py-3">
-                      <span class="badge rounded-pill px-3 py-1.5 fw-semibold small"
-                            [class.status-in-stock]="prod.status === 'Stokta Var'"
-                            [class.status-critical]="prod.status === 'Kritik'"
+                      <span class="badge rounded-pill px-3 py-1.5 fw-semibold small" 
+                            [class.status-in-stock]="prod.status === 'Stokta Var'" 
+                            [class.status-critical]="prod.status === 'Kritik'" 
                             [class.status-out]="prod.status === 'Tükendi'">
                         {{ prod.status }}
                       </span>

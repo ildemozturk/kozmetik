@@ -73,6 +73,10 @@ export class AdminDashboard implements OnInit, OnDestroy {
   criticalStocks: CriticalStockItem[] = [];
   recentOrders: RecentOrder[] = [];
 
+  // Pagination
+  currentPage: number = 1;
+  pageSize: number = 5;
+
   statusOptions: string[] = ['Hazırlanıyor', 'Kargoda', 'Teslim Edildi', 'İptal Edildi'];
 
   private apiUrl = 'http://localhost:5246/api';
@@ -94,6 +98,26 @@ export class AdminDashboard implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.salesChart) {
       this.salesChart.destroy();
+    }
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.recentOrders.length / this.pageSize) || 1;
+  }
+
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  get paginatedOrders(): RecentOrder[] {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return this.recentOrders.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.cdr.detectChanges();
     }
   }
 
@@ -277,6 +301,8 @@ export class AdminDashboard implements OnInit, OnDestroy {
         isUpdating: false
       };
     });
+
+    this.currentPage = 1;
 
     // 5. Günlük Grafik Verileri
     this.generateDailyChart(orders, this.chartDaysRange);

@@ -244,3 +244,35 @@
 .orders-table tbody tr {
   border-bottom: 1px solid #fafafa;
 }
+.btn-pagination-page,
+.btn-pagination-nav {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 50rem;
+  border: 1px solid #dee2e6;
+  background-color: #ffffff;
+  color: #495057;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-pagination-page.active {
+  background-color: #e65185 !important;
+  border-color: #e65185 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(230, 81, 133, 0.35);
+}
+
+.btn-pagination-nav:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: #dee2e6;
+  background-color: #f8f9fa;
+  color: #6c757d;
+}

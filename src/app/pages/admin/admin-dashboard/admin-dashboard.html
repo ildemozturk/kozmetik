@@ -203,6 +203,9 @@
       <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
         <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
           <h6 class="fw-bold mb-0 text-dark">Son Siparişler</h6>
+          @if (recentOrders.length > 0) {
+            <span class="text-muted small">Toplam {{ recentOrders.length }} sipariş</span>
+          }
         </div>
 
         <div class="table-responsive">
@@ -216,7 +219,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (order of recentOrders; track order.id) {
+              @for (order of paginatedOrders; track order.id) {
                 <tr>
                   <td class="ps-4 py-3.5 fw-bold text-pink font-monospace">{{ order.orderNo }}</td>
                   <td class="py-3.5 fw-semibold text-dark">{{ order.customerName }}</td>
@@ -234,6 +237,42 @@
             </tbody>
           </table>
         </div>
+
+        <!-- PAGINATION ALANI -->
+        @if (totalPages > 1) {
+          <div class="p-3 border-top d-flex justify-content-between align-items-center bg-white flex-wrap gap-2">
+            <span class="text-muted small">
+              Sayfa {{ currentPage }} / {{ totalPages }}
+            </span>
+            <div class="d-flex align-items-center gap-1.5">
+              <button 
+                type="button" 
+                class="btn-pagination-nav" 
+                [disabled]="currentPage === 1" 
+                (click)="goToPage(currentPage - 1)">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+
+              @for (page of pages; track page) {
+                <button 
+                  type="button" 
+                  class="btn-pagination-page" 
+                  [class.active]="currentPage === page" 
+                  (click)="goToPage(page)">
+                  {{ page }}
+                </button>
+              }
+
+              <button 
+                type="button" 
+                class="btn-pagination-nav" 
+                [disabled]="currentPage === totalPages" 
+                (click)="goToPage(currentPage + 1)">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        }
       </div>
 
     </div>
