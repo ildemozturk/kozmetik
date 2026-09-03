@@ -32,7 +32,6 @@ export class AdminCampaigns implements OnInit {
   adminFullName: string = 'Derin Aydın';
   adminRole: string = 'Yönetici';
 
-  // HTML'in beklediği dizi isimleri
   coupons: CouponItem[] = [];
   filteredCoupons: CouponItem[] = [];
 
@@ -40,7 +39,6 @@ export class AdminCampaigns implements OnInit {
   selectedCategoryFilter: string = 'Tümü';
   categories: string[] = ['Tümü', 'Tüm Ürünler', 'Cilt Bakımı', 'Makyaj', 'Parfüm', 'Saç Bakımı'];
 
-  // Modal ve Form Alanları
   isModalOpen: boolean = false;
   isEditing: boolean = false;
   isSaving: boolean = false;
@@ -113,9 +111,8 @@ export class AdminCampaigns implements OnInit {
         this.coupons = rawList.map((c: any): CouponItem => {
           const uLimit = Number(c.usageLimit ?? c.UsageLimit ?? 0);
           const uCount = Number(c.usedCount ?? c.UsedCount ?? 0);
-          const isLimitReached = uLimit > 0 && uCount >= uLimit;
-          const activeStatus = c.isActive !== undefined ? c.isActive : (c.IsActive !== undefined ? c.IsActive : true);
-          
+          const activeStatus = c.isActive !== undefined ? Boolean(c.isActive) : (c.IsActive !== undefined ? Boolean(c.IsActive) : true);
+
           let dType: 'PERCENTAGE' | 'FIXED' = 'PERCENTAGE';
           const incomingType = (c.discountType || c.DiscountType || '').toString().toUpperCase();
           if (incomingType.includes('FIXED')) {
@@ -133,7 +130,7 @@ export class AdminCampaigns implements OnInit {
             usedCount: uCount,
             usageLimit: uLimit,
             expiryDate: c.expiryDate || c.ExpiryDate || '',
-            isActive: isLimitReached ? false : activeStatus
+            isActive: activeStatus
           };
         });
 
@@ -187,7 +184,11 @@ export class AdminCampaigns implements OnInit {
   toggleStatus(item: CouponItem, event: Event): void {
     event.stopPropagation();
 
-    if (item.usageLimit > 0 && item.usedCount >= item.usageLimit) {
+    const limit = Number(item.usageLimit);
+    const count = Number(item.usedCount);
+
+    // Yalnızca limit pozitifse ve kullanım limiti doldurulmuşsa aktif etmeyi engelle
+    if (!item.isActive && limit > 0 && count >= limit) {
       this.toastService.error(`"${item.code}" kuponunun kullanım limiti dolduğu için aktif edilemez.`);
       item.isActive = false;
       this.cdr.detectChanges();
@@ -198,9 +199,9 @@ export class AdminCampaigns implements OnInit {
     const headers = this.getAuthHeaders();
 
     this.http.put(`${this.apiUrl}/${item.id}/toggle-status`, { isActive: newStatus }, { headers }).subscribe({
-      next: () => {
-        item.isActive = newStatus;
-        this.toastService.success(`Kupon durumu ${newStatus ? 'Aktif' : 'Pasif'} olarak güncellendi.`);
+      next: (res: any) => {
+        item.isActive = res.isActive !== undefined ? res.isActive : newStatus;
+        this.toastService.success(`Kupon durumu ${item.isActive ? 'Aktif' : 'Pasif'} olarak güncellendi.`);
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -220,7 +221,6 @@ export class AdminCampaigns implements OnInit {
     }
   }
 
-  // Modal Yönetimi
   openAddModal(): void {
     this.isEditing = false;
     this.couponForm = {

@@ -73,7 +73,6 @@
         </div>
         <div class="d-none d-md-block text-start">
           <h6 class="mb-0 fw-bold text-dark small">{{ adminFullName }}</h6>
-          <span class="text-muted" style="font-size: 0.72rem;">{{ adminRole }}</span>
         </div>
       </div>
     </header>
@@ -92,7 +91,7 @@
           <div class="kpi-card bg-white p-3.5 rounded-4 shadow-sm border border-light-subtle h-100">
             <div class="d-flex justify-content-between align-items-start mb-2">
               <span class="text-muted small fw-medium">Toplam Satış</span>
-              <div class="kpi-icon-pill bg-pink-soft text-pink"><i class="bi bi-currency-dollar"></i></div>
+              
             </div>
             <h3 class="fw-bold text-dark mb-1">₺{{ summary.totalSales | number:'1.2-2' }}</h3>
           </div>
@@ -102,7 +101,7 @@
           <div class="kpi-card bg-white p-3.5 rounded-4 shadow-sm border border-light-subtle h-100">
             <div class="d-flex justify-content-between align-items-start mb-2">
               <span class="text-muted small fw-medium">Toplam Sipariş</span>
-              <div class="kpi-icon-pill bg-pink-soft text-pink"><i class="bi bi-cart3"></i></div>
+            
             </div>
             <h3 class="fw-bold text-dark mb-1">{{ summary.totalOrdersCount }} adet</h3>
           </div>
@@ -112,7 +111,7 @@
           <div class="kpi-card bg-white p-3.5 rounded-4 shadow-sm border border-light-subtle h-100">
             <div class="d-flex justify-content-between align-items-start mb-2">
               <span class="text-muted small fw-medium">Kayıtlı Müşteri</span>
-              <div class="kpi-icon-pill bg-pink-soft text-pink"><i class="bi bi-people"></i></div>
+        
             </div>
             <h3 class="fw-bold text-dark mb-1">{{ summary.activeCustomerCount | number }} Kişi</h3>
           </div>
@@ -122,7 +121,7 @@
           <div class="kpi-card bg-white p-3.5 rounded-4 shadow-sm border border-light-subtle h-100">
             <div class="d-flex justify-content-between align-items-start mb-2">
               <span class="text-muted small fw-medium">Stoktaki Ürün</span>
-              <div class="kpi-icon-pill bg-pink-soft text-pink"><i class="bi bi-box-seam"></i></div>
+  
             </div>
             <h3 class="fw-bold text-dark mb-1">{{ summary.inStockVarietyCount }} Çeşit</h3>
           </div>
